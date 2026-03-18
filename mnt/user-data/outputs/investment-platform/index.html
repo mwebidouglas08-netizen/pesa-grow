@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LuminaVest — Smart Investment Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<!-- NAV -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand">
+    <div class="logo-icon">◆</div>
+    <span class="logo-text">LuminaVest</span>
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#home" class="nav-link active">Home</a></li>
+    <li><a href="#plans" class="nav-link">Plans</a></li>
+    <li><a href="#markets" class="nav-link">Markets</a></li>
+    <li><a href="#how" class="nav-link">How It Works</a></li>
+    <li><a href="#testimonials" class="nav-link">Reviews</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-ghost" onclick="showModal('login')">Login</button>
+    <button class="btn-primary" onclick="showModal('register')">Get Started</button>
+  </div>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">&#9776;</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg">
+    <div class="hero-orb orb1"></div>
+    <div class="hero-orb orb2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+  <div class="hero-content">
+    <div class="hero-badge">🔒 Trusted by 50,000+ Investors Worldwide</div>
+    <h1 class="hero-title">Grow Your Wealth<br><span class="gradient-text">Intelligently</span></h1>
+    <p class="hero-sub">Automated investment plans with guaranteed daily returns. Start with as little as $100 and watch your money work for you 24/7.</p>
+    <div class="hero-cta">
+      <button class="btn-primary btn-lg" onclick="showModal('register')">Start Investing Now</button>
+      <button class="btn-outline btn-lg" onclick="scrollTo('how')">See How It Works</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><span class="stat-num" data-target="50000">0</span><span>+</span><div class="stat-label">Active Investors</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span>$</span><span class="stat-num" data-target="12">0</span><span>M+</span><div class="stat-label">Total Paid Out</div></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" data-target="99">0</span><span>%</span><div class="stat-label">Uptime</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="portfolio-card">
+      <div class="pc-header">
+        <span class="pc-title">Portfolio Value</span>
+        <span class="pc-badge green">+12.4% ↑</span>
+      </div>
+      <div class="pc-value">$24,860.00</div>
+      <canvas id="miniChart" width="300" height="100"></canvas>
+      <div class="pc-bottom">
+        <div class="pc-item"><span class="pc-dot gold"></span> Bitcoin <span class="pc-pct">45%</span></div>
+        <div class="pc-item"><span class="pc-dot blue"></span> Ethereum <span class="pc-pct">30%</span></div>
+        <div class="pc-item"><span class="pc-dot green2"></span> Stocks <span class="pc-pct">25%</span></div>
+      </div>
+    </div>
+    <div class="floating-notif notif1">
+      <span class="notif-icon">💰</span>
+      <div><div class="notif-title">Profit Earned</div><div class="notif-val green">+$48.20</div></div>
+    </div>
+    <div class="floating-notif notif2">
+      <span class="notif-icon">📈</span>
+      <div><div class="notif-title">Daily ROI</div><div class="notif-val green">3.5%</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker"></div>
+</div>
+
+<!-- PLANS -->
+<section class="section" id="plans">
+  <div class="section-label">Investment Plans</div>
+  <h2 class="section-title">Choose Your Plan</h2>
+  <p class="section-sub">Select the perfect investment plan to match your financial goals</p>
+  <div class="plans-grid" id="plansGrid"></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section dark-section" id="how">
+  <div class="section-label">Process</div>
+  <h2 class="section-title">How It Works</h2>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">👤</div>
+      <h3>Create Account</h3>
+      <p>Sign up in minutes. Verify your identity and set up your secure investor profile.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">💳</div>
+      <h3>Deposit Funds</h3>
+      <p>Fund your account via crypto (BTC, ETH, USDT) or bank transfer securely.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">🎯</div>
+      <h3>Choose a Plan</h3>
+      <p>Pick an investment plan that fits your budget and return expectations.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-icon">💸</div>
+      <h3>Earn & Withdraw</h3>
+      <p>Watch daily profits accumulate. Withdraw anytime to your wallet or bank.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MARKETS -->
+<section class="section" id="markets">
+  <div class="section-label">Live Markets</div>
+  <h2 class="section-title">Market Overview</h2>
+  <div class="market-table-wrap">
+    <table class="market-table">
+      <thead>
+        <tr><th>Asset</th><th>Price</th><th>24h Change</th><th>Volume</th><th>Chart</th></tr>
+      </thead>
+      <tbody id="marketTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section dark-section" id="testimonials">
+  <div class="section-label">Reviews</div>
+  <h2 class="section-title">What Our Investors Say</h2>
+  <div class="testimonials-grid">
+    <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"I started with $500 and within a month I had earned $215 in profit. The platform is transparent and withdrawals are instant."</p><div class="tcard-author"><div class="tcard-avatar">JM</div><div><div class="tcard-name">James Mwangi</div><div class="tcard-role">Business Owner, Nairobi</div></div></div></div>
+    <div class="tcard featured"><div class="tcard-stars">★★★★★</div><p>"LuminaVest is the most reliable investment platform I've used. The daily ROI is consistent and customer support responds fast."</p><div class="tcard-author"><div class="tcard-avatar">SC</div><div><div class="tcard-name">Sarah Chen</div><div class="tcard-role">Software Engineer, Singapore</div></div></div></div>
+    <div class="tcard"><div class="tcard-stars">★★★★★</div><p>"I've referred 5 friends and we're all earning commissions together. The referral system is genuinely rewarding."</p><div class="tcard-author"><div class="tcard-avatar">AO</div><div><div class="tcard-name">Adaora Obi</div><div class="tcard-role">Investor, Lagos</div></div></div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="logo-icon">◆</div>
+      <span class="logo-text">LuminaVest</span>
+      <p>Smart, transparent, automated investing for everyone.</p>
+    </div>
+    <div class="footer-links">
+      <div class="fl-col"><h4>Platform</h4><a href="#">Dashboard</a><a href="#">Plans</a><a href="#">Markets</a><a href="#">Referrals</a></div>
+      <div class="fl-col"><h4>Support</h4><a href="#">FAQ</a><a href="#">Contact</a><a href="#">Live Chat</a><a href="#">Security</a></div>
+      <div class="fl-col"><h4>Legal</h4><a href="#">Terms</a><a href="#">Privacy</a><a href="#">Risk Disclosure</a></div>
+    </div>
+  </div>
+  <div class="footer-bottom"><p>© 2026 LuminaVest. All rights reserved. Investment involves risk. Past performance is not indicative of future results.</p></div>
+</footer>
+
+<!-- DASHBOARD OVERLAY -->
+<div class="dashboard-overlay" id="dashboardOverlay">
+  <nav class="dash-nav">
+    <div class="nav-brand"><div class="logo-icon">◆</div><span class="logo-text">LuminaVest</span></div>
+    <div class="dash-nav-right">
+      <span class="dash-user-name" id="dashUserName">Welcome</span>
+      <button class="btn-ghost" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+  <div class="dash-layout">
+    <aside class="dash-sidebar">
+      <ul class="dash-menu">
+        <li class="dash-item active" onclick="showTab('overview')"><span>📊</span> Overview</li>
+        <li class="dash-item" onclick="showTab('invest')"><span>💼</span> Invest</li>
+        <li class="dash-item" onclick="showTab('deposit')"><span>⬇️</span> Deposit</li>
+        <li class="dash-item" onclick="showTab('withdraw')"><span>⬆️</span> Withdraw</li>
+        <li class="dash-item" onclick="showTab('history')"><span>📋</span> History</li>
+        <li class="dash-item" onclick="showTab('referral')"><span>🤝</span> Referrals</li>
+        <li class="dash-item" onclick="showTab('profile')"><span>👤</span> Profile</li>
+      </ul>
+    </aside>
+    <main class="dash-main" id="dashMain"></main>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "pesagrow",
+  "version": "1.0.0",
+  "description": "Kenya's #1 investment platform. Built with Node.js + Express + SQLite.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Pesa Grow</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050709;--bg2:#0c0e14;--bg3:#13151f;--card:#0f1117;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--green:#10b981;--gold:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--text:#f0f2f8;--text2:#8892a4;--text3:#404760;--r:14px;--shadow:0 16px 48px rgba(0,0,0,.45)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+h1,h2,h3,h4,h5{font-family:'Clash Display',sans-serif}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
+
+/* TOP NAV */
+.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+.tn-brand{display:flex;align-items:center;gap:10px}
+.tn-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--green),var(--gold));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;color:#000}
+.tn-name{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700}
+.tn-right{display:flex;align-items:center;gap:16px}
+.notif-btn{background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;position:relative}
+.notif-badge{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;color:#fff}
+.user-pill{display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:6px 14px 6px 6px;cursor:pointer}
+.up-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:12px;color:#000}
+.up-name{font-size:14px;font-weight:600}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden}
+.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;overflow-y:auto}
+.sb-section{padding:0 12px;margin-bottom:6px}
+.sb-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 12px 4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:10px;cursor:pointer;font-size:14px;color:var(--text2);transition:.2s;text-decoration:none}
+.sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
+.sb-item.active{background:rgba(16,185,129,.1);color:var(--green);font-weight:600}
+.sb-item .ic{font-size:18px;width:20px;text-align:center}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:28px}
+.page{display:none}.page.active{display:block}
+
+/* COMPONENTS */
+.page-title{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;margin-bottom:22px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+.card-title{font-size:13px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.card-val{font-family:'Clash Display',sans-serif;font-size:30px;font-weight:700}
+.card-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.green{color:var(--green)}.gold{color:var(--gold)}.red{color:var(--red)}.blue{color:var(--blue)}
+
+/* FORM */
+.fg{margin-bottom:18px}
+.fg label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:7px}
+.fc{width:100%;padding:13px 15px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;transition:.2s}
+.fc:focus{outline:none;border-color:var(--green)}
+select.fc option{background:var(--bg3)}
+.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.btn{padding:11px 20px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:6px}
+.btn-green{background:linear-gradient(135deg,var(--green),#059669);color:#fff}.btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(16,185,129,.3)}
+.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#000}.btn-gold:hover{transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text)}
+.btn-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}.btn-red:hover{background:rgba(239,68,68,.2)}
+.btn-full{width:100%;padding:15px;font-size:16px;justify-content:center}
+.btn-sm{padding:8px 14px;font-size:13px}
+
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{padding:12px 16px;text-align:left;font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border)}
+.tbl td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:14px}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+
+/* BADGES */
+.badge{padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge-ok{background:rgba(16,185,129,.1);color:var(--green)}
+.badge-pend{background:rgba(245,158,11,.1);color:var(--gold)}
+.badge-fail{background:rgba(239,68,68,.1);color:var(--red)}
+.badge-info{background:rgba(59,130,246,.1);color:var(--blue)}
+
+/* PROGRESS */
+.prog-wrap{background:var(--bg3);border-radius:100px;height:8px;overflow:hidden;margin-top:8px}
+.prog-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width 1.2s ease}
+
+/* PROFIT TICKER */
+.profit-ticker{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:12px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.pt-label{font-size:13px;color:var(--text2)}
+.pt-val{font-family:'Clash Display',sans-serif;font-size:28px;font-weight:700;color:var(--green)}
+.pt-sub{font-size:12px;color:var(--green);opacity:.7}
+
+/* NOTIF PANEL */
+.notif-panel{position:fixed;top:60px;right:20px;width:340px;background:var(--card);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow);z-index:200;display:none;max-height:420px;overflow-y:auto}
+.notif-panel.open{display:block}
+.np-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.np-item{padding:14px 20px;border-bottom:1px solid var(--border);font-size:14px;display:flex;gap:10px;align-items:flex-start}
+.np-item:last-child{border-bottom:none}
+.np-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:5px}
+.np-dot.read{background:var(--text3)}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:600;padding:13px 20px;border-radius:12px;font-size:15px;font-weight:600;transform:translateY(60px);opacity:0;transition:.3s;max-width:300px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.toast.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer}
+
+/* RESPONSIVE */
+@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}}
+@media(max-width:640px){.sidebar{display:none}.main{padding:16px}.grid-4{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="tn-brand" style="cursor:pointer" onclick="location.href='index.html'">
+    <div class="tn-logo">PG</div>
+    <span class="tn-name">Pesa Grow</span>
+  </div>
+  <div class="tn-right">
+    <button class="notif-btn" onclick="toggleNotif()" title="Notifications">
+      🔔<span class="notif-badge" id="notifBadge" style="display:none">0</span>
+    </button>
+    <div class="user-pill" onclick="showPage('profile')">
+      <div class="up-av" id="userAv">PG</div>
+      <span class="up-name" id="userName">Loading...</span>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="PG.Auth.logout()">Logout</button>
+  </div>
+</div>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sb-section">
+      <div class="sb-item active" onclick="showPage('overview')" data-page="overview"><span class="ic">📊</span> Overview</div>
+      <div class="sb-item" onclick="showPage('invest')" data-page="invest"><span class="ic">💼</span> Invest</div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Money</div>
+      <div class="sb-item" onclick="showPage('deposit')" data-page="deposit"><span class="ic">⬇️</span> Deposit</div>
+      <div class="sb-item" onclick="showPage('withdraw')" data-page="withdraw"><span class="ic">⬆️</span> Withdraw</div>
+      <div class="sb-item" onclick="showPage('history')" data-page="history"><span class="ic">📋</span> History</div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-label">Account</div>
+      <div class="sb-item" onclick="showPage('referral')" data-page="referral"><span class="ic">🤝</span> Referrals</div>
+      <div class="sb-item" onclick="showPage('profile')" data-page="profile"><span class="ic">👤</span> Profile</div>
+    </div>
+    <div style="padding:16px 12px;margin-top:auto">
+      <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.15);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:22px;margin-bottom:6px">📞</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Need help?</div>
+        <a href="tel:0796820013" style="font-size:14px;font-weight:700;color:var(--green);text-decoration:none">0796820013</a>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main" id="mainContent">
+
+    <!-- OVERVIEW -->
+    <div class="page active" id="page-overview">
+      <div class="page-title">Portfolio Overview</div>
+      <div class="profit-ticker">
+        <div><div class="pt-label">Live Profit Counter</div><div class="pt-sub">Updates every second</div></div>
+        <div class="pt-val" id="liveProfit">KES 0.00</div>
+      </div>
+      <div class="grid-4">
+        <div class="card"><div class="card-title">Balance</div><div class="card-val green" id="ovBalance">KES 0</div><div class="card-sub">Available to invest or withdraw</div></div>
+        <div class="card"><div class="card-title">Invested</div><div class="card-val gold" id="ovInvested">KES 0</div><div class="card-sub" id="ovActivePlans">0 active plans</div></div>
+        <div class="card"><div class="card-title">Total Profits</div><div class="card-val green" id="ovProfits">KES 0</div><div class="card-sub">↑ Earning daily</div></div>
+        <div class="card"><div class="card-title">Withdrawn</div><div class="card-val" id="ovWithdrawn">KES 0</div><div class="card-sub">Total paid out</div></div>
+      </div>
+      <div class="grid-2">
+        <div>
+          <div style="font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px">Active Investments</div>
+          <div id="activeInvList"></div>
+        </div>
+        <div>
+          <div style="font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px">Recent Transactions</div>
+          <div id="recentTx"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVEST -->
+    <div class="page" id="page-invest">
+      <div class="page-title">Investment Plans</div>
+      <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.2);border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:14px;color:var(--text2)">
+        💡 <strong style="color:var(--text)">Balance:</strong> <span id="investBal">KES 0</span> — <button class="btn btn-ghost btn-sm" onclick="showPage('deposit')">Deposit More</button>
+      </div>
+      <div class="grid-3" id="investPlansGrid"></div>
+    </div>
+
+    <!-- DEPOSIT -->
+    <div class="page" id="page-deposit">
+      <div class="page-title">Deposit Funds</div>
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:20px">Deposit via M-Pesa</div>
+            <div style="background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.2);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px">
+              <div style="font-size:13px;color:var(--text2);margin-bottom:6px">Send M-Pesa to</div>
+              <div style="font-family:'Clash Display',sans-serif;font-size:36px;font-weight:700;color:var(--green)">0796820013</div>
+              <div style="font-size:14px;color:var(--text2)">PESA GROW LTD</div>
+            </div>
+            <div class="fg"><label>Payment Method</label>
+              <select class="fc" id="depMethod">
+                <option value="M-Pesa">M-Pesa</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Bitcoin">Bitcoin (BTC)</option>
+                <option value="USDT">USDT (TRC20)</option>
+              </select>
+            </div>
+            <div class="fg"><label>Amount (KES)</label><input class="fc" id="depAmt" type="number" min="1000" placeholder="Minimum KES 1,000"></div>
+            <div class="fg"><label>M-Pesa Transaction Code / Reference</label><input class="fc" id="depRef" placeholder="e.g. QJK8XYZABC"></div>
+            <div class="fg"><label>Notes (optional)</label><input class="fc" id="depNote" placeholder="Any additional info for admin"></div>
+            <button class="btn btn-green btn-full" onclick="submitDeposit()">Submit Deposit Request</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Payment Details</div>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">M-Pesa Till</span><strong>0796820013</strong></div>
+              <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Account Name</span><strong>PESA GROW LTD</strong></div>
+              <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Min Deposit</span><strong>KES 1,000</strong></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Confirmation Time</span><strong style="color:var(--green)">Within 30 mins</strong></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Add Test Balance (Demo)</div>
+            <p style="font-size:13px;color:var(--text2);margin-bottom:14px">Add funds directly for testing purposes.</p>
+            <div class="fg"><label>Amount (KES)</label><input class="fc" id="testAmt" type="number" value="5000" placeholder="5000"></div>
+            <button class="btn btn-gold btn-full" onclick="addTestBalance()">Add Test Balance</button>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:14px">Deposit History</div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Reference</th><th>Status</th></tr></thead><tbody id="depHistory"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div class="page" id="page-withdraw">
+      <div class="page-title">Withdraw Funds</div>
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:20px">Request Withdrawal</div>
+            <div style="background:var(--bg3);border-radius:10px;padding:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+              <span style="color:var(--text2)">Available Balance</span>
+              <span style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;color:var(--green)" id="wdBalance">KES 0</span>
+            </div>
+            <div class="fg"><label>Withdrawal Method</label>
+              <select class="fc" id="wdMethod">
+                <option value="M-Pesa">M-Pesa</option>
+                <option value="Bank Transfer">Bank Transfer</option>
+                <option value="Bitcoin">Bitcoin (BTC)</option>
+                <option value="USDT">USDT</option>
+              </select>
+            </div>
+            <div class="fg"><label>M-Pesa Number / Account</label><input class="fc" id="wdAddr" placeholder="e.g. 0712345678"></div>
+            <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd()"></div>
+            <div id="wdCalc" style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px;font-size:14px;display:none">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Processing Fee (2%)</span><span id="wdFee"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">You Receive</span><span id="wdNet" style="color:var(--green);font-weight:700"></span></div>
+            </div>
+            <button class="btn btn-green btn-full" onclick="submitWithdraw()">Request Withdrawal</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Withdrawal Summary</div>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Invested</span><span id="wdSumInv">KES 0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Profits</span><span id="wdSumProfit" style="color:var(--green)">KES 0</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Withdrawn</span><span id="wdSumWd">KES 0</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Processing Times</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">M-Pesa</span><span style="color:var(--green)">Instant – 2 hours</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Bank Transfer</span><span>1–3 Business Days</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Crypto</span><span>1–24 hours</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Fee</span><span>2%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:24px">
+        <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:14px">Withdrawal History</div>
+        <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Net</th><th>Status</th></tr></thead><tbody id="wdHistory"></tbody></table></div>
+      </div>
+    </div>
+
+    <!-- HISTORY -->
+    <div class="page" id="page-history">
+      <div class="page-title">Transaction History</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('all')">All</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('deposit')">Deposits</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('withdrawal')">Withdrawals</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('investment')">Investments</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('profit')">Profits</button>
+        <button class="btn btn-ghost btn-sm" onclick="filterTx('referral')">Referrals</button>
+      </div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Date & Time</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="txBody"></tbody></table></div>
+    </div>
+
+    <!-- REFERRAL -->
+    <div class="page" id="page-referral">
+      <div class="page-title">Referral Program</div>
+      <div style="background:linear-gradient(135deg,rgba(16,185,129,.08),var(--card));border:1px solid rgba(16,185,129,.2);border-radius:16px;padding:28px;text-align:center;margin-bottom:24px">
+        <div style="font-size:48px;margin-bottom:10px">🤝</div>
+        <h3 style="font-size:22px;margin-bottom:8px">Earn 5–10% Commission</h3>
+        <p style="color:var(--text2);max-width:400px;margin:0 auto;font-size:15px">Invite friends to Pesa Grow and earn a percentage of every investment they make — paid instantly.</p>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:16px">Your Referral Code</div>
+          <div style="background:var(--bg3);border:1.5px dashed var(--green);border-radius:12px;padding:20px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <span style="font-family:'Clash Display',sans-serif;font-size:28px;font-weight:700;color:var(--green);letter-spacing:4px" id="myRefCode">---</span>
+            <button class="btn btn-green btn-sm" onclick="copyCode()">Copy</button>
+          </div>
+          <div class="fg"><label>Your Referral Link</label>
+            <div style="display:flex;gap:10px"><input class="fc" id="refLink" readonly style="font-size:13px"><button class="btn btn-green btn-sm" onclick="copyLink()">Copy</button></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="shareRef('whatsapp')">📱 WhatsApp</button>
+            <button class="btn btn-ghost btn-sm" onclick="shareRef('telegram')">✈️ Telegram</button>
+            <button class="btn btn-ghost btn-sm" onclick="shareRef('sms')">💬 SMS</button>
+          </div>
+        </div>
+        <div>
+          <div class="grid-2" style="margin-bottom:16px">
+            <div class="card"><div class="card-title">My Referrals</div><div class="card-val green" id="refCount">0</div></div>
+            <div class="card"><div class="card-title">Commission Earned</div><div class="card-val gold" id="refEarned">KES 0</div></div>
+          </div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Commission Rates</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Starter Plan</span><span style="color:var(--green);font-weight:700">5% commission</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Silver Plan</span><span style="color:var(--green);font-weight:700">5% commission</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Gold Plan</span><span style="color:var(--gold);font-weight:700">7% commission</span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Platinum Plan</span><span style="color:var(--purple);font-weight:700">10% commission</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="page" id="page-profile">
+      <div class="page-title">My Profile</div>
+      <div class="grid-2">
+        <div>
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px">
+              <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;color:#000" id="profAv">PG</div>
+              <div><div style="font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700" id="profName">—</div><div style="font-size:13px;color:var(--text2)" id="profEmail">—</div></div>
+            </div>
+            <div class="fg"><label>First Name</label><input class="fc" id="pFirst"></div>
+            <div class="fg"><label>Last Name</label><input class="fc" id="pLast"></div>
+            <div class="fg"><label>Email</label><input class="fc" id="pEmail" type="email"></div>
+            <div class="fg"><label>Phone (M-Pesa)</label><input class="fc" id="pPhone"></div>
+            <button class="btn btn-green btn-full" onclick="saveProfile()">Save Changes</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:16px">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Change Password</div>
+            <div class="fg"><label>Current Password</label><input class="fc" id="curPass" type="password" placeholder="••••••••"></div>
+            <div class="fg"><label>New Password</label><input class="fc" id="newPass" type="password" placeholder="Min 8 characters"></div>
+            <div class="fg"><label>Confirm New Password</label><input class="fc" id="confPass" type="password" placeholder="Repeat"></div>
+            <button class="btn btn-ghost" style="width:100%;padding:13px" onclick="changePass()">Update Password</button>
+          </div>
+          <div class="card">
+            <div style="font-family:'Clash Display',sans-serif;font-size:16px;margin-bottom:14px">Account Info</div>
+            <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Account ID</span><span id="profId" style="font-family:monospace"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Member Since</span><span id="profJoined"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Last Login</span><span id="profLastLogin"></span></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">KYC Status</span><span id="profKyc" style="color:var(--gold)">Pending</span></div>
+            </div>
+            <button class="btn btn-ghost" style="width:100%;margin-top:14px;padding:12px;font-size:14px" onclick="toast('KYC verification coming soon!','ok')">Submit KYC Documents</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- NOTIFICATIONS PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="np-head"><span style="font-weight:700">Notifications</span><button class="btn btn-ghost btn-sm" onclick="markAllRead()">Mark all read</button></div>
+  <div id="notifList"></div>
+</div>
+
+<!-- INVEST MODAL -->
+<div class="modal-bg" id="investModal" onclick="if(event.target===this)document.getElementById('investModal').classList.remove('open')">
+  <div class="modal">
+    <button class="modal-x" onclick="document.getElementById('investModal').classList.remove('open')">×</button>
+    <div id="investModalBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="db.js"></script>
+<script>
+let currentUser = null;
+let allTx = [];
+let liveEarned = 0;
+
+async function init() {
+  currentUser = await PG.Auth.getMe();
+  if (!currentUser) { window.location.href = 'index.html'; return; }
+  document.getElementById('userName').textContent = currentUser.firstName;
+  document.getElementById('userAv').textContent = currentUser.firstName[0] + currentUser.lastName[0];
+  loadPage('overview');
+  loadNotifications();
+  startLiveTicker();
+}
+
+// ── PAGES ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s => {
+    s.classList.toggle('active', s.dataset.page === name);
+  });
+  loadPage(name);
+}
+
+async function loadPage(name) {
+  currentUser = await PG.Auth.getMe();
+  switch(name) {
+    case 'overview':  loadOverview(); break;
+    case 'invest':    loadInvest(); break;
+    case 'deposit':   loadDeposit(); break;
+    case 'withdraw':  loadWithdraw(); break;
+    case 'history':   loadHistory('all'); break;
+    case 'referral':  loadReferral(); break;
+    case 'profile':   loadProfile(); break;
+  }
+}
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  const u = currentUser;
+  const invs = await PG.DB.getByIndex('investments', 'userId', u.id);
+  const active = invs.filter(i => i.status === 'active');
+  const k = n => 'KES ' + (+n).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+  document.getElementById('ovBalance').textContent = k(u.balance);
+  document.getElementById('ovInvested').textContent = k(u.totalInvested);
+  document.getElementById('ovActivePlans').textContent = active.length + ' active plan(s)';
+  document.getElementById('ovProfits').textContent = k(u.totalProfits);
+  document.getElementById('ovWithdrawn').textContent = k(u.totalWithdrawn);
+
+  // Active investments
+  const container = document.getElementById('activeInvList');
+  if (!active.length) {
+    container.innerHTML = `<div class="card" style="text-align:center;padding:32px"><div style="font-size:40px;margin-bottom:10px">💼</div><p style="color:var(--text2)">No active investments.</p><button class="btn btn-green" style="margin-top:14px" onclick="showPage('invest')">Start Investing</button></div>`;
+  } else {
+    container.innerHTML = active.map(inv => {
+      const pct = Math.min(((Date.now() - new Date(inv.startDate)) / (inv.period * 86400000)) * 100, 100);
+      const daysLeft = Math.max(0, Math.ceil((new Date(inv.endDate) - Date.now()) / 86400000));
+      return `<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="font-family:'Clash Display',sans-serif;font-weight:700">${inv.planName} Plan</span>
+          <span style="font-size:13px;color:var(--text2)">${daysLeft} days left</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px">
+          <span>${k(inv.amount)} invested</span>
+          <span style="color:var(--green)">+${k(inv.earned)} earned</span>
+        </div>
+        <div class="prog-wrap"><div class="prog-bar" style="width:${pct.toFixed(1)}%"></div></div>
+        <div style="font-size:12px;color:var(--text2);margin-top:5px">${pct.toFixed(1)}% complete • ${inv.roi}% daily</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Recent transactions
+  const txs = await PG.DB.getByIndex('transactions', 'userId', u.id);
+  const recent = txs.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt)).slice(0,5);
+  document.getElementById('recentTx').innerHTML = recent.length ? recent.map(tx => `
+    <div class="card" style="margin-bottom:10px;padding:14px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><div style="font-weight:600;font-size:14px;text-transform:capitalize">${tx.type}</div><div style="font-size:12px;color:var(--text2)">${new Date(tx.createdAt).toLocaleDateString()}</div></div>
+        <div style="text-align:right"><div style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}KES ${(+tx.amount).toFixed(2)}</div><span class="badge badge-${tx.status==='completed'?'ok':tx.status==='pending'?'pend':'fail'}">${tx.status}</span></div>
+      </div>
+    </div>`).join('') : '<div class="card" style="text-align:center;padding:24px;color:var(--text2)">No transactions yet</div>';
+
+  // Compute live earned
+  liveEarned = active.reduce((s,i) => s + (i.earned||0), 0);
+}
+
+// ── LIVE PROFIT TICKER ──
+function startLiveTicker() {
+  setInterval(async () => {
+    const invs = await PG.DB.getByIndex('investments', 'userId', currentUser.id);
+    const active = invs.filter(i => i.status === 'active');
+    liveEarned = active.reduce((s,i) => s + (i.earned||0), 0);
+    document.getElementById('liveProfit').textContent = 'KES ' + liveEarned.toFixed(4);
+  }, 1000);
+}
+
+// ── INVEST ──
+async function loadInvest() {
+  currentUser = await PG.Auth.getMe();
+  document.getElementById('investBal').textContent = 'KES ' + (+currentUser.balance).toFixed(2);
+  const plans = await PG.DB.getAll('plans');
+  document.getElementById('investPlansGrid').innerHTML = plans.filter(p=>p.active).map(p => `
+    <div class="card" style="border-top:3px solid ${p.color};cursor:pointer;transition:.3s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''" onclick="openInvestModal('${p.id}')">
+      <div style="font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">${p.name}</div>
+      <div style="font-size:48px;font-weight:700;color:${p.color};font-family:'Clash Display',sans-serif;line-height:1">${p.roi}%</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Daily ROI • ${p.period} days</div>
+      <div style="font-size:13px;background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:14px">
+        <div style="color:var(--text2)">Min: <strong style="color:var(--text)">KES ${p.min.toLocaleString()}</strong></div>
+        <div style="color:var(--text2)">Max: <strong style="color:var(--text)">KES ${p.max.toLocaleString()}</strong></div>
+      </div>
+      <button class="btn btn-green btn-full">Invest Now</button>
+    </div>`).join('');
+}
+
+async function openInvestModal(planId) {
+  const plan = await PG.DB.get('plans', planId);
+  const modal = document.getElementById('investModal');
+  const body  = document.getElementById('investModalBody');
+  modal.classList.add('open');
+  body.innerHTML = `
+    <div style="font-family:'Clash Display',sans-serif;font-size:24px;font-weight:700;margin-bottom:6px">Invest in ${plan.name}</div>
+    <div style="font-size:14px;color:var(--text2);margin-bottom:20px">${plan.roi}% daily ROI for ${plan.period} days</div>
+    <div style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+      <span style="color:var(--text2)">Your Balance</span>
+      <span style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--green)">KES ${(+currentUser.balance).toFixed(2)}</span>
+    </div>
+    <div class="fg"><label>Investment Amount (KES)</label><input class="fc" id="invAmt" type="number" min="${plan.min}" max="${plan.max}" placeholder="Min KES ${plan.min.toLocaleString()}" oninput="calcInvest(${plan.roi},${plan.period})"></div>
+    <div id="invCalc" style="background:var(--bg3);border-radius:10px;padding:14px;margin-bottom:14px;display:none">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Daily Profit</span><span id="ic-daily" style="color:var(--green);font-weight:700"></span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Total Return</span><span id="ic-total" style="color:var(--gold);font-weight:700"></span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Net Profit</span><span id="ic-profit" style="color:var(--green);font-weight:700"></span></div>
+    </div>
+    <button class="btn btn-green btn-full" onclick="confirmInvest('${planId}')">Confirm Investment</button>`;
+}
+
+function calcInvest(roi, period) {
+  const amt = parseFloat(document.getElementById('invAmt').value);
+  const c = document.getElementById('invCalc');
+  if (amt > 0) {
+    c.style.display = 'block';
+    document.getElementById('ic-daily').textContent = 'KES ' + (amt * roi / 100).toFixed(2);
+    document.getElementById('ic-total').textContent = 'KES ' + (amt + amt * roi / 100 * period).toFixed(2);
+    document.getElementById('ic-profit').textContent = 'KES ' + (amt * roi / 100 * period).toFixed(2);
+  } else { c.style.display = 'none'; }
+}
+
+async function confirmInvest(planId) {
+  const amt = parseFloat(document.getElementById('invAmt').value);
+  if (!amt) { toast('Enter an amount','err'); return; }
+  try {
+    await PG.Investments.create(currentUser.id, planId, amt);
+    currentUser = await PG.Auth.getMe();
+    document.getElementById('investModal').classList.remove('open');
+    showPage('overview');
+    toast('Investment activated! Earning daily. 🚀','ok');
+  } catch(e) { toast(e.message, 'err'); }
+}
+
+// ── DEPOSIT ──
+async function loadDeposit() {
+  const deps = await PG.DB.getByIndex('deposits', 'userId', currentUser.id);
+  const sorted = deps.sort((a,b) => new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('depHistory').innerHTML = sorted.length ? sorted.map(d => `
+    <tr>
+      <td>${new Date(d.createdAt).toLocaleString()}</td>
+      <td>${d.method}</td>
+      <td>KES ${(+d.amount).toFixed(2)}</td>
+      <td style="font-family:monospace;font-size:13px">${d.proofNote||'—'}</td>
+      <td><span class="badge badge-${d.status==='approved'?'ok':d.status==='pending'?'pend':'fail'}">${d.status}</span></td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">No deposits yet</td></tr>';
+}
+
+async function submitDeposit() {
+  const amount = parseFloat(document.getElementById('depAmt').value);
+  const method = document.getElementById('depMethod').value;
+  const proofNote = document.getElementById('depRef').value.trim();
+  if (!amount || amount < 1000) { toast('Minimum deposit is KES 1,000','err'); return; }
+  if (!proofNote) { toast('Please enter your M-Pesa transaction code','err'); return; }
+  try {
+    await PG.Deposits.submit(currentUser.id, { amount, method, proofNote });
+    document.getElementById('depAmt').value = '';
+    document.getElementById('depRef').value = '';
+    toast('Deposit submitted! Admin will confirm within 30 minutes.','ok');
+    loadDeposit();
+  } catch(e) { toast(e.message,'err'); }
+}
+
+async function addTestBalance() {
+  const amt = parseFloat(document.getElementById('testAmt').value) || 5000;
+  currentUser.balance = (currentUser.balance||0) + amt;
+  await PG.DB.put('users', currentUser);
+  await PG.addTransaction({ userId: currentUser.id, type:'deposit', amount:amt, description:'Test Balance', status:'completed' });
+  toast('KES ' + amt.toFixed(2) + ' added! 💰','ok');
+  showPage('overview');
+}
+
+// ── WITHDRAW ──
+async function loadWithdraw() {
+  document.getElementById('wdBalance').textContent = 'KES ' + (+currentUser.balance).toFixed(2);
+  document.getElementById('wdSumInv').textContent = 'KES ' + (+currentUser.totalInvested).toFixed(2);
+  document.getElementById('wdSumProfit').textContent = 'KES ' + (+currentUser.totalProfits).toFixed(2);
+  document.getElementById('wdSumWd').textContent = 'KES ' + (+currentUser.totalWithdrawn).toFixed(2);
+  const wds = await PG.DB.getByIndex('withdrawals', 'userId', currentUser.id);
+  const sorted = wds.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('wdHistory').innerHTML = sorted.length ? sorted.map(w=>`
+    <tr>
+      <td>${new Date(w.createdAt).toLocaleString()}</td>
+      <td>${w.method}</td>
+      <td>KES ${(+w.amount).toFixed(2)}</td>
+      <td style="color:var(--green)">KES ${(+w.net).toFixed(2)}</td>
+      <td><span class="badge badge-${w.status==='approved'?'ok':w.status==='pending'?'pend':'fail'}">${w.status}</span></td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">No withdrawals yet</td></tr>';
+}
+
+function calcWd() {
+  const amt = parseFloat(document.getElementById('wdAmt').value);
+  const c = document.getElementById('wdCalc');
+  if (amt > 0) {
+    const fee = amt * 0.02;
+    c.style.display = 'block';
+    document.getElementById('wdFee').textContent = 'KES ' + fee.toFixed(2);
+    document.getElementById('wdNet').textContent = 'KES ' + (amt-fee).toFixed(2);
+  } else { c.style.display='none'; }
+}
+
+async function submitWithdraw() {
+  const amount  = parseFloat(document.getElementById('wdAmt').value);
+  const method  = document.getElementById('wdMethod').value;
+  const address = document.getElementById('wdAddr').value.trim();
+  if (!amount || amount < 500) { toast('Minimum withdrawal is KES 500','err'); return; }
+  if (!address) { toast('Enter your M-Pesa number or account details','err'); return; }
+  try {
+    await PG.Withdrawals.submit(currentUser.id, { amount, method, address });
+    document.getElementById('wdAmt').value='';
+    document.getElementById('wdAddr').value='';
+    document.getElementById('wdCalc').style.display='none';
+    toast('Withdrawal submitted! Processing within 2 hours.','ok');
+    loadWithdraw();
+  } catch(e) { toast(e.message,'err'); }
+}
+
+// ── HISTORY ──
+async function loadHistory(filter) {
+  const txs = await PG.DB.getByIndex('transactions', 'userId', currentUser.id);
+  const filtered = filter === 'all' ? txs : txs.filter(t => t.type === filter);
+  const sorted = filtered.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  document.getElementById('txBody').innerHTML = sorted.length ? sorted.map(tx=>`
+    <tr>
+      <td style="font-size:13px;color:var(--text2)">${new Date(tx.createdAt).toLocaleString()}</td>
+      <td><span style="text-transform:capitalize;font-weight:600">${tx.type}</span></td>
+      <td style="color:var(--text2);font-size:13px">${tx.description||'—'}</td>
+      <td style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}KES ${(+tx.amount).toFixed(2)}</td>
+      <td><span class="badge badge-${tx.status==='completed'?'ok':tx.status==='pending'?'pend':'fail'}">${tx.status}</span></td>
+    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">No transactions</td></tr>';
+}
+function filterTx(f) { loadHistory(f); }
+
+// ── REFERRAL ──
+async function loadReferral() {
+  document.getElementById('myRefCode').textContent = currentUser.refCode;
+  const url = window.location.origin + window.location.pathname.replace('dashboard.html','index.html') + '?ref=' + currentUser.refCode;
+  document.getElementById('refLink').value = url;
+  const refs = await PG.DB.getByIndex('referrals', 'referrerId', currentUser.id);
+  const totalComm = refs.reduce((s,r)=>s+r.earnings,0);
+  document.getElementById('refCount').textContent = refs.length;
+  document.getElementById('refEarned').textContent = 'KES ' + totalComm.toFixed(2);
+}
+function copyCode() { navigator.clipboard.writeText(document.getElementById('myRefCode').textContent).then(()=>toast('Code copied!','ok')); }
+function copyLink() { navigator.clipboard.writeText(document.getElementById('refLink').value).then(()=>toast('Link copied!','ok')); }
+function shareRef(via) {
+  const url = document.getElementById('refLink').value;
+  const msg = `Join Pesa Grow and earn daily returns on your investments! Use my referral link: ${url}`;
+  const urls = { whatsapp:`https://wa.me/?text=${encodeURIComponent(msg)}`, telegram:`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Join Pesa Grow`, sms:`sms:?body=${encodeURIComponent(msg)}` };
+  window.open(urls[via],'_blank');
+}
+
+// ── PROFILE ──
+async function loadProfile() {
+  const u = currentUser;
+  document.getElementById('profAv').textContent = u.firstName[0]+u.lastName[0];
+  document.getElementById('profName').textContent = u.firstName+' '+u.lastName;
+  document.getElementById('profEmail').textContent = u.email;
+  document.getElementById('pFirst').value = u.firstName;
+  document.getElementById('pLast').value = u.lastName;
+  document.getElementById('pEmail').value = u.email;
+  document.getElementById('pPhone').value = u.phone||'';
+  document.getElementById('profId').textContent = '#'+u.id.slice(-8);
+  document.getElementById('profJoined').textContent = new Date(u.createdAt).toLocaleDateString();
+  document.getElementById('profLastLogin').textContent = new Date(u.lastLogin).toLocaleDateString();
+  document.getElementById('profKyc').textContent = u.kycStatus==='verified'?'✓ Verified':'Pending';
+}
+async function saveProfile() {
+  currentUser.firstName = document.getElementById('pFirst').value.trim() || currentUser.firstName;
+  currentUser.lastName  = document.getElementById('pLast').value.trim()  || currentUser.lastName;
+  currentUser.email     = document.getElementById('pEmail').value.trim() || currentUser.email;
+  currentUser.phone     = document.getElementById('pPhone').value.trim();
+  await PG.DB.put('users', currentUser);
+  sessionStorage.setItem('pg_user', currentUser.id);
+  document.getElementById('userName').textContent = currentUser.firstName;
+  document.getElementById('userAv').textContent = currentUser.firstName[0]+currentUser.lastName[0];
+  toast('Profile saved! ✅','ok');
+}
+async function changePass() {
+  const cur=document.getElementById('curPass').value, nw=document.getElementById('newPass').value, cf=document.getElementById('confPass').value;
+  if (!cur || cur !== '' && PG.hash(cur) !== currentUser.password) { toast('Current password incorrect','err'); return; }
+  if (nw.length < 8) { toast('New password must be 8+ characters','err'); return; }
+  if (nw !== cf) { toast('Passwords do not match','err'); return; }
+  currentUser.password = PG.hash(nw);
+  await PG.DB.put('users', currentUser);
+  toast('Password updated! 🔒','ok');
+}
+
+// ── NOTIFICATIONS ──
+async function loadNotifications() {
+  const notifs = await PG.DB.getByIndex('notifications', 'userId', currentUser.id);
+  const unread = notifs.filter(n=>!n.read);
+  const badge = document.getElementById('notifBadge');
+  if (unread.length) { badge.style.display='flex'; badge.textContent=unread.length; }
+  else { badge.style.display='none'; }
+  const sorted = notifs.sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)).slice(0,15);
+  document.getElementById('notifList').innerHTML = sorted.length ? sorted.map(n=>`
+    <div class="np-item"><div class="np-dot ${n.read?'read':''}"></div><div><div style="font-size:14px">${n.message}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${new Date(n.createdAt).toLocaleString()}</div></div></div>`).join('') : '<div style="padding:24px;text-align:center;color:var(--text2);font-size:14px">No notifications yet</div>';
+}
+function toggleNotif() {
+  document.getElementById('notifPanel').classList.toggle('open');
+}
+async function markAllRead() {
+  const notifs = await PG.DB.getByIndex('notifications', 'userId', currentUser.id);
+  for (const n of notifs) { n.read=true; await PG.DB.put('notifications',n); }
+  loadNotifications();
+  document.getElementById('notifPanel').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.notif-btn') && !e.target.closest('.notif-panel')) {
+    document.getElementById('notifPanel').classList.remove('open');
+  }
+});
+setInterval(loadNotifications, 10000);
+
+function toast(msg, type='ok') {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+init();
+</script>
+</body>
+</html>
