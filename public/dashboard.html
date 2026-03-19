@@ -53,7 +53,9 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .sc-sub{font-size:12px;color:var(--text2);margin-top:4px}
 
 /* PROFIT TICKER */
-.profit-ticker{background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:13px;padding:16px 22px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.profit-ticker{background:linear-gradient(135deg,rgba(0,230,118,.07),rgba(0,230,118,.02));border:1px solid rgba(0,230,118,.25);border-radius:16px;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;position:relative;overflow:hidden}
+.profit-ticker::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scan 3s linear infinite}
+@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 .pt-left{display:flex;flex-direction:column;gap:3px}
 .pt-lbl{font-size:13px;color:var(--text2)}
 .pt-sub{font-size:11px;color:var(--green);opacity:.7}
@@ -115,6 +117,7 @@ select.fc option{background:var(--bg3)}
 /* STK */
 .stk-spinner{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
 
 /* NOTIF PANEL */
 .notif-panel{position:fixed;top:58px;right:20px;width:320px;background:var(--card);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow);z-index:300;display:none;max-height:400px;overflow-y:auto}
@@ -188,10 +191,16 @@ select.fc option{background:var(--bg3)}
     <div class="page-title">Portfolio Overview</div>
     <div class="profit-ticker">
       <div class="pt-left">
-        <div class="pt-lbl">Live Profit Accumulating</div>
-        <div class="pt-sub">Updates every second from active investments</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <div style="width:8px;height:8px;background:var(--green);border-radius:50%;animation:blink 1s infinite;flex-shrink:0"></div>
+          <div class="pt-lbl">Live Profit Accumulating</div>
+        </div>
+        <div class="pt-sub" id="liveSubText">Syncing with server...</div>
       </div>
-      <div class="pt-val" id="liveProfit">KES 0.0000</div>
+      <div style="text-align:right">
+        <div class="pt-val" id="liveProfit" style="font-variant-numeric:tabular-nums;letter-spacing:-1px">KES 0.0000</div>
+        <div style="font-size:11px;color:rgba(0,230,118,.5);margin-top:2px">↑ ticking every second</div>
+      </div>
     </div>
     <div class="stats-row">
       <div class="stat-card" style="--sc:var(--green)"><div class="sc-lbl">Balance</div><div class="sc-val" id="ovBalance">KES 0</div><div class="sc-sub">Available to use</div></div>
@@ -441,7 +450,6 @@ select.fc option{background:var(--bg3)}
 const API = window.location.origin;
 let currentUser = null;
 let allTx = [];
-let liveInterval = null;
 
 function token() { return localStorage.getItem('pg_token'); }
 
@@ -601,20 +609,88 @@ async function loadOverview() {
 }
 
 // ══════════════════════════════════════════════════
-//  LIVE PROFIT TICKER
+//  LIVE PROFIT TICKER — True real-time per-second
 // ══════════════════════════════════════════════════
+let activeInvestments = [];   // cached active investments
+let liveBaseEarned    = 0;    // earned at last server sync
+let liveBaseTime      = 0;    // timestamp of last server sync
+let livePerSecond     = 0;    // total KES earned per second across all investments
+let liveTickInterval  = null; // the per-second UI updater
+let liveSyncInterval  = null; // the server re-sync (every 30s)
+
 function startLiveTicker() {
-  if (liveInterval) clearInterval(liveInterval);
-  liveInterval = setInterval(async () => {
-    try {
-      if (!currentUser) return;
-      const data = await apiFetch('/api/user/dashboard');
-      const active = (data.investments||[]).filter(i=>i.status==='active');
-      const earned = active.reduce((s,i)=>s+(+i.earned||0),0);
-      const el = document.getElementById('liveProfit');
-      if (el) el.textContent = k(earned);
-    } catch {}
-  }, 10000);
+  // Clear any existing intervals
+  if (liveTickInterval) clearInterval(liveTickInterval);
+  if (liveSyncInterval) clearInterval(liveSyncInterval);
+
+  // Sync investment data from server immediately, then every 30s
+  syncLiveData();
+  liveSyncInterval = setInterval(syncLiveData, 30000);
+
+  // Update the UI display every second
+  liveTickInterval = setInterval(updateLiveDisplay, 1000);
+}
+
+async function syncLiveData() {
+  try {
+    const data = await apiFetch('/api/user/dashboard');
+    activeInvestments = (data.investments||[]).filter(i => i.status === 'active');
+
+    // Calculate total earned so far and per-second rate
+    liveBaseEarned = activeInvestments.reduce((s,i) => s + (+i.earned||0), 0);
+    liveBaseTime   = Date.now();
+
+    // Per second = sum of (amount * roi/100 / 86400) for each active investment
+    livePerSecond  = activeInvestments.reduce((s, i) => {
+      return s + ((+i.amount||0) * (+i.roi||0) / 100 / 86400);
+    }, 0);
+
+    // Also refresh the overview stats while we have fresh data
+    if (data.user) {
+      const el = document.getElementById('ovBalance');
+      if (el) el.textContent = k(data.user.balance);
+      const profEl = document.getElementById('ovProfits');
+      if (profEl) profEl.textContent = k(data.user.totalProfits);
+    }
+
+    // Update active investments progress bars
+    updateInvestmentProgress();
+
+  } catch {}
+}
+
+function updateLiveDisplay() {
+  const el = document.getElementById('liveProfit');
+  if (!el) return;
+
+  if (livePerSecond <= 0) {
+    el.textContent = 'KES 0.0000';
+    return;
+  }
+
+  // Calculate elapsed seconds since last server sync
+  const elapsed = (Date.now() - liveBaseTime) / 1000;
+
+  // Current earned = base + (rate per second × elapsed seconds)
+  const current = liveBaseEarned + (livePerSecond * elapsed);
+
+  // Show 4 decimal places so user can literally see it ticking up
+  el.textContent = 'KES ' + current.toFixed(4);
+
+  // Subtle green flash every 5 seconds to show it's live
+  if (Math.floor(elapsed) % 5 === 0 && elapsed > 0) {
+    el.style.textShadow = '0 0 20px rgba(0,230,118,0.8)';
+    setTimeout(() => { if(el) el.style.textShadow = ''; }, 500);
+  }
+}
+
+function updateInvestmentProgress() {
+  const subEl = document.getElementById('liveSubText');
+  if (subEl && livePerSecond > 0) {
+    subEl.textContent = `+KES ${livePerSecond.toFixed(6)}/sec · ${activeInvestments.length} active plan(s)`;
+  } else if (subEl) {
+    subEl.textContent = 'No active investments — deposit and invest to start earning';
+  }
 }
 
 // ══════════════════════════════════════════════════
