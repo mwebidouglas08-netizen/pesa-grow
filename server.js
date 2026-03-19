@@ -350,7 +350,7 @@ app.post('/api/auth/login', (req, res) => {
   res.json({ token, user: safeUser });
 });
 
-app.get('/api/auth/me', authUser, (req, res) => {
+app.get('/api/auth/me', authUser, (req, res, next) => {
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
   if (!user) return res.status(404).json({ error: 'Not found' });
   const { password: _, ...safe } = user;
@@ -361,9 +361,18 @@ app.get('/api/auth/me', authUser, (req, res) => {
 //  M-PESA ROUTES
 // ══════════════════════════════════════════════════════
 
-app.post('/api/mpesa/stk-push', authUser, async (req, res) => {
+app.post('/api/mpesa/stk-push', authUser, async (req, res, next) => {
   const { amount, phone } = req.body;
+
+  if (!req.user || !req.user.id) {
+    return res.status(401).json({ error: 'Unauthorized — please login again' });
+  }
+
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User account not found — please login again' });
+  }
   const minDep = parseFloat(getSetting('minDeposit')||1000);
   if (!amount || amount < minDep) return res.status(400).json({ error: `Minimum deposit is KES ${minDep}` });
   if (!phone) return res.status(400).json({ error: 'Phone number required' });
