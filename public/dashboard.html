@@ -497,7 +497,12 @@ async function init() {
     // Refresh from server
     try { currentUser = await apiFetch('/api/auth/me'); localStorage.setItem('pg_user', JSON.stringify(currentUser)); } catch {}
     if (!currentUser) { window.location.href = 'index.html'; return; }
-
+// Load platform settings
+let platformSettings = {};
+try {
+  const s = await apiFetch('/api/settings/public');
+  platformSettings = s;
+} catch {}
     const av = (currentUser.firstName||'P')[0] + (currentUser.lastName||'G')[0];
     document.getElementById('userAv').textContent = av.toUpperCase();
     document.getElementById('userName').textContent = currentUser.firstName;
@@ -704,17 +709,18 @@ async function loadDeposit() {
 }
 
 // STK PUSH
-async function doSTKPush() {
+async function doSTK(){
   const phone  = document.getElementById('stkPhone').value.trim();
   const amount = parseFloat(document.getElementById('stkAmt').value);
-  clearMsg('stkErr');
+
+  // Fetch live min deposit from backend
+  let minDep = 1000;
+  try { const s = await fetch(`${API}/api/settings/public`).then(r=>r.json()); minDep = parseFloat(s.minDeposit)||1000; } catch {}
 
   if (!phone) { showErr('stkErr','Enter your M-Pesa phone number'); return; }
-  if (!amount || amount < 1000) { showErr('stkErr','Minimum deposit is KES 1,000'); return; }
-
-  const btn = document.getElementById('stkBtn');
-  btn.textContent = 'Sending prompt...'; btn.disabled = true;
-  document.getElementById('stkStatusArea').innerHTML = '';
+  if (!amount || amount < minDep) { showErr('stkErr',`Minimum deposit is KES ${minDep.toLocaleString()}`); return; }
+  // ... rest of function
+}
 
   try {
     const res = await apiFetch('/api/mpesa/stk-push', {
@@ -777,10 +783,12 @@ async function doSTKPush() {
 
 // MANUAL DEPOSIT
 async function doManualDeposit() {
-  const amount   = parseFloat(document.getElementById('manAmt').value);
+  const amount   = parseFloat document.getElementById('stkAmt').placeholder = `Minimum KES ${(platformSettings.minDeposit||1000).toLocaleString()}`;
+document.getElementById('manAmt').placeholder  = `Minimum KES ${(platformSettings.minDeposit||1000).toLocaleString()}`;
   const method   = document.getElementById('manMethod').value;
   const proofNote = document.getElementById('manRef').value.trim();
-  if (!amount || amount < 1000) { toast('Minimum deposit is KES 1,000','err'); return; }
+  const minDep = parseFloat(platformSettings.minDeposit) || 1000;
+if (!amount || amount < minDep) { toast(`Minimum deposit is KES ${minDep.toLocaleString()}`,'err'); return; }
   if (!proofNote) { toast('Enter your M-Pesa transaction code','err'); return; }
   try {
     await apiFetch('/api/user/deposit/manual', { method:'POST', body:JSON.stringify({amount, method, proofNote}) });
