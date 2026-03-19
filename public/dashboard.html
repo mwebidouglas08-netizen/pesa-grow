@@ -289,13 +289,40 @@ select.fc option{background:var(--bg3)}
   <!-- ── WITHDRAW ─────────────────────────── -->
   <div class="page" id="page-withdraw">
     <div class="page-title">Withdraw Funds</div>
+
+    <!-- Rules banner -->
+    <div id="wdRulesBanner" style="margin-bottom:20px"></div>
+
     <div class="grid-2">
       <div class="card">
         <div class="card-title">💸 Request Withdrawal</div>
-        <div style="background:var(--bg3);border-radius:11px;padding:15px;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center">
-          <span style="color:var(--text2)">Available Balance</span>
-          <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;color:var(--green)" id="wdBalance">KES 0</span>
+
+        <!-- Balance boxes -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+          <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:14px;text-align:center">
+            <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Withdrawable</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:var(--green)" id="wdAvailable">KES 0</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:3px">Profits only</div>
+          </div>
+          <div style="background:rgba(255,193,7,.05);border:1px solid rgba(255,193,7,.15);border-radius:11px;padding:14px;text-align:center">
+            <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Locked</div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:var(--gold)" id="wdLocked">KES 0</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:3px" id="wdLockInfo">Principal</div>
+          </div>
         </div>
+
+        <!-- Daily limit tracker -->
+        <div id="wdDailyTracker" style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:13px;font-weight:600">Daily Withdrawals</div>
+            <div style="font-size:12px;color:var(--text2);margin-top:2px">Resets at midnight</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800" id="wdCountDisplay">0 / 3</div>
+            <div style="font-size:11px;color:var(--text2)" id="wdCountSub">withdrawals today</div>
+          </div>
+        </div>
+
         <div class="m-err" id="wdErr"></div>
         <div class="fg"><label>Withdrawal Method</label>
           <select class="fc" id="wdMethod">
@@ -310,19 +337,43 @@ select.fc option{background:var(--bg3)}
           <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">You Receive</span><span id="wdNetAmt" style="color:var(--green);font-weight:700"></span></div>
         </div>
         <div style="background:rgba(255,193,7,.05);border:1px solid rgba(255,193,7,.15);border-radius:9px;padding:10px 14px;font-size:13px;color:var(--text2);margin-bottom:14px">
-          Minimum withdrawal: <strong style="color:var(--text)" id="wdInfoMin">KES 500</strong> · Fee: <strong style="color:var(--text)" id="wdInfoFee2"><span id="wdFeeRate">2</span>%</strong>
+          Min: <strong style="color:var(--text)" id="wdInfoMin">KES 500</strong> · Fee: <strong style="color:var(--text)"><span id="wdFeeRate">2</span>%</strong>
         </div>
-        <button class="btn btn-green btn-full" onclick="doWithdraw()">Request Withdrawal</button>
+        <button class="btn btn-green btn-full" id="wdSubmitBtn" onclick="doWithdraw()">Request Withdrawal</button>
       </div>
+
       <div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-title">📊 Summary</div>
+        <!-- Rules card -->
+        <div class="card" style="margin-bottom:16px;border-color:rgba(0,230,118,.2)">
+          <div class="card-title">📋 Withdrawal Rules</div>
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
-            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Invested</span><span id="wdSumInv">KES 0</span></div>
-            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Profits</span><span id="wdSumProfit" style="color:var(--green)">KES 0</span></div>
-            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Withdrawn</span><span id="wdSumWd">KES 0</span></div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="color:var(--green);font-size:18px;flex-shrink:0">💰</span>
+              <div><strong>Profits Only</strong><br><span style="color:var(--text2);font-size:13px">Only profits can be withdrawn. Your initial investment is locked for 90 days.</span></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="color:var(--gold);font-size:18px;flex-shrink:0">🔒</span>
+              <div><strong>90-Day Lock</strong><br><span style="color:var(--text2);font-size:13px">Your invested principal is locked for 90 days from investment date. It returns to your balance after 90 days.</span></div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="color:var(--blue);font-size:18px;flex-shrink:0">📅</span>
+              <div><strong>3 Times Per Day</strong><br><span style="color:var(--text2);font-size:13px">Maximum 3 profit withdrawals per day. Limit resets at midnight every day.</span></div>
+            </div>
           </div>
         </div>
+
+        <!-- Summary card -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title">📊 Summary</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Invested</span><span id="wdSumInv">KES 0</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Profits Earned</span><span id="wdSumProfit" style="color:var(--green)">KES 0</span></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Total Withdrawn</span><span id="wdSumWd">KES 0</span></div>
+            <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)"><span style="color:var(--text2)">Balance</span><span id="wdBalance" style="color:var(--green);font-weight:700">KES 0</span></div>
+          </div>
+        </div>
+
+        <!-- History -->
         <div class="card">
           <div class="card-title">📂 Withdrawal History</div>
           <div class="tbl-wrap"><table class="tbl">
@@ -1064,29 +1115,24 @@ async function doManualDeposit() {
 // ══════════════════════════════════════════════════
 //  WITHDRAW
 // ══════════════════════════════════════════════════
+let wdInfo = null;
+
 async function loadWithdraw() {
-  // Apply live settings to withdrawal form
-  const minWd   = parseFloat(platformSettings.minWithdraw)||500;
-  const feeRate = parseFloat(platformSettings.withdrawFee)||2;
-  const wdEl    = document.getElementById('wdAmt');
-  if (wdEl) { wdEl.min = minWd; wdEl.placeholder = `Min KES ${minWd.toLocaleString()}`; }
-
-  // Update the info card with live values
-  const infoMinEl  = document.getElementById('wdInfoMin');
-  const infoFeeEl  = document.getElementById('wdInfoFee');
-  const infoFeeEl2 = document.getElementById('wdFeeRate');
-  if (infoMinEl)  infoMinEl.textContent  = `KES ${minWd.toLocaleString()}`;
-  if (infoFeeEl)  infoFeeEl.textContent  = feeRate;
-  if (infoFeeEl2) infoFeeEl2.textContent = feeRate;
-
-  document.getElementById('wdBalance').textContent    = k(currentUser.balance);
-  document.getElementById('wdSumInv').textContent     = k(currentUser.totalInvested);
-  document.getElementById('wdSumProfit').textContent  = k(currentUser.totalProfits);
-  document.getElementById('wdSumWd').textContent      = k(currentUser.totalWithdrawn);
   clearMsg('wdErr');
   try {
+    wdInfo = await apiFetch('/api/user/withdraw-info');
+    renderWithdrawRules(wdInfo);
+  } catch(e) {
+    wdInfo = { withdrawableBalance: currentUser.balance, totalLocked:0, principalLocked:false, todayWithdrawals:0, maxDailyWithdrawals:3, withdrawalsRemaining:3, feeRate:2, minWithdraw:500, lockDays:90, earliestUnlockDays:0 };
+    renderWithdrawRules(wdInfo);
+  }
+  document.getElementById('wdBalance').textContent   = k(currentUser.balance);
+  document.getElementById('wdSumInv').textContent    = k(currentUser.totalInvested);
+  document.getElementById('wdSumProfit').textContent = k(currentUser.totalProfits);
+  document.getElementById('wdSumWd').textContent     = k(currentUser.totalWithdrawn);
+  try {
     const data = await apiFetch('/api/user/dashboard');
-    const wds = (data.withdrawals||[]).slice(0,8);
+    const wds = (data.withdrawals||[]).slice(0,10);
     document.getElementById('wdHistory').innerHTML = wds.length ? wds.map(w=>`
       <tr>
         <td style="font-weight:700">${k(w.amount)}</td>
@@ -1098,11 +1144,54 @@ async function loadWithdraw() {
   } catch {}
 }
 
+function renderWithdrawRules(info) {
+  const avail = document.getElementById('wdAvailable');
+  if (avail) avail.textContent = k(info.withdrawableBalance);
+  const locked = document.getElementById('wdLocked');
+  if (locked) locked.textContent = k(info.totalLocked);
+  const lockInfo = document.getElementById('wdLockInfo');
+  if (lockInfo) {
+    if (info.principalLocked && info.earliestUnlockDays > 0)
+      lockInfo.innerHTML = `<span style="color:var(--gold)">Unlocks in ${info.earliestUnlockDays} days</span>`;
+    else if (!info.totalLocked)
+      lockInfo.innerHTML = `<span style="color:var(--green)">Nothing locked</span>`;
+    else lockInfo.textContent = `${info.lockDays}-day lock`;
+  }
+  const max = info.maxDailyWithdrawals||3;
+  const used = info.todayWithdrawals||0;
+  const rem = Math.max(0, max - used);
+  const cntEl = document.getElementById('wdCountDisplay');
+  const subEl = document.getElementById('wdCountSub');
+  if (cntEl) { cntEl.textContent = `${used} / ${max}`; cntEl.style.color = rem===0?'var(--red)':rem===1?'var(--gold)':'var(--green)'; }
+  if (subEl) subEl.textContent = rem > 0 ? `${rem} remaining today` : '0 remaining — resets at midnight';
+  const minEl=document.getElementById('wdInfoMin'), feeEl=document.getElementById('wdInfoFee'), feeEl2=document.getElementById('wdFeeRate');
+  if (minEl) minEl.textContent = `KES ${(+info.minWithdraw||500).toLocaleString()}`;
+  if (feeEl) feeEl.textContent = info.feeRate||2;
+  if (feeEl2) feeEl2.textContent = info.feeRate||2;
+  const wdEl = document.getElementById('wdAmt');
+  if (wdEl) { wdEl.min = info.minWithdraw||500; wdEl.max = info.withdrawableBalance; wdEl.placeholder = `Max KES ${(+info.withdrawableBalance||0).toLocaleString()} (profits only)`; }
+  const btn = document.getElementById('wdSubmitBtn');
+  if (btn) {
+    if (rem === 0) { btn.disabled=true; btn.textContent='🚫 Daily Limit Reached — Resets at Midnight'; btn.style.opacity='.5'; }
+    else { btn.disabled=false; btn.textContent=`Request Withdrawal (${rem} left today)`; btn.style.opacity='1'; }
+  }
+  const banner = document.getElementById('wdRulesBanner');
+  if (banner) {
+    if (info.principalLocked) {
+      banner.innerHTML = `<div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.25);border-radius:13px;padding:16px 20px;display:flex;align-items:flex-start;gap:12px"><span style="font-size:24px;flex-shrink:0">🔒</span><div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin-bottom:4px">Investment Locked for ${info.lockDays} Days</div><div style="font-size:13px;color:var(--text2)">Your invested principal of <strong style="color:var(--text)">${k(info.totalLocked)}</strong> is locked. Only profits (<strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong>) can be withdrawn. Principal unlocks in <strong style="color:var(--gold)">${info.earliestUnlockDays} day(s)</strong>.</div></div></div>`;
+    } else if (info.withdrawableBalance <= 0) {
+      banner.innerHTML = `<div style="background:rgba(79,195,247,.05);border:1px solid rgba(79,195,247,.2);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">ℹ️ No profits available to withdraw yet. Keep investing and earning!</div>`;
+    } else {
+      banner.innerHTML = `<div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">✅ <strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong> available to withdraw. ${rem} withdrawal(s) remaining today.</div>`;
+    }
+  }
+}
+
 function calcWd() {
   const amt = parseFloat(document.getElementById('wdAmt').value);
   const c = document.getElementById('wdCalc');
   if (amt > 0) {
-    const feeRate = parseFloat(platformSettings.withdrawFee||2) / 100;
+    const feeRate = parseFloat((wdInfo&&wdInfo.feeRate)||platformSettings.withdrawFee||2) / 100;
     const fee = amt * feeRate;
     c.style.display = 'block';
     document.getElementById('wdFeeAmt').textContent = k(fee);
@@ -1114,26 +1203,30 @@ async function doWithdraw() {
   const amount  = parseFloat(document.getElementById('wdAmt').value);
   const method  = document.getElementById('wdMethod').value;
   const address = document.getElementById('wdAddr').value.trim();
-  const minWd   = parseFloat(platformSettings.minWithdraw)||500;
+  const minWd   = wdInfo ? (+wdInfo.minWithdraw||500) : 500;
   clearMsg('wdErr');
   if (!amount || amount < minWd) { showErr('wdErr',`Minimum withdrawal is KES ${minWd.toLocaleString()}`); return; }
   if (!address) { showErr('wdErr','Enter your M-Pesa number or account details'); return; }
-  const btn = document.querySelector('#page-withdraw .btn-green');
+  if (wdInfo && wdInfo.principalLocked && amount > wdInfo.withdrawableBalance) { showErr('wdErr',`Only profits can be withdrawn. Available: ${k(wdInfo.withdrawableBalance)}`); return; }
+  if (wdInfo && wdInfo.withdrawalsRemaining <= 0) { showErr('wdErr','Daily withdrawal limit reached. Resets at midnight.'); return; }
+  const btn = document.getElementById('wdSubmitBtn');
   btn.textContent = 'Submitting...'; btn.disabled = true;
   try {
     const res = await apiFetch('/api/user/withdraw', { method:'POST', body:JSON.stringify({amount, method, address}) });
     document.getElementById('wdAmt').value = '';
     document.getElementById('wdAddr').value = '';
     document.getElementById('wdCalc').style.display = 'none';
-    toast(`Withdrawal of ${k(amount)} submitted! Processing within 2 hours.`,'ok');
+    const rem = res.withdrawalsRemainingToday !== undefined ? res.withdrawalsRemainingToday : '';
+    toast(`Withdrawal of ${k(amount)} submitted! ${rem !== '' ? rem+' withdrawal(s) left today.' : ''}`, 'ok');
     currentUser = await apiFetch('/api/auth/me');
     localStorage.setItem('pg_user', JSON.stringify(currentUser));
     loadWithdraw();
   } catch(e) {
     showErr('wdErr', e.message);
+    btn.textContent = 'Request Withdrawal'; btn.disabled = false;
   }
-  btn.textContent = 'Request Withdrawal'; btn.disabled = false;
 }
+
 
 // ══════════════════════════════════════════════════
 //  HISTORY
