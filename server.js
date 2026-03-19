@@ -35,23 +35,23 @@ db.pragma('foreign_keys = ON');
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
-    id          TEXT PRIMARY KEY,
-    firstName   TEXT NOT NULL,
-    lastName    TEXT NOT NULL,
-    email       TEXT UNIQUE NOT NULL,
-    phone       TEXT,
-    password    TEXT NOT NULL,
-    role        TEXT DEFAULT 'user',
-    status      TEXT DEFAULT 'active',
-    balance     REAL DEFAULT 0,
-    totalInvested  REAL DEFAULT 0,
-    totalProfits   REAL DEFAULT 0,
-    totalWithdrawn REAL DEFAULT 0,
-    refCode     TEXT UNIQUE,
-    referredBy  TEXT,
-    kycStatus   TEXT DEFAULT 'none',
-    createdAt   TEXT NOT NULL,
-    lastLogin   TEXT
+    id              TEXT PRIMARY KEY,
+    firstName       TEXT NOT NULL,
+    lastName        TEXT NOT NULL,
+    email           TEXT UNIQUE NOT NULL,
+    phone           TEXT,
+    password        TEXT NOT NULL,
+    role            TEXT DEFAULT 'user',
+    status          TEXT DEFAULT 'active',
+    balance         REAL DEFAULT 0,
+    totalInvested   REAL DEFAULT 0,
+    totalProfits    REAL DEFAULT 0,
+    totalWithdrawn  REAL DEFAULT 0,
+    refCode         TEXT UNIQUE,
+    referredBy      TEXT,
+    kycStatus       TEXT DEFAULT 'none',
+    createdAt       TEXT NOT NULL,
+    lastLogin       TEXT
   );
 
   CREATE TABLE IF NOT EXISTS plans (
@@ -62,7 +62,7 @@ db.exec(`
     minAmount     REAL NOT NULL,
     maxAmount     REAL NOT NULL,
     referralBonus REAL DEFAULT 5,
-    color         TEXT DEFAULT '#10b981',
+    color         TEXT DEFAULT '#00e676',
     description   TEXT,
     popular       INTEGER DEFAULT 0,
     active        INTEGER DEFAULT 1,
@@ -148,17 +148,36 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS mpesa_logs (
-    id              TEXT PRIMARY KEY,
-    checkoutId      TEXT,
-    phone           TEXT,
-    amount          REAL,
-    resultCode      TEXT,
-    resultDesc      TEXT,
-    receiptNo       TEXT,
-    rawCallback     TEXT,
-    processedAt     TEXT
+    id            TEXT PRIMARY KEY,
+    checkoutId    TEXT,
+    phone         TEXT,
+    amount        REAL,
+    resultCode    TEXT,
+    resultDesc    TEXT,
+    receiptNo     TEXT,
+    rawCallback   TEXT,
+    processedAt   TEXT
   );
 `);
+
+// Safely add any missing columns to existing database
+const addCol = (table, col, type) => {
+  try { db.prepare(`ALTER TABLE ${table} ADD COLUMN ${col} ${type}`).run(); } catch {}
+};
+addCol('users', 'totalInvested',  'REAL DEFAULT 0');
+addCol('users', 'totalProfits',   'REAL DEFAULT 0');
+addCol('users', 'totalWithdrawn', 'REAL DEFAULT 0');
+addCol('users', 'kycStatus',      "TEXT DEFAULT 'none'");
+addCol('users', 'referredBy',     'TEXT');
+addCol('users', 'role',           "TEXT DEFAULT 'user'");
+addCol('users', 'status',         "TEXT DEFAULT 'active'");
+addCol('deposits', 'mpesaCheckoutId', 'TEXT');
+addCol('deposits', 'mpesaReceiptNo',  'TEXT');
+addCol('deposits', 'mpesaPhone',      'TEXT');
+addCol('deposits', 'rejectionReason', 'TEXT');
+addCol('withdrawals', 'rejectionReason', 'TEXT');
+addCol('investments', 'planName',     'TEXT');
+addCol('investments', 'lastCredited', 'TEXT');
 
 // ── SEED DATA ───────────────────────────────────────────
 function seedDefaults() {
