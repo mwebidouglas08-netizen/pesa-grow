@@ -3,199 +3,200 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pesa Grow — Smart Investment Platform</title>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Pesa Grow — Kenya's #1 Investment Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg:#050709; --bg2:#0c0e14; --bg3:#13151f; --card:#0f1117;
-  --border:rgba(255,255,255,0.06); --border2:rgba(255,255,255,0.12);
-  --green:#10b981; --green2:#34d399; --gold:#f59e0b; --gold2:#fbbf24;
-  --red:#ef4444; --blue:#3b82f6; --purple:#8b5cf6;
-  --text:#f0f2f8; --text2:#8892a4; --text3:#404760;
-  --r:14px; --shadow:0 20px 60px rgba(0,0,0,0.5);
+:root{
+  --bg:#030508;--bg2:#080c12;--bg3:#0f1520;--card:#0a0f18;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --green:#00e676;--gold:#ffc107;--red:#ff4d6a;--blue:#4fc3f7;
+  --text:#eef2ff;--text2:#7986a8;--text3:#3d4a66;
+  --r:16px;--shadow:0 24px 80px rgba(0,0,0,0.6);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
-h1,h2,h3,h4,h5{font-family:'Clash Display',sans-serif}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:3px}
 
 /* NAV */
-.nav{position:fixed;top:0;left:0;right:0;z-index:99;padding:18px 5%;display:flex;align-items:center;justify-content:space-between;transition:.3s}
-.nav.scrolled{background:rgba(5,7,9,0.92);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
-.nav-brand{display:flex;align-items:center;gap:10px}
-.nav-logo{width:36px;height:36px;background:linear-gradient(135deg,var(--green),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:16px;color:#000}
-.nav-name{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 5%;display:flex;align-items:center;justify-content:space-between;transition:.3s}
+.nav.scrolled{background:rgba(3,5,8,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.nav-logo{width:38px;height:38px;background:linear-gradient(135deg,var(--green),#00b341);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:15px;color:#000}
+.nav-name{font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.5px}
 .nav-links{display:flex;gap:32px;list-style:none}
 .nav-links a{color:var(--text2);text-decoration:none;font-size:15px;font-weight:500;transition:.2s}
 .nav-links a:hover{color:var(--text)}
-.nav-cta{display:flex;gap:10px}
-.btn{padding:11px 22px;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
-.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.25)}
-.btn-green{background:linear-gradient(135deg,var(--green),#059669);color:#fff}
-.btn-green:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(16,185,129,.35)}
-.btn-lg{padding:16px 36px;font-size:16px;border-radius:12px}
-.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border2);border-radius:10px;padding:14px 28px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:.2s}
-.btn-outline:hover{border-color:var(--green);color:var(--green)}
+.nav-cta{display:flex;gap:10px;align-items:center}
 .hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
 
-/* HERO */
-.hero{min-height:100vh;display:flex;align-items:center;padding:110px 5% 80px;position:relative;gap:60px}
-.hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.orb{position:absolute;border-radius:50%;filter:blur(120px);opacity:.12}
-.orb1{width:700px;height:700px;background:var(--green);top:-200px;left:-150px}
-.orb2{width:500px;height:500px;background:var(--gold);bottom:-100px;right:-50px}
-.orb3{width:400px;height:400px;background:var(--purple);top:50%;right:20%}
-.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:50px 50px}
-.hero-content{flex:1;position:relative;z-index:1;max-width:600px}
-.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green);padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:28px}
-.hero-tag span{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.hero-h1{font-size:clamp(44px,5.5vw,76px);font-weight:700;line-height:1.06;letter-spacing:-2px;margin-bottom:20px}
-.hero-h1 em{font-style:normal;background:linear-gradient(135deg,var(--green),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-sub{font-size:18px;color:var(--text2);line-height:1.65;margin-bottom:36px;max-width:460px}
-.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:56px}
-.hero-social-proof{display:flex;align-items:center;gap:20px}
-.avatars{display:flex}
-.avatar-placeholder{width:36px;height:36px;border-radius:50%;border:2px solid var(--bg);margin-left:-10px;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000}
-.hero-proof-text{font-size:14px;color:var(--text2)}
-.hero-proof-text strong{color:var(--text)}
-.hero-visual{flex:0 0 420px;position:relative;z-index:1}
+/* BUTTONS */
+.btn{padding:11px 22px;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,.3)}
+.btn-green{background:linear-gradient(135deg,var(--green),#00b341);color:#000;font-weight:800}
+.btn-green:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,230,118,.3)}
+.btn-lg{padding:16px 36px;font-size:16px;border-radius:13px}
+.btn-outline{background:transparent;color:var(--text);border:2px solid var(--border2);border-radius:11px;padding:14px 28px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:.2s}
+.btn-outline:hover{border-color:var(--green);color:var(--green)}
 
-/* PLATFORM CARD */
-.platform-card{background:rgba(15,17,23,.9);border:1px solid var(--border2);border-radius:20px;padding:24px;backdrop-filter:blur(20px);box-shadow:var(--shadow)}
-.pc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.pc-title{font-size:13px;color:var(--text2);font-weight:500}
-.pc-live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:600}
-.pc-live-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-.balance-display{text-align:center;padding:20px 0;border-bottom:1px solid var(--border)}
-.balance-label{font-size:13px;color:var(--text2);margin-bottom:6px}
-.balance-val{font-family:'Clash Display',sans-serif;font-size:42px;font-weight:700}
-.balance-growth{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.1);color:var(--green);padding:4px 12px;border-radius:100px;font-size:13px;font-weight:600;margin-top:8px}
-.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
-.ms-item{background:var(--bg3);border-radius:10px;padding:14px}
-.ms-label{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.ms-val{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:600}
-.ms-val.green{color:var(--green)}
-.ms-val.gold{color:var(--gold)}
-.float-card{position:absolute;background:rgba(13,15,20,.95);border:1px solid var(--border2);border-radius:12px;padding:12px 16px;display:flex;align-items:center;gap:10px;backdrop-filter:blur(20px);animation:floaty 3s ease-in-out infinite}
-.float-card.fc1{top:-24px;right:-16px;animation-delay:0s}
-.float-card.fc2{bottom:-16px;left:-16px;animation-delay:1.5s}
-@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
-.fc-icon{font-size:22px}
-.fc-label{font-size:11px;color:var(--text2)}
-.fc-val{font-weight:700;font-size:15px;color:var(--green)}
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 5% 80px;position:relative;gap:60px}
+.hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.hero-cover{
+  position:absolute;inset:0;
+  background:
+    linear-gradient(to right, rgba(3,5,8,1) 0%, rgba(3,5,8,0.88) 55%, rgba(3,5,8,0.4) 100%),
+    url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&q=80') center/cover no-repeat;
+}
+.hero-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,var(--bg) 100%)}
+.orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.12;z-index:1}
+.orb1{width:600px;height:600px;background:var(--green);top:-100px;left:-100px}
+.orb2{width:400px;height:400px;background:var(--gold);bottom:0;right:50px}
+.grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:48px 48px;z-index:1}
+
+.hero-content{flex:1;position:relative;z-index:2;max-width:620px}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:28px}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+.hero-h1{font-size:clamp(46px,6vw,82px);font-weight:800;line-height:1.04;letter-spacing:-2.5px;margin-bottom:22px}
+.hero-h1 em{font-style:normal;color:var(--green)}
+.hero-sub{font-size:18px;color:var(--text2);line-height:1.7;margin-bottom:38px;max-width:480px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:52px}
+.hero-stats{display:flex;align-items:center;gap:36px;flex-wrap:wrap}
+.hstat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:800}
+.hstat-lbl{font-size:13px;color:var(--text2);margin-top:2px}
+.hstat-div{width:1px;height:36px;background:var(--border2)}
+
+.hero-visual{flex:0 0 400px;position:relative;z-index:2}
+.live-card{background:rgba(10,15,24,0.92);border:1px solid var(--border2);border-radius:20px;padding:24px;backdrop-filter:blur(20px);box-shadow:var(--shadow)}
+.lc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.lc-title{font-size:13px;color:var(--text2)}
+.lc-live{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:700}
+.lc-balance{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;font-weight:800;margin-bottom:4px}
+.lc-growth{display:inline-flex;align-items:center;gap:5px;background:rgba(0,230,118,.08);color:var(--green);padding:4px 12px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:16px}
+.lc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.lc-item{background:var(--bg3);border-radius:12px;padding:13px}
+.lc-lbl{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.lc-val{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700}
+.lc-val.g{color:var(--green)}.lc-val.gold{color:var(--gold)}
+.fn{position:absolute;background:rgba(10,15,24,.96);border:1px solid var(--border2);border-radius:12px;padding:11px 15px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:floaty 3s ease-in-out infinite}
+.fn1{top:-28px;right:-20px}.fn2{bottom:-20px;left:-24px;animation-delay:1.5s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.fn-lbl{font-size:11px;color:var(--text2)}.fn-val{font-weight:700;font-size:15px;color:var(--green)}
 
 /* TICKER */
-.ticker-strip{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:12px 0;overflow:hidden}
-.ticker-inner{display:flex;gap:48px;width:max-content;animation:scroll 35s linear infinite}
+.ticker-bar{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:11px 0;overflow:hidden}
+.ticker-inner{display:flex;gap:52px;width:max-content;animation:scroll 40s linear infinite}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ti{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap}
-.ti-sym{color:var(--text2);font-weight:600}
-.ti-p{font-weight:600}
-.ti-c.up{color:var(--green)}.ti-c.dn{color:var(--red)}
+.ti{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;font-weight:500}
+.ti-sym{color:var(--text2)}.ti-c.up{color:var(--green)}.ti-c.dn{color:var(--red)}
 
 /* STATS BAR */
-.stats-bar{padding:60px 5%;background:var(--bg2);border-bottom:1px solid var(--border)}
-.stats-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
-.stat-box{background:var(--bg2);padding:32px;text-align:center}
-.stat-num{font-family:'Clash Display',sans-serif;font-size:42px;font-weight:700;line-height:1;margin-bottom:8px}
-.stat-lbl{font-size:14px;color:var(--text2)}
+.stats-bar{padding:56px 5%;background:var(--bg2);border-bottom:1px solid var(--border)}
+.stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+.stat-box{background:var(--bg2);padding:30px;text-align:center}
+.stat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:6px}
+.stat-lbl{font-size:13px;color:var(--text2)}
+
+/* SECTIONS */
+.section{padding:96px 5%;max-width:1280px;margin:0 auto}
+.dark-section{background:var(--bg2)}
+.dark-section .section{padding:96px 5%}
+.sec-lbl{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px}
+.sec-title{font-size:clamp(30px,4vw,50px);font-weight:800;letter-spacing:-1.5px;margin-bottom:14px}
+.sec-sub{font-size:16px;color:var(--text2);line-height:1.65;max-width:460px;margin-bottom:56px}
 
 /* PLANS */
-.section{padding:100px 5%;max-width:1300px;margin:0 auto}
-.sec-label{font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:12px}
-.sec-title{font-size:clamp(32px,4vw,52px);font-weight:700;letter-spacing:-1.5px;margin-bottom:16px}
-.sec-sub{font-size:17px;color:var(--text2);line-height:1.6;max-width:480px;margin-bottom:60px}
-.plans-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
 .plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:all .3s;cursor:pointer}
-.plan:hover{transform:translateY(-6px);border-color:var(--border2);box-shadow:0 24px 60px rgba(0,0,0,.45)}
-.plan.pop{border-color:var(--green)}
-.plan::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--plan-clr,var(--green))}
-.plan-badge{position:absolute;top:18px;right:18px;background:var(--green);color:#fff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;letter-spacing:.8px;text-transform:uppercase}
-.plan-name{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:600;margin-bottom:6px}
-.plan-roi{font-family:'Clash Display',sans-serif;font-size:56px;font-weight:700;color:var(--plan-clr,var(--green));line-height:1}
-.plan-roi-sub{font-size:13px;color:var(--text2);margin-bottom:20px}
-.plan-range{font-size:13px;color:var(--text2);margin-bottom:20px;padding:10px 14px;background:var(--bg3);border-radius:8px}
+.plan:hover{transform:translateY(-6px);box-shadow:0 28px 70px rgba(0,0,0,.5);border-color:var(--border2)}
+.plan.pop{border-color:rgba(0,230,118,.35)}
+.plan::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc,var(--green))}
+.plan-badge{position:absolute;top:16px;right:16px;background:var(--green);color:#000;font-size:10px;font-weight:800;padding:4px 10px;border-radius:100px;letter-spacing:.8px}
+.plan-name{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px}
+.plan-roi{font-family:'Bricolage Grotesque',sans-serif;font-size:54px;font-weight:800;color:var(--pc,var(--green));line-height:1}
+.plan-sub{font-size:13px;color:var(--text2);margin-bottom:18px}
+.plan-range{font-size:13px;background:var(--bg3);border-radius:9px;padding:10px 13px;color:var(--text2);margin-bottom:18px}
 .plan-range strong{color:var(--text)}
-.plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:24px}
-.plan-feats li{font-size:14px;color:var(--text2);display:flex;gap:8px;align-items:center}
-.plan-feats li::before{content:'✓';color:var(--green);font-weight:800}
-.plan-btn{width:100%;padding:14px;border:none;border-radius:10px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:15px;cursor:pointer;background:var(--plan-clr,var(--green));color:#fff;transition:.2s}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:22px}
+.plan-feats li{font-size:14px;color:var(--text2);display:flex;gap:8px}
+.plan-feats li::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0}
+.plan-btn{width:100%;padding:14px;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:15px;cursor:pointer;background:var(--pc,var(--green));color:#000;transition:.2s}
 .plan-btn:hover{opacity:.85;transform:translateY(-1px)}
 
-/* HOW IT WORKS */
-.hiw-section{padding:100px 5%;background:var(--bg2)}
-.hiw-inner{max-width:1200px;margin:0 auto}
-.steps{display:flex;gap:0;align-items:stretch;flex-wrap:wrap;margin-top:60px}
-.step{flex:1;min-width:200px;padding:28px;position:relative}
-.step:not(:last-child)::after{content:'→';position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:24px;color:var(--text3);z-index:1}
-.step-n{font-family:'Clash Display',sans-serif;font-size:60px;font-weight:700;color:rgba(255,255,255,.04);line-height:1;margin-bottom:12px}
-.step-icon{font-size:36px;margin-bottom:14px}
-.step h3{font-size:18px;margin-bottom:8px}
-.step p{font-size:14px;color:var(--text2);line-height:1.6}
-.step-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+/* STEPS */
+.steps{display:flex;align-items:flex-start;flex-wrap:wrap;margin-top:56px}
+.step{flex:1;min-width:200px;padding:20px;position:relative}
+.step:not(:last-child)::after{content:'→';position:absolute;right:-14px;top:50px;font-size:22px;color:var(--text3)}
+.step-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;height:100%}
+.step-n{font-family:'Bricolage Grotesque',sans-serif;font-size:56px;font-weight:800;color:rgba(255,255,255,.04);line-height:1;margin-bottom:10px}
+.step-icon{font-size:34px;margin-bottom:14px}
+.step-card h3{font-size:18px;margin-bottom:8px}
+.step-card p{font-size:14px;color:var(--text2);line-height:1.6}
 
 /* TESTIMONIALS */
-.testi-wrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:60px}
-.tcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px}
-.tcard.feat{border-color:rgba(16,185,129,.3);background:linear-gradient(135deg,rgba(16,185,129,.04),var(--card))}
-.tc-stars{color:var(--gold);margin-bottom:12px;font-size:16px}
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:56px}
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px}
+.tcard.feat{border-color:rgba(0,230,118,.25)}
+.tc-stars{color:var(--gold);font-size:16px;margin-bottom:12px}
 .tc-text{font-size:15px;color:var(--text2);line-height:1.65;margin-bottom:18px}
 .tc-author{display:flex;align-items:center;gap:12px}
-.tc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;color:#000}
-.tc-name{font-weight:700;font-size:15px}
-.tc-role{font-size:12px;color:var(--text2)}
+.tc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13px;color:#000;flex-shrink:0}
+.tc-name{font-weight:700;font-size:15px}.tc-role{font-size:12px;color:var(--text2)}
 
-/* MPESA SECTION */
-.mpesa-section{padding:100px 5%;background:var(--bg2);border-top:1px solid var(--border)}
-.mpesa-inner{max-width:900px;margin:0 auto;text-align:center}
-.mpesa-card{background:var(--card);border:2px solid rgba(16,185,129,.2);border-radius:24px;padding:48px;display:flex;flex-direction:column;align-items:center;gap:20px;margin-top:40px}
-.mpesa-logo{font-family:'Clash Display',sans-serif;font-size:36px;font-weight:700;color:var(--green)}
-.mpesa-num{font-family:'Clash Display',sans-serif;font-size:52px;font-weight:700;letter-spacing:4px;color:var(--text)}
+/* MPESA */
+.mpesa-card{background:var(--card);border:2px solid rgba(0,230,118,.15);border-radius:24px;padding:48px;display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:40px;text-align:center}
+.mpesa-num{font-family:'Bricolage Grotesque',sans-serif;font-size:52px;font-weight:800;letter-spacing:3px}
 
 /* FOOTER */
-.footer{background:#030405;border-top:1px solid var(--border);padding:60px 5% 28px}
-.footer-top{display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:40px;margin-bottom:48px}
-.foot-brand p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.65;max-width:220px}
+.footer{background:#020305;border-top:1px solid var(--border);padding:56px 5% 28px}
+.footer-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:40px;margin-bottom:44px}
+.foot-brand p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.7;max-width:220px}
 .foot-col h4{font-size:14px;font-weight:700;margin-bottom:16px}
 .foot-col a{display:block;font-size:14px;color:var(--text2);text-decoration:none;margin-bottom:10px;transition:.2s}
 .foot-col a:hover{color:var(--green)}
-.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
-.footer-bottom p{font-size:13px;color:var(--text3)}
+.footer-btm{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.footer-btm p{font-size:13px;color:var(--text3)}
 
 /* MODAL */
-.modal-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:36px;width:100%;max-width:440px;position:relative;max-height:90vh;overflow-y:auto}
-.modal-x{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:38px;width:100%;max-width:440px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text2);font-size:24px;cursor:pointer;line-height:1}
 .modal-x:hover{color:var(--text)}
-.m-title{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;margin-bottom:6px}
+.m-title{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px}
 .m-sub{font-size:14px;color:var(--text2);margin-bottom:26px}
 .fg{margin-bottom:18px}
 .fg label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:7px}
-.fc{width:100%;padding:13px 15px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;transition:.2s}
+.fc{width:100%;padding:13px 15px;background:var(--bg3);border:1px solid var(--border2);border-radius:11px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;transition:.2s}
 .fc:focus{outline:none;border-color:var(--green)}
-.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.m-switch{font-size:14px;color:var(--text2);text-align:center;margin-top:18px}
+.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.m-switch{font-size:14px;color:var(--text2);text-align:center;margin-top:16px}
 .m-switch span{color:var(--green);cursor:pointer;font-weight:600}
-.m-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:12px 14px;border-radius:8px;font-size:14px;margin-bottom:14px;display:none}
+.m-err{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red);padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
+.m-ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
+
+/* STK */
+.stk-spinner{width:48px;height:48px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* TOAST */
-.toast{position:fixed;bottom:24px;right:24px;z-index:600;padding:14px 22px;border-radius:12px;font-size:15px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast{position:fixed;bottom:24px;right:24px;z-index:600;padding:14px 22px;border-radius:13px;font-size:15px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .toast.show{transform:translateY(0);opacity:1}
-.toast.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
-.toast.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,44,.3);color:var(--red)}
+.toast.ok{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.toast.err{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:var(--red)}
 
-@media(max-width:1100px){.hero{flex-direction:column;text-align:center;padding:110px 5% 60px}.hero-sub{margin:0 auto 36px}.hero-btns{justify-content:center}.hero-social-proof{justify-content:center}.hero-visual{display:none}.footer-top{grid-template-columns:1fr 1fr}}
-@media(max-width:768px){.nav-links,.nav-cta{display:none}.hamburger{display:block}.stats-inner{grid-template-columns:1fr 1fr}.steps{flex-direction:column}.step:not(:last-child)::after{content:'↓';right:50%;top:auto;bottom:-18px;transform:none}.footer-top{grid-template-columns:1fr}}
+@media(max-width:1100px){.hero{flex-direction:column;text-align:center;padding:110px 5% 60px}.hero-sub{margin:0 auto 38px}.hero-btns{justify-content:center}.hero-stats{justify-content:center}.hero-visual{display:none}.footer-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:768px){.nav-links,.nav-cta{display:none}.hamburger{display:block}.stats-inner{grid-template-columns:1fr 1fr}.steps{flex-direction:column}.step:not(:last-child)::after{display:none}.footer-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav class="nav" id="mainNav">
-  <div class="nav-brand">
+  <div class="nav-brand" onclick="window.scrollTo(0,0)">
     <div class="nav-logo">PG</div>
     <span class="nav-name">Pesa Grow</span>
   </div>
@@ -213,170 +214,164 @@ h1,h2,h3,h4,h5{font-family:'Clash Display',sans-serif}
 
 <!-- HERO -->
 <section class="hero" id="home">
-  <div class="hero-bg"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div><div class="grid-bg"></div></div>
+  <div class="hero-bg">
+    <div class="hero-cover"></div>
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="grid-bg"></div>
+  </div>
   <div class="hero-content">
-    <div class="hero-tag"><span></span> Kenya's #1 Smart Investment Platform</div>
-    <h1 class="hero-h1">Grow Your <em>Pesa</em><br>Every Day</h1>
-    <p class="hero-sub">Earn up to 10% daily returns on your investments. Start with as little as KES 1,000 and watch your money multiply 24/7.</p>
+    <div class="hero-tag"><span class="live-dot"></span> Kenya's #1 Daily Investment Platform</div>
+    <h1 class="hero-h1">Make Your<br><em>Money Work</em><br>24/7 For You</h1>
+    <p class="hero-sub">Earn up to 10% daily returns. Start with KES 1,000 via M-Pesa. Profits credit automatically every day.</p>
     <div class="hero-btns">
-      <button class="btn btn-green btn-lg" onclick="openModal('register')">Start Investing Free</button>
+      <button class="btn btn-green btn-lg" onclick="openModal('register')">🚀 Start Investing Free</button>
       <button class="btn-outline" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">View Plans →</button>
     </div>
-    <div class="hero-social-proof">
-      <div class="avatars">
-        <div class="avatar-placeholder">JM</div>
-        <div class="avatar-placeholder" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">AO</div>
-        <div class="avatar-placeholder" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">SK</div>
-        <div class="avatar-placeholder" style="background:linear-gradient(135deg,#10b981,#3b82f6)">+</div>
-      </div>
-      <div class="hero-proof-text">Joined by <strong>50,000+</strong> investors across Kenya</div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num">50K+</div><div class="hstat-lbl">Active Investors</div></div>
+      <div class="hstat-div"></div>
+      <div class="hstat"><div class="hstat-num">KES 12M+</div><div class="hstat-lbl">Total Paid Out</div></div>
+      <div class="hstat-div"></div>
+      <div class="hstat"><div class="hstat-num">99.9%</div><div class="hstat-lbl">Uptime</div></div>
     </div>
   </div>
   <div class="hero-visual">
-    <div class="platform-card">
-      <div class="pc-top">
-        <span class="pc-title">Portfolio Summary</span>
-        <span class="pc-live"><span class="pc-live-dot"></span>LIVE</span>
+    <div class="live-card">
+      <div class="lc-header">
+        <span class="lc-title">Live Portfolio</span>
+        <span class="lc-live"><span class="live-dot"></span> LIVE</span>
       </div>
-      <div class="balance-display">
-        <div class="balance-label">Total Portfolio Value</div>
-        <div class="balance-val">KES <span id="heroBalance">248,600</span></div>
-        <div class="balance-growth">↑ +12.4% this month</div>
+      <div class="lc-balance">KES <span id="heroBalance">248,600</span></div>
+      <div class="lc-growth">↑ +12.4% this month</div>
+      <div class="lc-grid">
+        <div class="lc-item"><div class="lc-lbl">Daily Profit</div><div class="lc-val g">+KES 1,240</div></div>
+        <div class="lc-item"><div class="lc-lbl">ROI</div><div class="lc-val gold">7% /day</div></div>
       </div>
-      <div class="mini-stats">
-        <div class="ms-item"><div class="ms-label">Daily Profit</div><div class="ms-val green">+KES 1,240</div></div>
-        <div class="ms-item"><div class="ms-label">ROI</div><div class="ms-val gold">7% / day</div></div>
-      </div>
-      <canvas id="heroChart" width="370" height="80"></canvas>
+      <canvas id="heroChart" width="352" height="70"></canvas>
     </div>
-    <div class="float-card fc1"><span class="fc-icon">💰</span><div><div class="fc-label">Profit Credited</div><div class="fc-val">+KES 480</div></div></div>
-    <div class="float-card fc2"><span class="fc-icon">📈</span><div><div class="fc-label">Active Investors</div><div class="fc-val">12,540</div></div></div>
+    <div class="fn fn1"><span style="font-size:20px">💰</span><div><div class="fn-lbl">Profit Credited</div><div class="fn-val">+KES 480</div></div></div>
+    <div class="fn fn2"><span style="font-size:20px">📈</span><div><div class="fn-lbl">New Investor</div><div class="fn-val">Just joined!</div></div></div>
   </div>
 </section>
 
 <!-- TICKER -->
-<div class="ticker-strip"><div class="ticker-inner" id="ticker"></div></div>
+<div class="ticker-bar"><div class="ticker-inner" id="ticker"></div></div>
 
-<!-- STATS BAR -->
+<!-- STATS -->
 <div class="stats-bar">
   <div class="stats-inner">
     <div class="stat-box"><div class="stat-num" style="color:var(--green)">50K+</div><div class="stat-lbl">Registered Members</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--gold)">KES 12M+</div><div class="stat-lbl">Total Paid Out</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--blue)">99.9%</div><div class="stat-lbl">Platform Uptime</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--purple)">24/7</div><div class="stat-lbl">Support Available</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--green)">24/7</div><div class="stat-lbl">Support Available</div></div>
   </div>
 </div>
 
 <!-- PLANS -->
 <section id="plans">
   <div class="section">
-    <div class="sec-label">Investment Plans</div>
+    <div class="sec-lbl">Investment Plans</div>
     <h2 class="sec-title">Choose Your Plan</h2>
-    <p class="sec-sub">Pick a plan that matches your goals. All plans include daily profit crediting.</p>
-    <div class="plans-wrap" id="plansGrid">
-      <!-- Plans loaded from backend -->
+    <p class="sec-sub">All plans include daily profit crediting and instant M-Pesa withdrawals.</p>
+    <div class="plans-grid" id="plansGrid">
       <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">Loading plans...</div>
     </div>
   </div>
 </section>
 
 <!-- HOW IT WORKS -->
-<section class="hiw-section" id="how">
-  <div class="hiw-inner">
-    <div class="sec-label">Process</div>
+<div class="dark-section" id="how">
+  <div class="section" style="max-width:1200px;margin:0 auto">
+    <div class="sec-lbl">Process</div>
     <h2 class="sec-title">How Pesa Grow Works</h2>
     <div class="steps">
       <div class="step"><div class="step-card"><div class="step-n">01</div><div class="step-icon">👤</div><h3>Create Account</h3><p>Sign up free in 2 minutes. No paperwork, no hidden fees.</p></div></div>
-      <div class="step"><div class="step-card"><div class="step-n">02</div><div class="step-icon">📲</div><h3>Deposit via M-Pesa</h3><p>Fund your account instantly via M-Pesa to 0796820013.</p></div></div>
-      <div class="step"><div class="step-card"><div class="step-n">03</div><div class="step-icon">🎯</div><h3>Choose a Plan</h3><p>Select an investment plan and activate it with one click.</p></div></div>
+      <div class="step"><div class="step-card"><div class="step-n">02</div><div class="step-icon">📲</div><h3>Deposit via M-Pesa</h3><p>We send a prompt to your phone. Enter your PIN and funds reflect instantly.</p></div></div>
+      <div class="step"><div class="step-card"><div class="step-n">03</div><div class="step-icon">🎯</div><h3>Choose a Plan</h3><p>Pick an investment plan and activate it with one click.</p></div></div>
       <div class="step"><div class="step-card"><div class="step-n">04</div><div class="step-icon">💸</div><h3>Earn & Withdraw</h3><p>Profits credit daily. Withdraw anytime to your M-Pesa.</p></div></div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- TESTIMONIALS -->
-<section style="background:var(--bg2);padding:100px 5%">
-  <div style="max-width:1200px;margin:0 auto">
-    <div class="sec-label">Testimonials</div>
+<section>
+  <div class="section">
+    <div class="sec-lbl">Testimonials</div>
     <h2 class="sec-title">What Our Investors Say</h2>
-    <div class="testi-wrap">
-      <div class="tcard"><div class="tc-stars">★★★★★</div><p class="tc-text">"I started with KES 5,000 and earned KES 1,050 in the first week. Pesa Grow has completely changed how I think about saving money."</p><div class="tc-author"><div class="tc-av">JM</div><div><div class="tc-name">James Mwangi</div><div class="tc-role">Entrepreneur, Nairobi</div></div></div></div>
-      <div class="tcard feat"><div class="tc-stars">★★★★★</div><p class="tc-text">"The M-Pesa integration is seamless. I deposit and receive withdrawals within minutes. Best investment platform in Kenya."</p><div class="tc-author"><div class="tc-av">FW</div><div><div class="tc-name">Faith Wanjiru</div><div class="tc-role">Teacher, Kisumu</div></div></div></div>
-      <div class="tcard"><div class="tc-stars">★★★★★</div><p class="tc-text">"I referred 8 friends and earn commissions every time they invest. Pesa Grow's referral program is genuinely rewarding!"</p><div class="tc-author"><div class="tc-av">AK</div><div><div class="tc-name">Amina Kamau</div><div class="tc-role">Business Owner, Mombasa</div></div></div></div>
+    <div class="testi-grid">
+      <div class="tcard"><div class="tc-stars">★★★★★</div><p class="tc-text">"I started with KES 5,000 and earned KES 1,050 in the first week. Pesa Grow is the real deal."</p><div class="tc-author"><div class="tc-av">JM</div><div><div class="tc-name">James Mwangi</div><div class="tc-role">Entrepreneur, Nairobi</div></div></div></div>
+      <div class="tcard feat"><div class="tc-stars">★★★★★</div><p class="tc-text">"M-Pesa STK Push is seamless. I just enter my PIN and funds are in my account instantly."</p><div class="tc-author"><div class="tc-av">FW</div><div><div class="tc-name">Faith Wanjiru</div><div class="tc-role">Teacher, Kisumu</div></div></div></div>
+      <div class="tcard"><div class="tc-stars">★★★★★</div><p class="tc-text">"Referred 8 friends and earn commissions on every investment they make. Amazing system!"</p><div class="tc-author"><div class="tc-av">AK</div><div><div class="tc-name">Amina Kamau</div><div class="tc-role">Business Owner, Mombasa</div></div></div></div>
     </div>
   </div>
 </section>
 
-<!-- MPESA SECTION -->
-<section class="mpesa-section" id="contact">
-  <div class="mpesa-inner">
-    <div class="sec-label">Deposit</div>
+<!-- MPESA -->
+<div class="dark-section" id="contact">
+  <div class="section" style="max-width:860px;margin:0 auto;text-align:center">
+    <div class="sec-lbl">Deposit</div>
     <h2 class="sec-title">Pay via M-Pesa</h2>
-    <p style="color:var(--text2);font-size:17px">Send your investment directly to our M-Pesa. Funds reflect instantly in your dashboard.</p>
+    <p style="color:var(--text2);font-size:17px">Instant STK Push deposits — your phone prompts you automatically. No manual sending needed.</p>
     <div class="mpesa-card">
-      <div class="mpesa-logo">🟢 M-PESA</div>
-      <div style="font-size:15px;color:var(--text2)">Send to Till / Paybill Number:</div>
+      <div style="font-size:36px;font-weight:800;color:var(--green)">🟢 M-PESA</div>
+      <div style="font-size:15px;color:var(--text2)">Till / Paybill Number</div>
       <div class="mpesa-num">0796820013</div>
-      <div style="font-size:18px;color:var(--text2)">PESA GROW LTD</div>
-      <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:14px 24px;font-size:14px;color:var(--text2);text-align:center">
-        After paying, <strong style="color:var(--text)">upload your M-Pesa receipt</strong> in your dashboard under Deposits. Your balance updates within 30 minutes.
+      <div style="font-size:17px;color:var(--text2)">PESA GROW LTD</div>
+      <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:11px;padding:14px 24px;font-size:14px;color:var(--text2);max-width:500px">
+        Login then click <strong style="color:var(--text)">💳 Deposit</strong> in the nav. We'll send an M-Pesa prompt to your phone instantly.
       </div>
-      <div style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center">
+      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
         <button class="btn btn-green" onclick="openModal('register')">Open Account Free</button>
-        <a href="tel:0796820013" class="btn btn-ghost">📞 Call 0796820013</a>
-        <a href="https://wa.me/254796820013" target="_blank" class="btn btn-ghost">💬 WhatsApp Us</a>
+        <a href="tel:0796820013" class="btn btn-ghost">📞 0796820013</a>
+        <a href="https://wa.me/254796820013" target="_blank" class="btn btn-ghost">💬 WhatsApp</a>
       </div>
     </div>
   </div>
-</section>
+</div>
 
 <!-- FOOTER -->
 <footer class="footer">
-  <div class="footer-top">
+  <div class="footer-grid">
     <div class="foot-brand">
-      <div class="nav-brand"><div class="nav-logo">PG</div><span class="nav-name">Pesa Grow</span></div>
+      <div style="display:flex;align-items:center;gap:10px"><div class="nav-logo">PG</div><span class="nav-name">Pesa Grow</span></div>
       <p>Kenya's trusted daily investment platform. Grow your money safely and consistently.</p>
-      <div style="margin-top:16px;display:flex;gap:10px">
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
         <a href="tel:0796820013" class="btn btn-ghost" style="font-size:13px;padding:8px 14px">📞 0796820013</a>
         <a href="https://wa.me/254796820013" target="_blank" class="btn btn-ghost" style="font-size:13px;padding:8px 14px">💬 WhatsApp</a>
       </div>
     </div>
     <div class="foot-col"><h4>Platform</h4><a href="#plans">Plans</a><a href="#how">How It Works</a><a href="#contact">Deposit</a></div>
-    <div class="foot-col"><h4>Support</h4><a href="tel:0796820013">Call: 0796820013</a><a href="https://wa.me/254796820013">WhatsApp</a><a href="#">FAQ</a></div>
+    <div class="foot-col"><h4>Support</h4><a href="tel:0796820013">Call Us</a><a href="https://wa.me/254796820013">WhatsApp</a><a href="#">FAQ</a></div>
     <div class="foot-col"><h4>Legal</h4><a href="#">Terms of Service</a><a href="#">Privacy Policy</a><a href="#">Risk Disclosure</a></div>
   </div>
-  <div class="footer-bottom">
+  <div class="footer-btm">
     <p>© 2026 Pesa Grow. All rights reserved. | Support: 0796820013</p>
     <p>Investments involve risk. Past performance is not indicative of future results.</p>
   </div>
 </footer>
 
-<!-- AUTH MODAL -->
+<!-- MODAL -->
 <div class="modal-bg" id="authModal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-x" onclick="closeModal()">×</button>
     <div id="modalBody"></div>
   </div>
 </div>
-
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ══════════════════════════════════════════
-//  PG — API Client (connects to backend)
+//  API CLIENT — no external files needed
 // ══════════════════════════════════════════
 const API = window.location.origin;
 
 window.PG = {
-  _token: () => localStorage.getItem('pg_token'),
-
   Auth: {
     async login(email, password) {
       const r = await fetch(`${API}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({email, password})
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'Login failed');
@@ -384,11 +379,9 @@ window.PG = {
       localStorage.setItem('pg_user', JSON.stringify(d.user));
       return d.user;
     },
-
     async register(data) {
       const r = await fetch(`${API}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify(data)
       });
       const d = await r.json();
@@ -397,179 +390,252 @@ window.PG = {
       localStorage.setItem('pg_user', JSON.stringify(d.user));
       return d.user;
     },
-
-    async getMe() {
-      const u = localStorage.getItem('pg_user');
-      return u ? JSON.parse(u) : null;
+    getMe() {
+      try { return JSON.parse(localStorage.getItem('pg_user')); } catch { return null; }
     },
-
-    logout() {
-      localStorage.clear();
-      window.location.href = 'index.html';
-    }
+    logout() { localStorage.clear(); location.reload(); }
+  },
+  token: () => localStorage.getItem('pg_token'),
+  async stkPush(phone, amount) {
+    const r = await fetch(`${API}/api/mpesa/stk-push`, {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+PG.token()},
+      body: JSON.stringify({phone, amount})
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || 'STK Push failed');
+    return d;
+  },
+  async pollPayment(checkoutId) {
+    const r = await fetch(`${API}/api/mpesa/status/${checkoutId}`, {
+      headers:{'Authorization':'Bearer '+PG.token()}
+    });
+    return r.json();
   }
 };
 
-// ── Nav scroll ──
-window.addEventListener('scroll', () => {
-  document.getElementById('mainNav').classList.toggle('scrolled', scrollY > 50);
-});
+// Auto-fill referral from URL
+(()=>{ const ref = new URLSearchParams(location.search).get('ref'); if(ref) sessionStorage.setItem('pg_ref',ref); })();
 
-function toggleMenu() {
-  const links = document.querySelector('.nav-links');
-  const cta   = document.querySelector('.nav-cta');
-  links.style.display = links.style.display === 'flex' ? 'none' : 'flex';
-  cta.style.display   = cta.style.display   === 'flex' ? 'none' : 'flex';
+// Nav scroll
+window.addEventListener('scroll',()=>document.getElementById('mainNav').classList.toggle('scrolled',scrollY>50));
+
+// Mobile menu
+function toggleMenu(){
+  ['nav-links','nav-cta'].forEach(cls=>{
+    const el=document.querySelector('.'+cls);
+    el.style.display=el.style.display==='flex'?'none':'flex';
+  });
 }
 
-// ── Ticker ──
-const MKTS = [
-  {sym:'BTC',price:67420,chg:2.4},{sym:'ETH',price:3210,chg:1.8},
-  {sym:'SOL',price:182,chg:-0.9},{sym:'BNB',price:540,chg:3.1},
-  {sym:'XRP',price:0.62,chg:-1.3},{sym:'USDT',price:1.00,chg:0.01},
-];
-function buildTicker() {
-  const items = [...MKTS,...MKTS].map(m =>
-    `<div class="ti"><span class="ti-sym">${m.sym}</span><span class="ti-p">$${m.price.toLocaleString()}</span><span class="ti-c ${m.chg>=0?'up':'dn'}">${m.chg>=0?'+':''}${m.chg}%</span></div>`
-  ).join('');
-  document.getElementById('ticker').innerHTML = items;
+// Ticker
+const MKTS=[{sym:'BTC',p:67420,c:2.4},{sym:'ETH',p:3210,c:1.8},{sym:'SOL',p:182,c:-0.9},{sym:'BNB',p:540,c:3.1},{sym:'XRP',p:0.62,c:-1.3},{sym:'USDT',p:1.00,c:0.01},{sym:'ADA',p:0.45,c:1.2},{sym:'DOT',p:7.2,c:-0.8}];
+function buildTicker(){
+  document.getElementById('ticker').innerHTML=[...MKTS,...MKTS].map(m=>`<div class="ti"><span class="ti-sym">${m.sym}</span><span>$${m.p.toLocaleString()}</span><span class="ti-c ${m.c>=0?'up':'dn'}">${m.c>=0?'+':''}${m.c}%</span></div>`).join('');
 }
 buildTicker();
-setInterval(() => { MKTS.forEach(m => { m.price = +(m.price*(1+(Math.random()-.49)*.003)).toFixed(2); m.chg = +(m.chg+(Math.random()-.5)*.1).toFixed(2); }); buildTicker(); }, 5000);
+setInterval(()=>{MKTS.forEach(m=>{m.p=+(m.p*(1+(Math.random()-.49)*.003)).toFixed(m.p>10?2:4);m.c=+(m.c+(Math.random()-.5)*.1).toFixed(2)});buildTicker();},5000);
 
-// ── Hero chart ──
-function drawHeroChart() {
-  const c = document.getElementById('heroChart'); if (!c) return;
-  const ctx = c.getContext('2d'), w = c.width, h = c.height;
-  const pts = [15,25,22,38,30,48,42,58,52,68,60,75,70,82];
+// Hero chart
+function drawChart(){
+  const c=document.getElementById('heroChart');if(!c)return;
+  const ctx=c.getContext('2d'),w=c.width,h=c.height;
+  const pts=[12,20,18,32,26,44,38,54,48,62,56,70,66,78];
   ctx.clearRect(0,0,w,h);
-  const g = ctx.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,'rgba(16,185,129,.25)'); g.addColorStop(1,'rgba(16,185,129,0)');
-  ctx.beginPath();
-  pts.forEach((p,i) => { const x=(i/(pts.length-1))*w, y=h-(p/100)*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
-  ctx.strokeStyle='#10b981'; ctx.lineWidth=2; ctx.stroke();
-  ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath(); ctx.fillStyle=g; ctx.fill();
+  const g=ctx.createLinearGradient(0,0,0,h);g.addColorStop(0,'rgba(0,230,118,.2)');g.addColorStop(1,'rgba(0,230,118,0)');
+  ctx.beginPath();pts.forEach((p,i)=>{const x=i/(pts.length-1)*w,y=h-p/100*h;i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+  ctx.strokeStyle='#00e676';ctx.lineWidth=2;ctx.stroke();
+  ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();ctx.fillStyle=g;ctx.fill();
 }
-setTimeout(drawHeroChart, 300);
-let hb = 248600;
-setInterval(() => { hb += Math.floor(Math.random()*120); document.getElementById('heroBalance').textContent = hb.toLocaleString(); }, 3000);
+setTimeout(drawChart,300);
+let hb=248600;setInterval(()=>{hb+=Math.floor(Math.random()*150);document.getElementById('heroBalance').textContent=hb.toLocaleString();},3000);
 
-// ── Load Plans from backend ──
-fetch(`${API}/api/plans`)
-  .then(r => r.json())
-  .then(plans => {
-    const grid = document.getElementById('plansGrid');
-    if (!plans.length) { grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2)">No plans available yet.</div>'; return; }
-    grid.innerHTML = plans.map(p => `
-      <div class="plan ${p.popular?'pop':''}" style="--plan-clr:${p.color||'var(--green)'}">
-        ${p.popular ? '<div class="plan-badge">POPULAR</div>' : ''}
-        <div class="plan-name">${p.name}</div>
-        <div class="plan-roi">${p.roi}%</div>
-        <div class="plan-roi-sub">Daily ROI • ${p.period} Days</div>
-        <div class="plan-range">KES <strong>${(+p.minAmount).toLocaleString()}</strong> – <strong>${(+p.maxAmount).toLocaleString()}</strong></div>
-        <ul class="plan-feats">
-          <li>${p.roi}% daily profit</li>
-          <li>${p.period}-day contract</li>
-          <li>Instant M-Pesa withdrawals</li>
-          <li>${p.referralBonus||5}% referral commission</li>
-          <li>${p.description||'Smart automated growth'}</li>
-        </ul>
-        <button class="plan-btn" onclick="openModal('register')">Invest Now</button>
-      </div>`).join('');
-  })
-  .catch(() => {
-    document.getElementById('plansGrid').innerHTML = `
-      <div class="plan" style="--plan-clr:#22d3ee"><div class="plan-name">Starter</div><div class="plan-roi">3%</div><div class="plan-roi-sub">Daily ROI • 7 Days</div><div class="plan-range">KES <strong>1,000</strong> – <strong>9,999</strong></div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>
-      <div class="plan pop" style="--plan-clr:#f59e0b"><div class="plan-badge">POPULAR</div><div class="plan-name">Gold</div><div class="plan-roi">7%</div><div class="plan-roi-sub">Daily ROI • 21 Days</div><div class="plan-range">KES <strong>50,000</strong> – <strong>199,999</strong></div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>
-      <div class="plan" style="--plan-clr:#8b5cf6"><div class="plan-name">Platinum</div><div class="plan-roi">10%</div><div class="plan-roi-sub">Daily ROI • 30 Days</div><div class="plan-range">KES <strong>200,000</strong>+</div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>`;
-  });
+// Load plans
+fetch(`${API}/api/plans`).then(r=>r.json()).then(plans=>{
+  if(!plans||!plans.length){document.getElementById('plansGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">No plans yet.</div>';return;}
+  document.getElementById('plansGrid').innerHTML=plans.map(p=>`
+    <div class="plan ${p.popular?'pop':''}" style="--pc:${p.color||'var(--green)'}">
+      ${p.popular?'<div class="plan-badge">POPULAR</div>':''}
+      <div class="plan-name">${p.name}</div>
+      <div class="plan-roi">${p.roi}%</div>
+      <div class="plan-sub">Daily ROI • ${p.period} Days</div>
+      <div class="plan-range">KES <strong>${(+p.minAmount).toLocaleString()}</strong> – <strong>${(+p.maxAmount).toLocaleString()}</strong></div>
+      <ul class="plan-feats">
+        <li>${p.roi}% profit credited daily</li>
+        <li>${p.period}-day investment period</li>
+        <li>M-Pesa instant withdrawals</li>
+        <li>${p.referralBonus||5}% referral commission</li>
+        <li>${p.description||'Automated daily growth'}</li>
+      </ul>
+      <button class="plan-btn" onclick="openModal('register')">Invest Now</button>
+    </div>`).join('');
+}).catch(()=>{
+  document.getElementById('plansGrid').innerHTML=`
+    <div class="plan" style="--pc:#00e5ff"><div class="plan-name">Starter</div><div class="plan-roi">3%</div><div class="plan-sub">Daily ROI • 7 Days</div><div class="plan-range">KES <strong>1,000</strong> – <strong>9,999</strong></div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>
+    <div class="plan pop" style="--pc:#ffc107"><div class="plan-badge">POPULAR</div><div class="plan-name">Gold</div><div class="plan-roi">7%</div><div class="plan-sub">Daily ROI • 21 Days</div><div class="plan-range">KES <strong>50,000</strong> – <strong>199,999</strong></div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>
+    <div class="plan" style="--pc:#8b5cf6"><div class="plan-name">Platinum</div><div class="plan-roi">10%</div><div class="plan-sub">Daily ROI • 30 Days</div><div class="plan-range">KES <strong>200,000</strong>+</div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>`;
+});
 
-// ── AUTH MODALS ──
-function openModal(type) {
-  document.getElementById('authModal').classList.add('open');
-  renderModal(type);
-}
-function closeModal() { document.getElementById('authModal').classList.remove('open'); }
+// ══════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════
+function openModal(type){document.getElementById('authModal').classList.add('open');renderModal(type);}
+function closeModal(){document.getElementById('authModal').classList.remove('open');}
 
-function renderModal(type) {
-  const b = document.getElementById('modalBody');
-  if (type === 'login') {
-    b.innerHTML = `
-      <div class="m-title">Welcome Back</div>
+function renderModal(type){
+  const b=document.getElementById('modalBody');
+  if(type==='login'){
+    b.innerHTML=`
+      <div class="m-title">Welcome Back 👋</div>
       <div class="m-sub">Login to your Pesa Grow account</div>
       <div class="m-err" id="mErr"></div>
-      <div class="fg"><label>Email Address</label><input class="fc" id="lEmail" type="email" placeholder="you@email.com"></div>
-      <div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="••••••••"></div>
-      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px;margin-top:4px" onclick="doLogin()">Login to Account</button>
-      <div class="m-switch">No account? <span onclick="renderModal('register')">Register free</span></div>`;
-  } else if (type === 'register') {
-    b.innerHTML = `
-      <div class="m-title">Create Account</div>
+      <div class="fg"><label>Email Address</label><input class="fc" id="lEmail" type="email" placeholder="you@email.com" autofocus></div>
+      <div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doLogin()">Login to Account</button>
+      <div class="m-switch" style="margin-top:14px">No account? <span onclick="renderModal('register')">Register free</span></div>`;
+
+  } else if(type==='register'){
+    b.innerHTML=`
+      <div class="m-title">Create Account 🚀</div>
       <div class="m-sub">Join 50,000+ investors. Start earning today.</div>
       <div class="m-err" id="mErr"></div>
       <div class="fc-row">
-        <div class="fg"><label>First Name</label><input class="fc" id="rFirst" placeholder="John"></div>
+        <div class="fg"><label>First Name</label><input class="fc" id="rFirst" placeholder="John" autofocus></div>
         <div class="fg"><label>Last Name</label><input class="fc" id="rLast" placeholder="Doe"></div>
       </div>
       <div class="fg"><label>Email</label><input class="fc" id="rEmail" type="email" placeholder="you@email.com"></div>
       <div class="fg"><label>Phone (M-Pesa)</label><input class="fc" id="rPhone" placeholder="0712345678"></div>
       <div class="fg"><label>Password</label><input class="fc" id="rPass" type="password" placeholder="Min 8 characters"></div>
-      <div class="fg"><label>Referral Code (optional)</label><input class="fc" id="rRef" placeholder="Enter code if you have one"></div>
-      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px;margin-top:4px" onclick="doRegister()">Create Free Account</button>
-      <div class="m-switch">Have an account? <span onclick="renderModal('login')">Login here</span></div>`;
+      <div class="fg"><label>Referral Code (optional)</label><input class="fc" id="rRef" placeholder="Enter referral code" value="${sessionStorage.getItem('pg_ref')||''}"></div>
+      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doRegister()">Create Free Account</button>
+      <div class="m-switch" style="margin-top:14px">Have an account? <span onclick="renderModal('login')">Login here</span></div>`;
+
+  } else if(type==='stk'){
+    const user=PG.Auth.getMe();
+    if(!user){renderModal('login');return;}
+    b.innerHTML=`
+      <div class="m-title">💳 M-Pesa Deposit</div>
+      <div class="m-sub">We'll send a payment prompt to your phone instantly.</div>
+      <div class="m-err" id="mErr"></div>
+      <div class="m-ok" id="mOk"></div>
+      <div class="fg"><label>M-Pesa Phone Number</label><input class="fc" id="stkPhone" placeholder="e.g. 0712345678" value="${user.phone||''}"></div>
+      <div class="fg"><label>Amount (KES)</label><input class="fc" id="stkAmt" type="number" placeholder="Min KES 1,000" min="1000"></div>
+      <div id="stkArea"></div>
+      <button class="btn btn-green" id="stkBtn" style="width:100%;padding:15px;font-size:16px" onclick="doSTK()">📲 Send M-Pesa Prompt</button>
+      <div style="font-size:13px;color:var(--text2);text-align:center;margin-top:12px">Your phone will ring. Enter your M-Pesa PIN to complete.</div>`;
   }
 }
 
-function showErr(id, msg) {
-  const el = document.getElementById(id); if (!el) return;
-  el.textContent = msg; el.style.display = 'block';
-}
+function showErr(msg){const e=document.getElementById('mErr');if(e){e.textContent=msg;e.style.display='block';}const o=document.getElementById('mOk');if(o)o.style.display='none';}
+function showOk(msg){const e=document.getElementById('mOk');if(e){e.textContent=msg;e.style.display='block';}const r=document.getElementById('mErr');if(r)r.style.display='none';}
 
-async function doLogin() {
-  const email = document.getElementById('lEmail').value.trim();
-  const pass  = document.getElementById('lPass').value;
-  if (!email || !pass) { showErr('mErr','Please fill all fields'); return; }
-  try {
-    const user = await PG.Auth.login(email, pass);
+// LOGIN
+async function doLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!email||!pass){showErr('Please fill all fields');return;}
+  const btn=document.querySelector('#modalBody .btn-green');
+  btn.textContent='Logging in...';btn.disabled=true;
+  try{
+    const user=await PG.Auth.login(email,pass);
     closeModal();
-    showToast('Welcome back, ' + user.firstName + '! 👋', 'ok');
-    setTimeout(() => {
-      window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
-    }, 600);
-  } catch(e) { showErr('mErr', e.message); }
+    showToast('Welcome back, '+user.firstName+'! 👋','ok');
+    updateNav(user);
+    setTimeout(()=>location.href=user.role==='admin'?'admin.html':'dashboard.html',700);
+  }catch(e){showErr(e.message);btn.textContent='Login to Account';btn.disabled=false;}
 }
 
-async function doRegister() {
-  const first = document.getElementById('rFirst').value.trim();
-  const last  = document.getElementById('rLast').value.trim();
-  const email = document.getElementById('rEmail').value.trim();
-  const phone = document.getElementById('rPhone').value.trim();
-  const pass  = document.getElementById('rPass').value;
-  const ref   = document.getElementById('rRef').value.trim();
-  if (!first||!last||!email||!phone||!pass) { showErr('mErr','Please fill all required fields'); return; }
-  if (pass.length < 8) { showErr('mErr','Password must be at least 8 characters'); return; }
-  try {
-    await PG.Auth.register({ firstName:first, lastName:last, email, phone, password:pass, refCode:ref });
+// REGISTER
+async function doRegister(){
+  const first=document.getElementById('rFirst').value.trim();
+  const last=document.getElementById('rLast').value.trim();
+  const email=document.getElementById('rEmail').value.trim();
+  const phone=document.getElementById('rPhone').value.trim();
+  const pass=document.getElementById('rPass').value;
+  const ref=document.getElementById('rRef').value.trim();
+  if(!first||!last||!email||!phone||!pass){showErr('Please fill all required fields');return;}
+  if(pass.length<8){showErr('Password must be at least 8 characters');return;}
+  const btn=document.querySelector('#modalBody .btn-green');
+  btn.textContent='Creating account...';btn.disabled=true;
+  try{
+    const user=await PG.Auth.register({firstName:first,lastName:last,email,phone,password:pass,refCode:ref});
     closeModal();
-    showToast('Account created! Welcome to Pesa Grow 🎉', 'ok');
-    setTimeout(() => window.location.href = 'dashboard.html', 700);
-  } catch(e) { showErr('mErr', e.message); }
+    showToast('Account created! Welcome to Pesa Grow 🎉','ok');
+    updateNav(user);
+    setTimeout(()=>location.href='dashboard.html',800);
+  }catch(e){showErr(e.message);btn.textContent='Create Free Account';btn.disabled=false;}
 }
 
-function showToast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 3500);
+// STK PUSH
+async function doSTK(){
+  const phone=document.getElementById('stkPhone').value.trim();
+  const amount=parseFloat(document.getElementById('stkAmt').value);
+  if(!phone){showErr('Enter your M-Pesa phone number');return;}
+  if(!amount||amount<1000){showErr('Minimum deposit is KES 1,000');return;}
+  const btn=document.getElementById('stkBtn');
+  btn.textContent='Sending prompt...';btn.disabled=true;
+  try{
+    const res=await PG.stkPush(phone,amount);
+    document.getElementById('stkArea').innerHTML=`
+      <div style="text-align:center;padding:20px 0">
+        <div class="stk-spinner"></div>
+        <div style="font-size:36px;margin-bottom:8px">📱</div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div>
+        <div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div>
+      </div>`;
+    btn.textContent='Waiting for payment...';
+    let tries=0;
+    const poll=setInterval(async()=>{
+      tries++;
+      if(tries>24){
+        clearInterval(poll);
+        showErr('Payment timed out. Try again or contact support.');
+        btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;
+        document.getElementById('stkArea').innerHTML='';
+        return;
+      }
+      try{
+        const s=await PG.pollPayment(res.checkoutRequestId);
+        if(s.status==='approved'){
+          clearInterval(poll);
+          document.getElementById('stkArea').innerHTML=`
+            <div style="text-align:center;padding:16px 0">
+              <div style="font-size:52px;margin-bottom:8px">✅</div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;color:var(--green)">Payment Confirmed!</div>
+              <div style="font-size:14px;color:var(--text2);margin-top:6px">KES ${amount.toLocaleString()} credited to your account.</div>
+            </div>`;
+          showToast('KES '+amount.toLocaleString()+' deposited! 💰','ok');
+          setTimeout(()=>{closeModal();location.href='dashboard.html';},2000);
+        } else if(s.status==='failed'||s.status==='cancelled'){
+          clearInterval(poll);
+          showErr('Payment '+s.status+'. Please try again.');
+          btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;
+          document.getElementById('stkArea').innerHTML='';
+        }
+      }catch{}
+    },5000);
+  }catch(e){showErr(e.message);btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;}
 }
 
-// Check if already logged in
-(async () => {
-  const user = await PG.Auth.getMe();
-  if (user) {
-    document.getElementById('navCta').innerHTML = `
-      <button class="btn btn-ghost" onclick="window.location.href='dashboard.html'">Dashboard</button>
-      <button class="btn btn-green" onclick="PG.Auth.logout()">Logout</button>`;
-  }
+// NAV UPDATE
+function updateNav(user){
+  document.getElementById('navCta').innerHTML=`
+    <span style="font-size:14px;color:var(--text2);font-weight:500">Hi, ${user.firstName} 👋</span>
+    <button class="btn btn-ghost" onclick="location.href='dashboard.html'">Dashboard</button>
+    <button class="btn btn-green" onclick="openModal('stk')">💳 Deposit</button>
+    <button class="btn btn-ghost" onclick="PG.Auth.logout()" style="color:var(--red);border-color:rgba(255,77,106,.3)">Logout</button>`;
+}
+
+// TOAST
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'),4000);
+}
+
+// INIT — check login state
+(()=>{
+  const user=PG.Auth.getMe();
+  if(user) updateNav(user);
 })();
 </script>
 </body>
