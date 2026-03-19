@@ -1,12 +1,14 @@
 {
+  "id": "/",
   "name": "Pesa Grow",
   "short_name": "Pesa Grow",
   "description": "Kenya's #1 Daily Investment Platform",
-  "start_url": "/index.html",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#030508",
   "theme_color": "#00e676",
+  "orientation": "any",
   "icons": [
     {
       "src": "/icons/icon-192.png",
