@@ -495,7 +495,14 @@ function clearMsg(errId) {
   const o = document.getElementById(errId.replace('Err','Ok')); if(o) o.style.display='none';
 }
 
-function doLogout() { localStorage.clear(); window.location.href = 'index.html'; }
+function doLogout() {
+  // Only clear auth keys — don't wipe everything
+  // This prevents "account not found" on next login
+  localStorage.removeItem('pg_token');
+  localStorage.removeItem('pg_user');
+  sessionStorage.clear();
+  window.location.href = 'index.html';
+}
 
 // ══════════════════════════════════════════════════
 //  INIT
@@ -505,30 +512,59 @@ let platformSettings = { minDeposit:1000, minWithdraw:500, withdrawFee:2 };
 async function init() {
   try {
     const stored = localStorage.getItem('pg_user');
-    if (!stored || !token()) { window.location.href = 'index.html'; return; }
-    currentUser = JSON.parse(stored);
-    // Refresh from server
-    try { currentUser = await apiFetch('/api/auth/me'); localStorage.setItem('pg_user', JSON.stringify(currentUser)); } catch {}
-    if (!currentUser) { window.location.href = 'index.html'; return; }
+    const tok    = token();
+
+    // No token at all — go to login
+    if (!tok) { window.location.href = 'index.html'; return; }
+
+    // Use stored user immediately for fast load
+    if (stored) {
+      try { currentUser = JSON.parse(stored); } catch {}
+    }
+
+    // Always verify token with server — catches expired/invalid tokens
+    try {
+      currentUser = await apiFetch('/api/auth/me');
+      localStorage.setItem('pg_user', JSON.stringify(currentUser));
+    } catch(authErr) {
+      // Token expired or invalid — clear and redirect to login
+      console.warn('Auth failed:', authErr.message);
+      localStorage.removeItem('pg_token');
+      localStorage.removeItem('pg_user');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    if (!currentUser || !currentUser.id) {
+      localStorage.removeItem('pg_token');
+      localStorage.removeItem('pg_user');
+      window.location.href = 'index.html';
+      return;
+    }
+
     // Load live platform settings
     try {
       platformSettings = await apiFetch('/api/settings/public');
       const minDep = parseFloat(platformSettings.minDeposit)||1000;
-      const stkEl = document.getElementById('stkAmt');
-      const manEl = document.getElementById('manAmt');
+      const stkEl  = document.getElementById('stkAmt');
+      const manEl  = document.getElementById('manAmt');
       if (stkEl) { stkEl.min = minDep; stkEl.placeholder = `Minimum KES ${minDep.toLocaleString()}`; }
       if (manEl) { manEl.min = minDep; manEl.placeholder = `Min KES ${minDep.toLocaleString()}`; }
     } catch {}
 
-    const av = (currentUser.firstName||'P')[0] + (currentUser.lastName||'G')[0];
-    document.getElementById('userAv').textContent = av.toUpperCase();
+    // Set nav user info
+    const av = ((currentUser.firstName||'P')[0] + (currentUser.lastName||'G')[0]).toUpperCase();
+    document.getElementById('userAv').textContent  = av;
     document.getElementById('userName').textContent = currentUser.firstName;
 
     await loadOverview();
     loadNotifications();
     startLiveTicker();
+    startDepositPoller(); // ← auto-checks pending deposits every 10s
   } catch(e) {
     console.error('Init error:', e);
+    localStorage.removeItem('pg_token');
+    localStorage.removeItem('pg_user');
     window.location.href = 'index.html';
   }
 }
@@ -697,8 +733,120 @@ function updateInvestmentProgress() {
 }
 
 // ══════════════════════════════════════════════════
-//  INVEST
+//  AUTO DEPOSIT POLLER
+//  Polls every 10s for pending deposits — instantly
+//  updates balance when a payment confirms
 // ══════════════════════════════════════════════════
+let depositPollInterval = null;
+let lastKnownBalance    = 0;
+let pendingDepositCount = 0;
+
+function startDepositPoller() {
+  if (depositPollInterval) clearInterval(depositPollInterval);
+  lastKnownBalance    = currentUser.balance || 0;
+  pendingDepositCount = 0;
+
+  depositPollInterval = setInterval(async () => {
+    try {
+      const data = await apiFetch('/api/user/balance');
+
+      // Detect balance increase — means a deposit was confirmed!
+      if (data.balance > lastKnownBalance) {
+        const increase = data.balance - lastKnownBalance;
+        lastKnownBalance = data.balance;
+
+        // Update all balance displays instantly
+        currentUser.balance = data.balance;
+        localStorage.setItem('pg_user', JSON.stringify(currentUser));
+        updateAllBalanceDisplays(data);
+
+        // Show a prominent success toast
+        showDepositConfirmedBanner(increase);
+
+        // Reload overview if user is on it
+        const overviewActive = document.getElementById('page-overview')?.classList.contains('active');
+        if (overviewActive) await loadOverview();
+
+        // Reload deposit page if user is on it
+        const depositActive = document.getElementById('page-deposit')?.classList.contains('active');
+        if (depositActive) loadDeposit();
+
+        // Refresh notifications
+        loadNotifications();
+      } else {
+        lastKnownBalance = data.balance;
+      }
+
+      // Track pending deposits — if reduced, something was processed
+      if (data.pendingDeps !== undefined) {
+        pendingDepositCount = data.pendingDeps;
+      }
+
+    } catch {}
+  }, 10000); // check every 10 seconds
+}
+
+function updateAllBalanceDisplays(data) {
+  // Update every balance element on the page
+  const bal = k(data.balance);
+  ['ovBalance','wdBalance','investBal'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = bal;
+      el.style.color = 'var(--green)';
+      el.style.transition = 'color 0.5s';
+      setTimeout(() => { if(el) el.style.color = ''; }, 2000);
+    }
+  });
+  if (data.totalProfits !== undefined) {
+    const profEl = document.getElementById('ovProfits');
+    if (profEl) profEl.textContent = k(data.totalProfits);
+  }
+  if (data.totalWithdrawn !== undefined) {
+    const wdEl = document.getElementById('ovWithdrawn');
+    if (wdEl) wdEl.textContent = k(data.totalWithdrawn);
+    const wdSumEl = document.getElementById('wdSumWd');
+    if (wdSumEl) wdSumEl.textContent = k(data.totalWithdrawn);
+  }
+}
+
+function showDepositConfirmedBanner(amount) {
+  // Remove any existing banner
+  const old = document.getElementById('depositBanner');
+  if (old) old.remove();
+
+  const banner = document.createElement('div');
+  banner.id = 'depositBanner';
+  banner.style.cssText = `
+    position:fixed;top:70px;left:50%;transform:translateX(-50%);
+    background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(0,180,100,.08));
+    border:1.5px solid rgba(0,230,118,.5);border-radius:14px;
+    padding:16px 28px;z-index:999;text-align:center;
+    box-shadow:0 8px 40px rgba(0,230,118,.25);
+    animation:slideDown .4s ease;max-width:380px;width:90%
+  `;
+  banner.innerHTML = `
+    <div style="font-size:28px;margin-bottom:6px">💰</div>
+    <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;color:#00e676">
+      Deposit Confirmed!
+    </div>
+    <div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:4px">
+      KES ${(+amount).toLocaleString('en-KE',{minimumFractionDigits:2})} has been credited to your balance
+    </div>
+  `;
+  document.body.appendChild(banner);
+
+  // Also show toast
+  showToast(`💰 KES ${(+amount).toFixed(2)} deposit confirmed! Balance updated.`, 'ok');
+
+  // Auto remove after 5 seconds
+  setTimeout(() => { banner.style.opacity='0'; banner.style.transition='.5s'; setTimeout(()=>banner.remove(),500); }, 5000);
+}
+
+// Add slide down animation
+const style = document.createElement('style');
+style.textContent = `@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}`;
+document.head.appendChild(style);
 async function loadInvest() {
   try {
     const plans = await apiFetch('/api/plans');
