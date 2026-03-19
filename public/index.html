@@ -4,26 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 <title>Pesa Grow — Kenya's #1 Investment Platform</title>
-
-<!-- ── PWA ── -->
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#00e676">
 <meta name="description" content="Kenya's #1 Daily Investment Platform. Earn up to 10% daily via M-Pesa.">
-
-<!-- Android -->
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="application-name" content="Pesa Grow">
-
-<!-- iOS Safari -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pesa Grow">
-<link rel="apple-touch-icon" href="/icons/icon-180.png">
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
-<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
-
-<!-- Favicon -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
 <link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -885,185 +873,195 @@ function startVideo() {
 <style>
 @keyframes pgUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes pgFadeIn{from{opacity:0}to{opacity:1}}
-@keyframes pgPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.4)}50%{box-shadow:0 0 0 6px rgba(0,230,118,0)}}
+@keyframes pgPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.5)}50%{box-shadow:0 0 0 8px rgba(0,230,118,0)}}
 .pg-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(5,9,15,.97);border:2px solid #00e676;border-radius:16px;padding:13px 16px;z-index:99999;display:flex;align-items:center;gap:12px;box-shadow:0 0 0 4px rgba(0,230,118,.08),0 16px 60px rgba(0,0,0,.8);max-width:380px;width:92%;animation:pgUp .4s cubic-bezier(.22,1,.36,1) forwards;font-family:'DM Sans',sans-serif}
 .pg-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;animation:pgFadeIn .3s ease}
-.pg-modal{background:#0a0f18;border:1.5px solid rgba(0,230,118,.3);border-radius:20px;padding:32px 28px;max-width:420px;width:100%;font-family:'DM Sans',sans-serif}
+.pg-modal{background:#0a0f18;border:1.5px solid rgba(0,230,118,.3);border-radius:20px;padding:28px;max-width:440px;width:100%;font-family:'DM Sans',sans-serif;max-height:90vh;overflow-y:auto}
 .pg-step{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
 .pg-step:last-child{border-bottom:none}
-.pg-num{width:28px;height:28px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#000;flex-shrink:0}
+.pg-num{width:28px;height:28px;min-width:28px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#000}
 </style>
 <script>
 (function(){
-  var _prompt = null;
-  var _isIOS  = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var _isStandalone = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone;
+  var _prompt      = null;
+  var _isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var _isAndroid   = /android/i.test(navigator.userAgent);
+  var _isDesktop   = !_isIOS && !_isAndroid;
+  var _standalone  = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone === true;
 
-  // ── Register SW ──────────────────────────────────
+  /* ── 1. Register service worker ─────────────────── */
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
-      .then(function(r){ console.log('[SW] registered'); })
-      .catch(function(e){ console.warn('[SW]', e.message); });
+      .then(function(reg){
+        console.log('[SW] registered scope:', reg.scope);
+        /* tell waiting SW to take over immediately */
+        if (reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
+        reg.addEventListener('updatefound', function(){
+          var nw = reg.installing;
+          if (nw) nw.addEventListener('statechange', function(){
+            if (nw.state === 'installed' && reg.active) nw.postMessage({type:'SKIP_WAITING'});
+          });
+        });
+      })
+      .catch(function(e){ console.warn('[SW] failed:', e.message); });
   }
 
-  // ── Catch install prompt (Android/Chrome/Edge) ───
-  window.addEventListener('beforeinstallprompt', function(e) {
+  /* ── 2. Capture beforeinstallprompt ─────────────── */
+  window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
     _prompt = e;
-    console.log('[PWA] prompt captured ✅');
-    setTimeout(showBar, 1200);
+    console.log('[PWA] beforeinstallprompt captured ✅');
+    if (!_standalone) setTimeout(showBar, 1200);
   });
 
-  window.addEventListener('appinstalled', function() {
+  window.addEventListener('appinstalled', function(){
+    console.log('[PWA] installed!');
     removeBar();
-    removeInstallBtn();
-    try { showToast('Pesa Grow installed! 🎉', 'ok'); } catch(e){}
+    removeNavBtn();
+    try { showToast('Pesa Grow installed! 🎉','ok'); } catch(x){}
   });
 
-  // ── Show bottom bar ──────────────────────────────
-  function showBar() {
+  /* ── 3. Bottom install bar ───────────────────────── */
+  function showBar(){
+    if (_standalone) return;
     if (document.getElementById('pgBar')) return;
-    if (_isStandalone) return;
     var el = document.createElement('div');
     el.className = 'pg-bar'; el.id = 'pgBar';
     el.innerHTML =
-      '<div style="width:38px;height:38px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:14px;color:#000;flex-shrink:0">PG</div>' +
-      '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div><div style="font-size:11px;color:#7986a8;margin-top:1px">Add to home screen</div></div>' +
-      '<button onclick="pgDoInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:8px 16px;font-weight:800;font-size:13px;cursor:pointer;flex-shrink:0">Install</button>' +
-      '<button onclick="pgRemoveBar()" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0">×</button>';
+      '<div style="width:38px;height:38px;min-width:38px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:14px;color:#000">PG</div>' +
+      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div><div style="font-size:11px;color:#7986a8">Add to home screen</div></div>' +
+      '<button onclick="pgDoInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Install</button>' +
+      '<button onclick="removeBar()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0 4px;line-height:1">×</button>';
     document.body.appendChild(el);
   }
 
-  function removeBar() {
+  function removeBar(){
     var el = document.getElementById('pgBar');
-    if (el) { el.style.opacity='0'; el.style.transition='.3s'; setTimeout(function(){el.remove();},300); }
+    if (el){ el.style.opacity='0'; el.style.transition='.25s'; setTimeout(function(){if(el.parentNode)el.remove();},260); }
   }
-  window.pgRemoveBar = removeBar;
+  window.removeBar = removeBar;
 
-  function removeInstallBtn() {
+  function removeNavBtn(){
     var el = document.getElementById('pgNavBtn');
     if (el) el.remove();
   }
 
-  // ── Main install function ────────────────────────
-  window.pgDoInstall = async function() {
-    if (_prompt) {
-      // Native prompt available — use it
+  /* ── 4. pgDoInstall — called by button ───────────── */
+  window.pgDoInstall = async function(){
+    if (_prompt){
+      /* native prompt available — fire it */
       try {
         await _prompt.prompt();
-        var result = await _prompt.userChoice;
+        var r = await _prompt.userChoice;
         _prompt = null;
         removeBar();
-        if (result.outcome === 'accepted') {
-          setTimeout(function(){ try{ showToast('Pesa Grow installed! 🎉','ok'); }catch(e){} }, 500);
+        if (r.outcome === 'accepted'){
+          setTimeout(function(){ try{showToast('Installed! 🎉','ok');}catch(x){} }, 500);
         }
-      } catch(e) { console.warn('[PWA]', e); }
+      } catch(e){ console.warn('[PWA] prompt error:', e); pgShowModal(); }
     } else {
-      // No native prompt — show step-by-step modal
+      /* no native prompt — show manual guide */
       pgShowModal();
     }
   };
 
-  // ── Step-by-step install modal ───────────────────
-  var _isDesktop = !_isIOS && !/android|mobile|phone/i.test(navigator.userAgent);
-
-  function pgShowModal() {
+  /* ── 5. Manual install guide modal ──────────────── */
+  function pgShowModal(){
     if (document.getElementById('pgModal')) return;
 
     var title, steps, tip;
 
-    if (_isDesktop) {
-      // ── DESKTOP (Windows / Mac / Linux) ────────────
-      var isEdge   = /edg/i.test(navigator.userAgent);
-      var isChrome = /chrome/i.test(navigator.userAgent) && !isEdge;
-      var browser  = isEdge ? 'Edge' : isChrome ? 'Chrome' : 'Chrome or Edge';
-
-      title = '🖥️ Install on Computer';
-      tip   = 'Once installed, Pesa Grow opens like a normal desktop app — no browser needed!';
+    if (_isDesktop){
+      title = '🖥️ Install on Your Computer';
+      tip   = 'Once installed, Pesa Grow runs like a normal desktop app — fast, no browser tab needed.';
       steps = [
-        ['🌐', 'Make sure you are using <strong>' + browser + '</strong> browser'],
-        ['⊕',  'Look at the <strong>address bar</strong> (URL bar) at the top — you will see a <strong style="color:#00e676">⊕ install icon</strong> on the right side'],
-        ['🖱️', 'Click that <strong>install icon</strong> (⊕) in the address bar'],
-        ['✅',  'Click <strong>"Install"</strong> in the popup — Pesa Grow opens as a desktop app!']
+        'Open this page in <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> (not Firefox)',
+        'Look at the <strong>address bar</strong> at the top of your browser — on the far right you will see a small <strong style="color:#00e676;font-size:16px">⊕</strong> or computer icon',
+        'Click that icon. A small popup appears saying <strong>"Install Pesa Grow?"</strong>',
+        'Click <strong>"Install"</strong> — Pesa Grow opens as a desktop app and a shortcut is added!'
       ];
-    } else if (_isIOS) {
-      // ── iOS (iPhone / iPad) ─────────────────────────
+    } else if (_isIOS){
       title = '📱 Install on iPhone / iPad';
-      tip   = 'You must use Safari — Chrome on iPhone cannot install PWAs.';
+      tip   = 'Must use Safari — Chrome on iPhone cannot install apps this way.';
       steps = [
-        ['🌐', 'Open this page in <strong>Safari</strong> (not Chrome)'],
-        ['⬆️', 'Tap the <strong>Share</strong> button <strong style="color:#00e676">↑</strong> at the bottom of Safari'],
-        ['➕', 'Scroll down and tap <strong>"Add to Home Screen"</strong>'],
-        ['✅', 'Tap <strong>"Add"</strong> — Pesa Grow appears on your home screen!']
+        'Open this page in <strong>Safari</strong> browser',
+        'Tap the <strong>Share</strong> button <strong style="color:#00e676">⬆</strong> at the bottom of the screen',
+        'Scroll down the share menu and tap <strong>"Add to Home Screen"</strong>',
+        'Tap <strong>"Add"</strong> — Pesa Grow appears on your iPhone home screen!'
       ];
     } else {
-      // ── Android ─────────────────────────────────────
       title = '📲 Install on Android';
-      tip   = 'Works on Chrome, Samsung Internet and Edge browsers.';
+      tip   = 'Works best on Chrome browser.';
       steps = [
-        ['🌐', 'Make sure you are using <strong>Chrome</strong> browser'],
-        ['⋮',  'Tap the <strong>3-dot menu</strong> (⋮) in the top right corner'],
-        ['➕', 'Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>'],
-        ['✅', 'Tap <strong>"Install"</strong> — Pesa Grow is added to your home screen!']
+        'Open this page in <strong>Chrome</strong> browser',
+        'Tap the <strong>3-dot menu ⋮</strong> in the top-right corner of Chrome',
+        'Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>',
+        'Tap <strong>"Install"</strong> — Pesa Grow appears on your home screen!'
       ];
     }
 
-    var stepsHtml = steps.map(function(s, i) {
+    /* address bar visual for desktop */
+    var addrBar = _isDesktop ?
+      '<div style="margin:18px 0 6px">' +
+        '<div style="font-size:12px;color:#7986a8;margin-bottom:8px;font-weight:600">👇 Look for this in your browser address bar:</div>' +
+        '<div style="background:#1a2030;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">' +
+          '<div style="flex:1;background:#0f1520;border-radius:6px;padding:7px 11px;font-size:12px;color:#7986a8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+window.location.host+'</div>' +
+          '<div style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:800;white-space:nowrap;animation:pgPulse 1.5s infinite">⊕</div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:#7986a8;margin-top:6px;text-align:center">If you do not see ⊕, try refreshing the page once</div>' +
+      '</div>' : '';
+
+    var stepsHtml = steps.map(function(s,i){
       return '<div class="pg-step">' +
-        '<div class="pg-num">' + (i+1) + '</div>' +
-        '<div style="font-size:14px;color:#c8cfe8;line-height:1.6;padding-top:2px">' + s[0] + ' ' + s[1] + '</div>' +
+        '<div class="pg-num">'+(i+1)+'</div>' +
+        '<div style="font-size:14px;color:#c8cfe8;line-height:1.6;padding-top:2px">'+s+'</div>' +
         '</div>';
     }).join('');
 
-    // Desktop: show address bar visual hint
-    var desktopHint = _isDesktop ?
-      '<div style="margin:16px 0;background:#0f1520;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px">' +
-        '<div style="flex:1;background:#1a2030;border-radius:6px;padding:8px 12px;font-size:12px;color:#7986a8;font-family:monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + (window.location.hostname) + '</div>' +
-        '<div style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border-radius:6px;padding:6px 10px;font-weight:800;font-size:13px;white-space:nowrap;animation:pgPulse 1.5s infinite">⊕ Install</div>' +
-      '</div>' +
-      '<div style="font-size:12px;color:#7986a8;text-align:center;margin-bottom:8px">👆 This is what the install icon looks like in your address bar</div>'
-      : '';
-
     var bg = document.createElement('div');
-    bg.className = 'pg-modal-bg';
-    bg.id = 'pgModal';
-    bg.onclick = function(e) { if (e.target === bg) pgCloseModal(); };
-    bg.innerHTML =
-      '<div class="pg-modal">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">' +
-          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">' + title + '</div>' +
-          '<button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;line-height:1">×</button>' +
-        '</div>' +
-        desktopHint +
-        stepsHtml +
-        '<div style="margin-top:18px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:11px 14px;font-size:13px;color:#7986a8;text-align:center">' +
-          '💡 ' + tip +
-        '</div>' +
-        '<button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button>' +
+    bg.className='pg-modal-bg'; bg.id='pgModal';
+    bg.onclick=function(e){if(e.target===bg)pgCloseModal();};
+    bg.innerHTML=
+      '<div class="pg-modal">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'+
+          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">'+title+'</div>'+
+          '<button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0;line-height:1">×</button>'+
+        '</div>'+
+        addrBar+
+        stepsHtml+
+        '<div style="margin-top:18px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#7986a8;text-align:center">'+
+          '💡 '+tip+
+        '</div>'+
+        '<button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button>'+
       '</div>';
-
     document.body.appendChild(bg);
   }
 
-  window.pgCloseModal = function() {
-    var el = document.getElementById('pgModal');
-    if (el) { el.style.opacity='0'; el.style.transition='.3s'; setTimeout(function(){el.remove();},300); }
+  window.pgCloseModal=function(){
+    var el=document.getElementById('pgModal');
+    if(el){el.style.opacity='0';el.style.transition='.25s';setTimeout(function(){if(el.parentNode)el.remove();},260);}
   };
 
-  // ── Add Install button to navbar ─────────────────
-  window.addEventListener('load', function() {
-    if (_isStandalone) return;
-    setTimeout(function() {
+  /* ── 6. Nav install button ───────────────────────── */
+  window.addEventListener('load', function(){
+    if (_standalone) return;
+    setTimeout(function(){
       var nav = document.getElementById('navCta');
       if (!nav || document.getElementById('pgNavBtn')) return;
       var btn = document.createElement('button');
       btn.id = 'pgNavBtn';
       btn.className = 'btn btn-ghost';
-      btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.3);color:#00e676';
-      btn.innerHTML = _isDesktop ? '🖥️ Install App' : '📲 Install';
+      btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.35);color:#00e676;gap:5px';
+      btn.innerHTML = _isDesktop ? '🖥️ Install' : '📲 Install';
+      btn.title = 'Install Pesa Grow as an app';
       btn.onclick = window.pgDoInstall;
       nav.insertBefore(btn, nav.firstChild);
-    }, 800);
+    }, 600);
+
+    /* iOS: show bar after delay */
+    if (_isIOS && !_standalone){
+      setTimeout(showBar, 2000);
+    }
   });
 
 })();
