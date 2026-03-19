@@ -1,53 +1,38 @@
-// ══════════════════════════════════════════════════
-//  PESA GROW — SERVICE WORKER v2
-//  Robust PWA install — never fails silently
-// ══════════════════════════════════════════════════
+/* Pesa Grow Service Worker */
+const V = 'pg-3';
 
-const CACHE = 'pesagrow-v2';
+self.addEventListener('install', e => {
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(V).then(c =>
+      Promise.allSettled([
+        c.add('/'),
+        c.add('/index.html'),
+        c.add('/manifest.json'),
+      ])
+    )
+  );
+});
 
-// ── INSTALL — cache pages but NEVER fail ──────────
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE).then(async cache => {
-      // Add files one by one — if one fails, others still cache
-      const files = ['/', '/index.html', '/dashboard.html', '/manifest.json'];
-      for (const file of files) {
-        try { await cache.add(file); } catch(e) { console.warn('[SW] Could not cache:', file); }
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== V).map(k => caches.delete(k)))
+    ).then(() => self.clients.claim())
+  );
+});
+
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  if (url.pathname.startsWith('/api/')) return;
+  e.respondWith(
+    fetch(e.request).then(r => {
+      if (r.ok) {
+        const c = r.clone();
+        caches.open(V).then(cache => cache.put(e.request, c));
       }
-    }).then(() => self.skipWaiting())
+      return r;
+    }).catch(() => caches.match(e.request).then(r => r || caches.match('/index.html')))
   );
-});
-
-// ── ACTIVATE — clean old caches ───────────────────
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
-      .then(() => self.clients.claim())
-  );
-});
-
-// ── FETCH — network first, cache fallback ─────────
-self.addEventListener('fetch', event => {
-  // Skip non-GET and API requests
-  if (event.request.method !== 'GET') return;
-  if (event.request.url.includes('/api/')) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(res => {
-        // Cache fresh successful responses
-        if (res && res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE).then(c => c.put(event.request, clone)).catch(()=>{});
-        }
-        return res;
-      })
-      .catch(() => caches.match(event.request).then(cached => cached || caches.match('/index.html')))
-  );
-});
-
-// ── MESSAGE — allow force update ──────────────────
-self.addEventListener('message', event => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
