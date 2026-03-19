@@ -17,6 +17,20 @@ app.set('trust proxy', 1);
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve sw.js and manifest.json from root with correct headers
+// These MUST be at / for PWA to work
+app.get('/sw.js', (req, res) => {
+  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Service-Worker-Allowed', '/');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, 'public', 'sw.js'));
+});
+app.get('/manifest.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
+});
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true });
 app.use('/api/', limiter);
 
@@ -331,17 +345,17 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Enter your email and password' });
     const user = db.prepare('SELECT * FROM users WHERE email=?').get(email);
-    if (!user) return res.status(400).json({ error: 'No account found with that email. Please register first.' });
+    if (!user) return res.status(400).json({ error: 'Account not found' });
     if (!bcrypt.compareSync(password, user.password)) return res.status(400).json({ error: 'Incorrect password' });
     if (user.status === 'suspended') return res.status(403).json({ error: 'Account suspended. Contact 0796820013' });
-    db.prepare('UPDATE users SET lastLogin=? WHERE id=?').run(now(), user.id);
+    db.prepare('UPDATE users SET lastLogin=? WHERE id=?').run(now(),user.id);
     const token = jwt.sign({ id:user.id, role:user.role }, JWT_SECRET, { expiresIn:'7d' });
     const { password:_, ...safe } = user;
     res.json({ token, user: safe });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
+
 app.get('/api/auth/me', authUser, (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
