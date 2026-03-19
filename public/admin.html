@@ -4,302 +4,404 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin Panel — Pesa Grow</title>
-<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#050709;--bg2:#0c0e14;--bg3:#13151f;--card:#0f1117;--border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);--green:#10b981;--gold:#f59e0b;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;--text:#f0f2f8;--text2:#8892a4;--text3:#404760;--r:14px;--shadow:0 16px 48px rgba(0,0,0,.45)}
+:root{
+  --bg:#030508;--bg2:#080c12;--bg3:#0f1520;--card:#0a0f18;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.14);
+  --green:#00e676;--gold:#ffc107;--red:#ff4d6a;--blue:#4fc3f7;--purple:#b388ff;
+  --text:#eef2ff;--text2:#7986a8;--text3:#3d4a66;
+  --r:14px;--shadow:0 20px 60px rgba(0,0,0,.6);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
-h1,h2,h3,h4{font-family:'Clash Display',sans-serif}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
+h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
 
-.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
-.tn-brand{display:flex;align-items:center;gap:10px}
-.tn-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--green),var(--gold));border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:14px;color:#000}
-.tn-name{font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700}
-.admin-badge{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;letter-spacing:.5px}
+/* LOGIN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:48px 48px}
+.login-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:44px;width:100%;max-width:420px;box-shadow:var(--shadow)}
+.login-brand{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px}
+.logo-sq{width:44px;height:44px;background:linear-gradient(135deg,var(--green),#00b341);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:17px;color:#000}
+.logo-name{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;letter-spacing:-.5px}
+.admin-pill{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.25);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;margin-left:6px}
+
+/* TOP NAV */
+.top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
+.tn-left{display:flex;align-items:center;gap:12px}
 .tn-right{display:flex;align-items:center;gap:12px}
+.tn-name{font-size:13px;color:var(--text2)}
 
-.layout{display:flex;flex:1;overflow:hidden}
-.sidebar{width:240px;background:var(--bg2);border-right:1px solid var(--border);padding:20px 0;flex-shrink:0;overflow-y:auto}
-.sb-label{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:8px 20px 4px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:14px;color:var(--text2);transition:.2s}
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 57px)}
+.sidebar{width:236px;background:var(--bg2);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:10px 20px 4px}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 20px;cursor:pointer;font-size:14px;color:var(--text2);transition:.2s;position:relative;border-right:3px solid transparent}
 .sb-item:hover{background:rgba(255,255,255,.03);color:var(--text)}
-.sb-item.active{background:rgba(239,68,68,.08);color:var(--red);font-weight:600;border-right:3px solid var(--red)}
-.sb-item .ic{font-size:18px;width:22px;text-align:center}
-.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px}
+.sb-item.active{background:rgba(255,77,106,.06);color:var(--red);font-weight:600;border-right-color:var(--red)}
+.sb-item .ic{font-size:17px;width:22px;text-align:center;flex-shrink:0}
+.sb-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;min-width:20px;text-align:center}
+.sb-bottom{margin-top:auto;padding:16px 12px}
 
-.main{flex:1;overflow-y:auto;padding:28px}
+.main{flex:1;overflow-y:auto;padding:28px 32px}
 .page{display:none}.page.active{display:block}
-.page-title{font-family:'Clash Display',sans-serif;font-size:26px;font-weight:700;margin-bottom:22px}
+.page-title{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;margin-bottom:6px;letter-spacing:-.5px}
+.page-sub{font-size:14px;color:var(--text2);margin-bottom:24px}
 
-.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
-.card-title{font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
-.card-val{font-family:'Clash Display',sans-serif;font-size:30px;font-weight:700}
-.card-sub{font-size:13px;color:var(--text2);margin-top:4px}
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:.2s}
+.stat-card:hover{border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--sc,var(--green))}
+.sc-lbl{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.sc-val{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;line-height:1}
+.sc-sub{font-size:12px;color:var(--text2)}
+.sc-icon{position:absolute;top:16px;right:16px;font-size:28px;opacity:.15}
 
-.fg{margin-bottom:16px}
-.fg label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
-.fc{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-family:'Plus Jakarta Sans',sans-serif;transition:.2s}
-.fc:focus{outline:none;border-color:var(--green)}
-select.fc option{background:var(--bg3)}
-.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-.btn{padding:10px 18px;border-radius:9px;font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:.2s;display:inline-flex;align-items:center;gap:6px}
-.btn-green{background:linear-gradient(135deg,var(--green),#059669);color:#fff}.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(16,185,129,.3)}
-.btn-red{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25)}.btn-red:hover{background:rgba(239,68,68,.2)}
-.btn-gold{background:linear-gradient(135deg,var(--gold),#d97706);color:#000}.btn-gold:hover{transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text)}
-.btn-blue{background:rgba(59,130,246,.1);color:var(--blue);border:1px solid rgba(59,130,246,.25)}
-.btn-full{width:100%;padding:14px;font-size:15px;justify-content:center}
-.btn-sm{padding:7px 12px;font-size:12px}
-
-.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
+/* TABLES */
+.tbl-wrap{overflow-x:auto;border-radius:13px;border:1px solid var(--border)}
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border)}
-.tbl td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px}
+.tbl th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(255,255,255,.015)}
+.tbl-tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 
-.badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase}
-.badge-ok{background:rgba(16,185,129,.1);color:var(--green)}
-.badge-pend{background:rgba(245,158,11,.1);color:var(--gold)}
-.badge-fail{background:rgba(239,68,68,.1);color:var(--red)}
-.badge-info{background:rgba(59,130,246,.1);color:var(--blue)}
+/* BADGES */
+.badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;white-space:nowrap}
+.b-ok{background:rgba(0,230,118,.1);color:var(--green)}
+.b-pend{background:rgba(255,193,7,.1);color:var(--gold)}
+.b-fail{background:rgba(255,77,106,.1);color:var(--red)}
+.b-blue{background:rgba(79,195,247,.1);color:var(--blue)}
+.b-purple{background:rgba(179,136,255,.1);color:var(--purple)}
 
-.modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.75);backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-green{background:linear-gradient(135deg,var(--green),#00b341);color:#000}.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,230,118,.3)}
+.btn-red{background:rgba(255,77,106,.1);color:var(--red);border:1px solid rgba(255,77,106,.25)}.btn-red:hover{background:rgba(255,77,106,.2)}
+.btn-gold{background:rgba(255,193,7,.1);color:var(--gold);border:1px solid rgba(255,193,7,.25)}.btn-gold:hover{background:rgba(255,193,7,.2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}.btn-ghost:hover{color:var(--text);border-color:var(--border2)}
+.btn-blue{background:rgba(79,195,247,.1);color:var(--blue);border:1px solid rgba(79,195,247,.25)}.btn-blue:hover{background:rgba(79,195,247,.2)}
+.btn-sm{padding:6px 11px;font-size:12px;border-radius:7px}
+.btn-full{width:100%;padding:14px;font-size:15px;justify-content:center;border-radius:11px}
+
+/* FORM */
+.fg{margin-bottom:16px}
+.fg label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
+.fc{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;transition:.2s}
+.fc:focus{outline:none;border-color:var(--green)}
+textarea.fc{resize:vertical;min-height:90px}
+select.fc option{background:var(--bg3)}
+.fc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fc-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:16px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
-.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto}
-.modal-x{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:500px;position:relative;max-height:92vh;overflow-y:auto}
+.modal-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer}
+.modal-x:hover{color:var(--text)}
+.modal-title{font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px}
+.modal-sub{font-size:14px;color:var(--text2);margin-bottom:22px}
+.m-err{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
 
-.toast{position:fixed;bottom:20px;right:20px;z-index:600;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;transform:translateY(60px);opacity:0;transition:.3s;max-width:300px}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;z-index:600;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;transform:translateY(60px);opacity:0;transition:.3s;max-width:320px;box-shadow:var(--shadow)}
 .toast.show{transform:translateY(0);opacity:1}
-.toast.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
-.toast.err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red)}
+.toast.ok{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.toast.err{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:var(--red)}
 
-/* LOGIN SCREEN */
-.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
-.login-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:40px;width:100%;max-width:420px}
-.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:28px;justify-content:center}
-.login-logo .tn-logo{width:44px;height:44px;font-size:18px}
-.login-logo .tn-name{font-size:24px}
-.m-err{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--red);padding:11px 14px;border-radius:8px;font-size:13px;margin-bottom:14px;display:none}
+/* PLAN CARDS */
+.plan-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;position:relative;overflow:hidden;transition:.2s}
+.plan-card:hover{border-color:var(--border2)}
+.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--pc,var(--green))}
 
-@media(max-width:900px){.grid-4{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
-@media(max-width:640px){.sidebar{display:none}.main{padding:16px}.grid-4{grid-template-columns:1fr 1fr}}
+/* USER ROW */
+.user-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:12px;color:#000;flex-shrink:0}
+
+@media(max-width:900px){.stats-grid{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}.fc-row{grid-template-columns:1fr}.fc-row3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.sidebar{display:none}.main{padding:16px}.stats-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 
-<!-- LOGIN SCREEN -->
+<!-- ══ LOGIN ══════════════════════════════════════════ -->
 <div class="login-screen" id="loginScreen">
   <div class="login-box">
-    <div class="login-logo">
-      <div class="tn-logo">PG</div>
-      <span class="tn-name">Pesa Grow</span>
+    <div class="login-brand">
+      <div class="logo-sq">PG</div>
+      <span class="logo-name">Pesa Grow</span>
+      <span class="admin-pill">ADMIN</span>
     </div>
     <div style="text-align:center;margin-bottom:24px">
-      <div style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:6px">Admin Login</div>
-      <div style="font-size:14px;color:var(--text2)">Restricted access — administrators only</div>
+      <div style="font-size:22px;font-weight:700;font-family:'Bricolage Grotesque',sans-serif;margin-bottom:6px">Admin Panel Access</div>
+      <div style="font-size:14px;color:var(--text2)">Restricted — authorized administrators only</div>
     </div>
-    <div class="m-err" id="loginErr"></div>
-    <div class="fg"><label>Email Address</label><input class="fc" id="adminEmail" type="email" placeholder="admin@pesagrow.co.ke" value="admin@pesagrow.co.ke"></div>
-    <div class="fg"><label>Password</label><input class="fc" id="adminPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doAdminLogin()"></div>
-    <button class="btn btn-green btn-full" onclick="doAdminLogin()">Login to Admin Panel</button>
+    <div class="m-err" id="loginErr" style="display:none"></div>
+    <div class="fg"><label>Email Address</label><input class="fc" id="aEmail" type="email" value="admin@pesagrow.co.ke" placeholder="admin@pesagrow.co.ke"></div>
+    <div class="fg"><label>Password</label><input class="fc" id="aPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="btn btn-green btn-full" onclick="doLogin()">Login to Admin Panel</button>
   </div>
 </div>
 
-<!-- MAIN APP (shown after login) -->
+<!-- ══ MAIN APP ═══════════════════════════════════════ -->
 <div id="adminApp" style="display:none;flex-direction:column;min-height:100vh">
 
+<!-- TOP NAV -->
 <div class="top-nav">
-  <div class="tn-brand">
-    <div class="tn-logo">PG</div>
-    <span class="tn-name">Pesa Grow</span>
-    <span class="admin-badge">ADMIN</span>
+  <div class="tn-left">
+    <div class="logo-sq" style="width:30px;height:30px;font-size:13px">PG</div>
+    <span class="logo-name" style="font-size:17px">Pesa Grow</span>
+    <span class="admin-pill">ADMIN</span>
   </div>
   <div class="tn-right">
-    <span style="font-size:13px;color:var(--text2)" id="adminName">Admin</span>
-    <button class="btn btn-ghost btn-sm" onclick="doLogout()">Logout</button>
+    <span class="tn-name" id="adminGreet">Admin</span>
+    <button class="btn btn-ghost btn-sm" onclick="doLogout()">⏏ Logout</button>
   </div>
 </div>
 
 <div class="layout">
-  <aside class="sidebar">
-    <div class="sb-item active" onclick="showPage('dashboard')" data-page="dashboard"><span class="ic">📊</span> Dashboard</div>
-    <div class="sb-label">Management</div>
-    <div class="sb-item" onclick="showPage('members')" data-page="members"><span class="ic">👥</span> Members</div>
-    <div class="sb-item" onclick="showPage('deposits')" data-page="deposits"><span class="ic">⬇️</span> Deposits <span class="sb-badge" id="depBadge" style="display:none">0</span></div>
-    <div class="sb-item" onclick="showPage('withdrawals')" data-page="withdrawals"><span class="ic">⬆️</span> Withdrawals <span class="sb-badge" id="wdBadge" style="display:none">0</span></div>
-    <div class="sb-item" onclick="showPage('investments')" data-page="investments"><span class="ic">📈</span> Investments</div>
-    <div class="sb-item" onclick="showPage('transactions')" data-page="transactions"><span class="ic">📋</span> Transactions</div>
-    <div class="sb-label">Configuration</div>
-    <div class="sb-item" onclick="showPage('plans')" data-page="plans"><span class="ic">🗂</span> Plans</div>
-    <div class="sb-item" onclick="showPage('broadcast')" data-page="broadcast"><span class="ic">📣</span> Broadcast</div>
-    <div class="sb-item" onclick="showPage('settings')" data-page="settings"><span class="ic">⚙️</span> Settings</div>
-    <div class="sb-item" onclick="showPage('mpesaklogs')" data-page="mpesaklogs"><span class="ic">📱</span> M-Pesa Logs</div>
-  </aside>
 
-  <main class="main" id="mainContent">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-item active" data-page="dashboard" onclick="showPage('dashboard')"><span class="ic">📊</span> Dashboard</div>
+  <div class="sb-lbl">Management</div>
+  <div class="sb-item" data-page="members" onclick="showPage('members')"><span class="ic">👥</span> Members</div>
+  <div class="sb-item" data-page="deposits" onclick="showPage('deposits')"><span class="ic">⬇️</span> Deposits <span class="sb-badge" id="depBadge" style="display:none">0</span></div>
+  <div class="sb-item" data-page="withdrawals" onclick="showPage('withdrawals')"><span class="ic">⬆️</span> Withdrawals <span class="sb-badge" id="wdBadge" style="display:none">0</span></div>
+  <div class="sb-item" data-page="investments" onclick="showPage('investments')"><span class="ic">📈</span> Investments</div>
+  <div class="sb-item" data-page="transactions" onclick="showPage('transactions')"><span class="ic">📋</span> Transactions</div>
+  <div class="sb-lbl">Configuration</div>
+  <div class="sb-item" data-page="plans" onclick="showPage('plans')"><span class="ic">🗂</span> Plans</div>
+  <div class="sb-item" data-page="broadcast" onclick="showPage('broadcast')"><span class="ic">📣</span> Broadcast</div>
+  <div class="sb-item" data-page="settings" onclick="showPage('settings')"><span class="ic">⚙️</span> Settings</div>
+  <div class="sb-item" data-page="mplogs" onclick="showPage('mplogs')"><span class="ic">📱</span> M-Pesa Logs</div>
+  <div class="sb-bottom">
+    <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.12);border-radius:12px;padding:14px;text-align:center">
+      <div style="font-size:20px;margin-bottom:6px">📞</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Support Line</div>
+      <a href="tel:0796820013" style="font-size:14px;font-weight:700;color:var(--green);text-decoration:none">0796820013</a>
+    </div>
+  </div>
+</aside>
 
-    <!-- DASHBOARD -->
-    <div class="page active" id="page-dashboard">
-      <div class="page-title">Dashboard Overview</div>
-      <div class="grid-4" id="statsGrid">
-        <div class="card"><div class="card-title">Total Members</div><div class="card-val green" id="s-members">—</div></div>
-        <div class="card"><div class="card-title">Active Investors</div><div class="card-val blue" id="s-investors">—</div></div>
-        <div class="card"><div class="card-title">Pending Deposits</div><div class="card-val gold" id="s-pdeps">—</div></div>
-        <div class="card"><div class="card-title">Pending Withdrawals</div><div class="card-val red" id="s-pwds">—</div></div>
-        <div class="card"><div class="card-title">Total Deposited</div><div class="card-val" id="s-deposited">—</div></div>
-        <div class="card"><div class="card-title">Total Withdrawn</div><div class="card-val" id="s-withdrawn">—</div></div>
-        <div class="card"><div class="card-title">Total Invested</div><div class="card-val" id="s-invested">—</div></div>
-        <div class="card"><div class="card-title">Profits Paid</div><div class="card-val green" id="s-profits">—</div></div>
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- ── DASHBOARD ─────────────────────────────── -->
+  <div class="page active" id="page-dashboard">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Platform overview — real-time stats</div>
+    <div class="stats-grid">
+      <div class="stat-card" style="--sc:var(--green)"><div class="sc-icon">👥</div><div class="sc-lbl">Total Members</div><div class="sc-val" id="s-members">—</div><div class="sc-sub">Registered users</div></div>
+      <div class="stat-card" style="--sc:var(--blue)"><div class="sc-icon">📈</div><div class="sc-lbl">Active Investors</div><div class="sc-val" id="s-investors">—</div><div class="sc-sub">Currently investing</div></div>
+      <div class="stat-card" style="--sc:var(--gold)"><div class="sc-icon">⬇️</div><div class="sc-lbl">Pending Deposits</div><div class="sc-val" id="s-pdeps">—</div><div class="sc-sub">Awaiting approval</div></div>
+      <div class="stat-card" style="--sc:var(--red)"><div class="sc-icon">⬆️</div><div class="sc-lbl">Pending Withdrawals</div><div class="sc-val" id="s-pwds">—</div><div class="sc-sub">Awaiting processing</div></div>
+      <div class="stat-card" style="--sc:var(--green)"><div class="sc-icon">💰</div><div class="sc-lbl">Total Deposited</div><div class="sc-val" id="s-dep">—</div><div class="sc-sub">All approved deposits</div></div>
+      <div class="stat-card" style="--sc:var(--red)"><div class="sc-icon">💸</div><div class="sc-lbl">Total Withdrawn</div><div class="sc-val" id="s-wd">—</div><div class="sc-sub">All approved withdrawals</div></div>
+      <div class="stat-card" style="--sc:var(--gold)"><div class="sc-icon">📊</div><div class="sc-lbl">Total Invested</div><div class="sc-val" id="s-inv">—</div><div class="sc-sub">All investment volumes</div></div>
+      <div class="stat-card" style="--sc:var(--purple)"><div class="sc-icon">🏆</div><div class="sc-lbl">Profits Paid</div><div class="sc-val" id="s-prof">—</div><div class="sc-sub">Credited to members</div></div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;margin-bottom:12px">Recent Members</div>
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>Member</th><th>Balance</th><th>Status</th><th>Joined</th></tr></thead>
+          <tbody id="dashMembers"></tbody>
+        </table></div>
       </div>
-      <div class="grid-2">
-        <div>
-          <div style="font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px">Recent Members</div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th>Email</th><th>Balance</th><th>Joined</th></tr></thead><tbody id="recentMembers"></tbody></table></div>
-        </div>
-        <div>
-          <div style="font-family:'Clash Display',sans-serif;font-size:18px;font-weight:700;margin-bottom:14px">Recent Transactions</div>
-          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody id="recentTx"></tbody></table></div>
-        </div>
+      <div>
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;margin-bottom:12px">Recent Transactions</div>
+        <div class="tbl-wrap"><table class="tbl">
+          <thead><tr><th>Type</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="dashTx"></tbody>
+        </table></div>
       </div>
     </div>
+  </div>
 
-    <!-- MEMBERS -->
-    <div class="page" id="page-members">
-      <div class="page-title">Members</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-        <input class="fc" id="memberSearch" style="max-width:280px" placeholder="Search by name or email..." oninput="filterMembers()">
-        <button class="btn btn-green" onclick="openAddBalance()">💰 Adjust Balance</button>
-        <button class="btn btn-ghost" onclick="loadMembers()">🔄 Refresh</button>
-      </div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Balance</th><th>Invested</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
-        <tbody id="membersBody"></tbody>
-      </table></div>
+  <!-- ── MEMBERS ────────────────────────────────── -->
+  <div class="page" id="page-members">
+    <div class="page-title">Members</div>
+    <div class="page-sub">Manage all registered users</div>
+    <div class="tbl-tools">
+      <input class="fc" id="memberSearch" style="max-width:260px;padding:9px 13px" placeholder="🔍 Search name or email..." oninput="filterMembers()">
+      <button class="btn btn-green" onclick="openAdjustBalance()">💰 Adjust Balance</button>
+      <button class="btn btn-blue" onclick="openAddMember()">➕ Add Member</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadMembers()">🔄 Refresh</button>
+      <span style="font-size:13px;color:var(--text2);margin-left:auto">Total: <strong id="memberCount">—</strong></span>
     </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Member</th><th>Email</th><th>Phone</th><th>Balance</th><th>Invested</th><th>KYC</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+      <tbody id="membersBody"></tbody>
+    </table></div>
+  </div>
 
-    <!-- DEPOSITS -->
-    <div class="page" id="page-deposits">
-      <div class="page-title">Deposits</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button class="btn btn-ghost btn-sm active" onclick="filterDeps('all',this)">All</button>
-        <button class="btn btn-ghost btn-sm" onclick="filterDeps('pending',this)">Pending</button>
-        <button class="btn btn-ghost btn-sm" onclick="filterDeps('approved',this)">Approved</button>
-        <button class="btn btn-ghost btn-sm" onclick="filterDeps('rejected',this)">Rejected</button>
-        <button class="btn btn-ghost btn-sm" onclick="loadDeposits()">🔄 Refresh</button>
-      </div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Member</th><th>Amount</th><th>Method</th><th>Reference</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-        <tbody id="depositsBody"></tbody>
-      </table></div>
+  <!-- ── DEPOSITS ───────────────────────────────── -->
+  <div class="page" id="page-deposits">
+    <div class="page-title">Deposits</div>
+    <div class="page-sub">Review and approve member deposit requests</div>
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm filterDepBtn active" onclick="filterDeps('all',this)">All</button>
+      <button class="btn btn-ghost btn-sm filterDepBtn" onclick="filterDeps('pending',this)">⏳ Pending</button>
+      <button class="btn btn-ghost btn-sm filterDepBtn" onclick="filterDeps('approved',this)">✅ Approved</button>
+      <button class="btn btn-ghost btn-sm filterDepBtn" onclick="filterDeps('rejected',this)">❌ Rejected</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadDeposits()">🔄 Refresh</button>
     </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Member</th><th>Amount</th><th>Method</th><th>Reference / Receipt</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="depsBody"></tbody>
+    </table></div>
+  </div>
 
-    <!-- WITHDRAWALS -->
-    <div class="page" id="page-withdrawals">
-      <div class="page-title">Withdrawals</div>
-      <div style="display:flex;gap:10px;margin-bottom:16px">
-        <button class="btn btn-ghost btn-sm" onclick="filterWds('all',this)">All</button>
-        <button class="btn btn-ghost btn-sm" onclick="filterWds('pending',this)">Pending</button>
-        <button class="btn btn-ghost btn-sm" onclick="filterWds('approved',this)">Approved</button>
-        <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals()">🔄 Refresh</button>
-      </div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Member</th><th>Amount</th><th>Fee</th><th>Net</th><th>Method</th><th>Account</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
-        <tbody id="withdrawalsBody"></tbody>
-      </table></div>
+  <!-- ── WITHDRAWALS ────────────────────────────── -->
+  <div class="page" id="page-withdrawals">
+    <div class="page-title">Withdrawals</div>
+    <div class="page-sub">Process and approve withdrawal requests</div>
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm filterWdBtn active" onclick="filterWds('all',this)">All</button>
+      <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('pending',this)">⏳ Pending</button>
+      <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('approved',this)">✅ Approved</button>
+      <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('rejected',this)">❌ Rejected</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals()">🔄 Refresh</button>
     </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Member</th><th>Amount</th><th>Fee</th><th>Net Payout</th><th>Method</th><th>Account</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+      <tbody id="wdsBody"></tbody>
+    </table></div>
+  </div>
 
-    <!-- INVESTMENTS -->
-    <div class="page" id="page-investments">
-      <div class="page-title">Investments</div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Member</th><th>Plan</th><th>Amount</th><th>ROI</th><th>Earned</th><th>Status</th><th>Start</th><th>End</th></tr></thead>
-        <tbody id="investmentsBody"></tbody>
-      </table></div>
+  <!-- ── INVESTMENTS ───────────────────────────── -->
+  <div class="page" id="page-investments">
+    <div class="page-title">Investments</div>
+    <div class="page-sub">All active and completed investment plans</div>
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm filterInvBtn active" onclick="filterInvs('all',this)">All</button>
+      <button class="btn btn-ghost btn-sm filterInvBtn" onclick="filterInvs('active',this)">🟢 Active</button>
+      <button class="btn btn-ghost btn-sm filterInvBtn" onclick="filterInvs('completed',this)">✅ Completed</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadInvestments()">🔄 Refresh</button>
     </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Member</th><th>Plan</th><th>Amount</th><th>ROI/day</th><th>Earned So Far</th><th>Progress</th><th>Status</th><th>Start</th><th>End</th></tr></thead>
+      <tbody id="invsBody"></tbody>
+    </table></div>
+  </div>
 
-    <!-- TRANSACTIONS -->
-    <div class="page" id="page-transactions">
-      <div class="page-title">All Transactions</div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Type</th><th>Amount</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
-        <tbody id="transactionsBody"></tbody>
-      </table></div>
+  <!-- ── TRANSACTIONS ──────────────────────────── -->
+  <div class="page" id="page-transactions">
+    <div class="page-title">All Transactions</div>
+    <div class="page-sub">Complete platform transaction log</div>
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm filterTxBtn active" onclick="filterTx('all',this)">All</button>
+      <button class="btn btn-ghost btn-sm filterTxBtn" onclick="filterTx('deposit',this)">Deposits</button>
+      <button class="btn btn-ghost btn-sm filterTxBtn" onclick="filterTx('withdrawal',this)">Withdrawals</button>
+      <button class="btn btn-ghost btn-sm filterTxBtn" onclick="filterTx('investment',this)">Investments</button>
+      <button class="btn btn-ghost btn-sm filterTxBtn" onclick="filterTx('profit',this)">Profits</button>
+      <button class="btn btn-ghost btn-sm filterTxBtn" onclick="filterTx('referral',this)">Referrals</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadTransactions()">🔄 Refresh</button>
     </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Type</th><th>Amount</th><th>Description</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody id="txBody"></tbody>
+    </table></div>
+  </div>
 
-    <!-- PLANS -->
-    <div class="page" id="page-plans">
-      <div class="page-title">Investment Plans</div>
-      <button class="btn btn-green" style="margin-bottom:16px" onclick="openPlanModal()">+ Add New Plan</button>
-      <div class="grid-3" id="plansGrid"></div>
+  <!-- ── PLANS ─────────────────────────────────── -->
+  <div class="page" id="page-plans">
+    <div class="page-title">Investment Plans</div>
+    <div class="page-sub">Create and manage investment plans available to members</div>
+    <div class="tbl-tools">
+      <button class="btn btn-green" onclick="openPlanModal(null)">➕ Add New Plan</button>
+      <button class="btn btn-ghost btn-sm" onclick="loadPlans()">🔄 Refresh</button>
     </div>
+    <div class="grid-3" id="plansGrid" style="margin-top:4px"></div>
+  </div>
 
-    <!-- BROADCAST -->
-    <div class="page" id="page-broadcast">
-      <div class="page-title">Broadcast Notification</div>
-      <div class="card" style="max-width:600px">
-        <div class="fg">
-          <label>Send To</label>
-          <select class="fc" id="broadcastTarget">
-            <option value="">All Members</option>
+  <!-- ── BROADCAST ──────────────────────────────── -->
+  <div class="page" id="page-broadcast">
+    <div class="page-title">Broadcast Notifications</div>
+    <div class="page-sub">Send messages to all members or specific users</div>
+    <div class="grid-2" style="max-width:900px">
+      <div class="card">
+        <div class="card-title">Send Notification</div>
+        <div class="fg"><label>Send To</label>
+          <select class="fc" id="bcTarget">
+            <option value="">📢 All Members</option>
           </select>
         </div>
-        <div class="fg"><label>Message</label><textarea class="fc" id="broadcastMsg" rows="4" placeholder="Type your message here..."></textarea></div>
-        <div class="fg">
-          <label>Type</label>
-          <select class="fc" id="broadcastType">
-            <option value="info">Info</option>
-            <option value="success">Success</option>
-            <option value="error">Error</option>
+        <div class="fg"><label>Notification Type</label>
+          <select class="fc" id="bcType">
+            <option value="info">ℹ️ Info</option>
+            <option value="success">✅ Success</option>
+            <option value="error">❌ Alert / Warning</option>
           </select>
         </div>
+        <div class="fg"><label>Message</label><textarea class="fc" id="bcMsg" placeholder="Type your message here..."></textarea></div>
         <button class="btn btn-green btn-full" onclick="sendBroadcast()">📣 Send Notification</button>
       </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="page" id="page-settings">
-      <div class="page-title">Platform Settings</div>
-      <div class="grid-2">
-        <div class="card">
-          <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:18px">General</div>
-          <div class="fg"><label>Site Name</label><input class="fc" id="set-siteName"></div>
-          <div class="fg"><label>Support Phone</label><input class="fc" id="set-sitePhone"></div>
-          <div class="fg"><label>Support Email</label><input class="fc" id="set-siteEmail"></div>
-          <div class="fg"><label>M-Pesa Till Number</label><input class="fc" id="set-mpesaTill"></div>
-          <div class="fg"><label>M-Pesa Account Name</label><input class="fc" id="set-mpesaName"></div>
-        </div>
-        <div class="card">
-          <div style="font-family:'Clash Display',sans-serif;font-size:18px;margin-bottom:18px">Financial</div>
-          <div class="fg"><label>Min Deposit (KES)</label><input class="fc" id="set-minDeposit" type="number"></div>
-          <div class="fg"><label>Min Withdrawal (KES)</label><input class="fc" id="set-minWithdraw" type="number"></div>
-          <div class="fg"><label>Withdrawal Fee (%)</label><input class="fc" id="set-withdrawFee" type="number"></div>
-          <div class="fg"><label>Default Referral Rate (%)</label><input class="fc" id="set-referralRate" type="number"></div>
-          <div class="fg"><label>Welcome Bonus (KES)</label><input class="fc" id="set-welcomeBonus" type="number"></div>
+      <div class="card">
+        <div class="card-title">Quick Templates</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left" onclick="setTemplate('🎉 Your investment has matured! Check your dashboard to view your profits and withdraw.')">🎉 Investment Matured</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left" onclick="setTemplate('✅ Your deposit has been approved and credited to your balance. Start investing now!')">✅ Deposit Approved</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left" onclick="setTemplate('⚠️ Platform maintenance scheduled. Withdrawals may be delayed for up to 2 hours. Thank you for your patience.')">⚠️ Maintenance Notice</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left" onclick="setTemplate('🚀 New investment plan available! Login to your dashboard to explore higher returns.')">🚀 New Plan Alert</button>
+          <button class="btn btn-ghost" style="justify-content:flex-start;text-align:left" onclick="setTemplate('💰 Your withdrawal has been processed and sent to your M-Pesa number. Thank you!')">💸 Withdrawal Processed</button>
         </div>
       </div>
-      <button class="btn btn-green" style="margin-top:16px;padding:14px 32px" onclick="saveSettings()">💾 Save All Settings</button>
     </div>
+  </div>
 
-    <!-- MPESA LOGS -->
-    <div class="page" id="page-mpesaklogs">
-      <div class="page-title">M-Pesa Callback Logs</div>
-      <div class="tbl-wrap"><table class="tbl">
-        <thead><tr><th>Checkout ID</th><th>Phone</th><th>Amount</th><th>Result</th><th>Receipt</th><th>Date</th></tr></thead>
-        <tbody id="mpesaLogsBody"></tbody>
-      </table></div>
+  <!-- ── SETTINGS ───────────────────────────────── -->
+  <div class="page" id="page-settings">
+    <div class="page-title">Platform Settings</div>
+    <div class="page-sub">Configure platform behaviour, fees and limits</div>
+    <div class="grid-2" style="max-width:900px;margin-bottom:20px">
+      <div class="card">
+        <div class="card-title">🏢 General Settings</div>
+        <div class="fg"><label>Site Name</label><input class="fc" id="set-siteName" placeholder="Pesa Grow"></div>
+        <div class="fg"><label>Support Phone</label><input class="fc" id="set-sitePhone" placeholder="0796820013"></div>
+        <div class="fg"><label>Support Email</label><input class="fc" id="set-siteEmail" placeholder="support@pesagrow.co.ke"></div>
+        <div class="fg"><label>M-Pesa Till Number</label><input class="fc" id="set-mpesaTill" placeholder="0796820013"></div>
+        <div class="fg"><label>M-Pesa Account Name</label><input class="fc" id="set-mpesaName" placeholder="PESA GROW LTD"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">💰 Financial Settings</div>
+        <div class="fg"><label>Min Deposit (KES)</label><input class="fc" id="set-minDeposit" type="number" placeholder="1000"></div>
+        <div class="fg"><label>Min Withdrawal (KES)</label><input class="fc" id="set-minWithdraw" type="number" placeholder="500"></div>
+        <div class="fg"><label>Withdrawal Fee (%)</label><input class="fc" id="set-withdrawFee" type="number" step="0.1" placeholder="2"></div>
+        <div class="fg"><label>Default Referral Rate (%)</label><input class="fc" id="set-referralRate" type="number" placeholder="5"></div>
+        <div class="fg"><label>Welcome Bonus (KES)</label><input class="fc" id="set-welcomeBonus" type="number" placeholder="0"></div>
+        <div class="fg"><label>Minimum Holding Period (days)</label><input class="fc" id="set-minHoldingDays" type="number" placeholder="3"></div>
+      </div>
     </div>
+    <button class="btn btn-green" style="padding:14px 36px;font-size:15px" onclick="saveSettings()">💾 Save All Settings</button>
+  </div>
 
-  </main>
-</div>
-</div>
+  <!-- ── MPESA LOGS ─────────────────────────────── -->
+  <div class="page" id="page-mplogs">
+    <div class="page-title">M-Pesa Callback Logs</div>
+    <div class="page-sub">All Daraja STK Push payment records</div>
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm" onclick="loadMpesaLogs()">🔄 Refresh</button>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Checkout ID</th><th>Phone</th><th>Amount</th><th>Result</th><th>Receipt No.</th><th>Processed At</th></tr></thead>
+      <tbody id="mpBody"></tbody>
+    </table></div>
+  </div>
 
-<!-- MODALS -->
+</main>
+</div>
+</div><!-- /adminApp -->
+
+<!-- ══ MODAL ══════════════════════════════════════ -->
 <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <button class="modal-x" onclick="closeModal()">×</button>
@@ -310,529 +412,559 @@ select.fc option{background:var(--bg3)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-//  API CLIENT
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
+//  CORE
+// ══════════════════════════════════════════════════
 const API = window.location.origin;
-let adminToken = localStorage.getItem('pg_admin_token');
-let allMembers = [], allDeposits = [], allWithdrawals = [];
+let TOKEN = localStorage.getItem('pg_admin_token');
+let allMembers=[], allDeposits=[], allWithdrawals=[], allInvestments=[], allTx=[];
 
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminToken };
-}
+const H = () => ({ 'Content-Type':'application/json', 'Authorization':'Bearer '+TOKEN });
+const k = n => 'KES '+(+(n||0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const dt = s => s ? new Date(s).toLocaleString('en-KE',{day:'2-digit',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+const ds = s => s ? new Date(s).toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+const initials = (f,l) => ((f||'?')[0]+(l||'?')[0]).toUpperCase();
 
-async function apiFetch(url, opts = {}) {
-  const r = await fetch(API + url, { headers: authHeaders(), ...opts });
+async function api(url, opts={}) {
+  const r = await fetch(API+url, { headers:H(), ...opts });
   const d = await r.json();
-  if (!r.ok) throw new Error(d.error || 'Request failed');
+  if (!r.ok) throw new Error(d.error||'Request failed');
   return d;
 }
 
-// ── FORMAT ──
-const k = n => 'KES ' + (+(n||0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-const dt = s => new Date(s).toLocaleString();
-const ds = s => new Date(s).toLocaleDateString();
-
-// ── TOAST ──
-function toast(msg, type = 'ok') {
+function toast(msg, type='ok') {
   const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 3500);
+  t.textContent=msg; t.className='toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'), 4000);
 }
-
-// ── MODAL ──
-function openModal(html) {
-  document.getElementById('modalBody').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
+function openModal(html) { document.getElementById('modalBody').innerHTML=html; document.getElementById('modalBg').classList.add('open'); }
 function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
 
-// ══════════════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════════════
-async function doAdminLogin() {
-  const email = document.getElementById('adminEmail').value.trim();
-  const pass  = document.getElementById('adminPass').value;
-  const err   = document.getElementById('loginErr');
-  err.style.display = 'none';
+// ══════════════════════════════════════════════════
+//  LOGIN / LOGOUT
+// ══════════════════════════════════════════════════
+async function doLogin() {
+  const email=document.getElementById('aEmail').value.trim();
+  const pass=document.getElementById('aPass').value;
+  const err=document.getElementById('loginErr');
+  err.style.display='none';
   try {
-    const r = await fetch(`${API}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password: pass })
-    });
-    const d = await r.json();
-    if (!r.ok) throw new Error(d.error || 'Login failed');
-    if (d.user.role !== 'admin') throw new Error('Access denied — admin only');
-    adminToken = d.token;
-    localStorage.setItem('pg_admin_token', adminToken);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminApp').style.display = 'flex';
-    document.getElementById('adminName').textContent = d.user.firstName + ' (Admin)';
+    const r=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password:pass})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Login failed');
+    if(d.user.role!=='admin') throw new Error('Access denied — admin accounts only');
+    TOKEN=d.token;
+    localStorage.setItem('pg_admin_token',TOKEN);
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='flex';
+    document.getElementById('adminGreet').textContent=d.user.firstName+' (Admin)';
     loadDashboard();
-  } catch(e) {
-    err.textContent = e.message; err.style.display = 'block';
-  }
+  } catch(e) { err.textContent=e.message; err.style.display='block'; }
 }
 
 function doLogout() {
   localStorage.removeItem('pg_admin_token');
-  location.reload();
+  TOKEN=null;
+  document.getElementById('adminApp').style.display='none';
+  document.getElementById('loginScreen').style.display='flex';
 }
 
-// Auto-login if token exists
 async function tryAutoLogin() {
-  if (!adminToken) return;
+  if(!TOKEN) return;
   try {
-    const user = await apiFetch('/api/auth/me');
-    if (user.role !== 'admin') { adminToken = null; localStorage.removeItem('pg_admin_token'); return; }
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('adminApp').style.display = 'flex';
-    document.getElementById('adminName').textContent = user.firstName + ' (Admin)';
+    const u=await api('/api/auth/me');
+    if(u.role!=='admin'){TOKEN=null;localStorage.removeItem('pg_admin_token');return;}
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('adminApp').style.display='flex';
+    document.getElementById('adminGreet').textContent=u.firstName+' (Admin)';
     loadDashboard();
-  } catch { adminToken = null; localStorage.removeItem('pg_admin_token'); }
+  } catch { TOKEN=null; localStorage.removeItem('pg_admin_token'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  NAVIGATION
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.querySelectorAll('.sb-item').forEach(s => s.classList.toggle('active', s.dataset.page === name));
-  loadPage(name);
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(s=>s.classList.toggle('active',s.dataset.page===name));
+  ({dashboard:loadDashboard,members:loadMembers,deposits:loadDeposits,withdrawals:loadWithdrawals,
+    investments:loadInvestments,transactions:loadTransactions,plans:loadPlans,
+    broadcast:loadBroadcast,settings:loadSettings,mplogs:loadMpesaLogs})[name]?.();
 }
 
-function loadPage(name) {
-  const map = {
-    dashboard: loadDashboard, members: loadMembers, deposits: loadDeposits,
-    withdrawals: loadWithdrawals, investments: loadInvestments,
-    transactions: loadTransactions, plans: loadPlans,
-    broadcast: loadBroadcast, settings: loadSettings, mpesaklogs: loadMpesaLogs
-  };
-  if (map[name]) map[name]();
-}
-
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  DASHBOARD
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadDashboard() {
   try {
-    const s = await apiFetch('/api/admin/stats');
-    document.getElementById('s-members').textContent   = s.totalMembers;
-    document.getElementById('s-investors').textContent = s.activeInvestors;
-    document.getElementById('s-pdeps').textContent     = s.pendingDeps;
-    document.getElementById('s-pwds').textContent      = s.pendingWds;
-    document.getElementById('s-deposited').textContent = k(s.totalDeposited);
-    document.getElementById('s-withdrawn').textContent = k(s.totalWithdrawn);
-    document.getElementById('s-invested').textContent  = k(s.totalInvested);
-    document.getElementById('s-profits').textContent   = k(s.totalProfitPaid);
+    const s=await api('/api/admin/stats');
+    document.getElementById('s-members').textContent=s.totalMembers;
+    document.getElementById('s-investors').textContent=s.activeInvestors;
+    document.getElementById('s-pdeps').textContent=s.pendingDeps;
+    document.getElementById('s-pwds').textContent=s.pendingWds;
+    document.getElementById('s-dep').textContent=k(s.totalDeposited);
+    document.getElementById('s-wd').textContent=k(s.totalWithdrawn);
+    document.getElementById('s-inv').textContent=k(s.totalInvested);
+    document.getElementById('s-prof').textContent=k(s.totalProfitPaid);
 
-    // Update sidebar badges
-    if (s.pendingDeps > 0) { document.getElementById('depBadge').textContent = s.pendingDeps; document.getElementById('depBadge').style.display = 'inline'; }
-    if (s.pendingWds > 0)  { document.getElementById('wdBadge').textContent  = s.pendingWds;  document.getElementById('wdBadge').style.display  = 'inline'; }
+    if(s.pendingDeps>0){document.getElementById('depBadge').textContent=s.pendingDeps;document.getElementById('depBadge').style.display='inline';}
+    if(s.pendingWds>0){document.getElementById('wdBadge').textContent=s.pendingWds;document.getElementById('wdBadge').style.display='inline';}
 
-    document.getElementById('recentMembers').innerHTML = (s.recentUsers||[]).map(u => `
+    document.getElementById('dashMembers').innerHTML=(s.recentUsers||[]).map(u=>`
       <tr>
-        <td><strong>${u.firstName} ${u.lastName}</strong></td>
-        <td style="color:var(--text2)">${u.email}</td>
-        <td style="color:var(--green)">${k(u.balance)}</td>
+        <td><div style="display:flex;align-items:center;gap:10px">
+          <div class="user-avatar">${initials(u.firstName,u.lastName)}</div>
+          <div><div style="font-weight:600">${u.firstName} ${u.lastName}</div><div style="font-size:12px;color:var(--text2)">${u.email}</div></div>
+        </div></td>
+        <td style="color:var(--green);font-weight:700">${k(u.balance)}</td>
+        <td><span class="badge ${u.status==='active'?'b-ok':'b-fail'}">${u.status}</span></td>
         <td style="color:var(--text2)">${ds(u.createdAt)}</td>
-      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">No members yet</td></tr>';
+      </tr>`).join('') || emptyRow(4,'No members yet');
 
-    document.getElementById('recentTx').innerHTML = (s.recentTx||[]).map(t => `
+    document.getElementById('dashTx').innerHTML=(s.recentTx||[]).map(t=>`
       <tr>
         <td style="text-transform:capitalize;font-weight:600">${t.type}</td>
-        <td style="color:var(--green)">${k(t.amount)}</td>
-        <td><span class="badge badge-${t.status==='completed'?'ok':t.status==='pending'?'pend':'fail'}">${t.status}</span></td>
+        <td style="color:var(--green);font-weight:700">${k(t.amount)}</td>
+        <td><span class="badge ${t.status==='completed'?'b-ok':t.status==='pending'?'b-pend':'b-fail'}">${t.status}</span></td>
         <td style="color:var(--text2)">${ds(t.createdAt)}</td>
-      </tr>`).join('') || '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">No transactions</td></tr>';
-  } catch(e) { toast('Failed to load dashboard: ' + e.message, 'err'); }
+      </tr>`).join('') || emptyRow(4,'No transactions');
+  } catch(e) { toast('Dashboard error: '+e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+function emptyRow(cols,msg) { return `<tr><td colspan="${cols}" style="text-align:center;padding:28px;color:var(--text2)">${msg}</td></tr>`; }
+
+// ══════════════════════════════════════════════════
 //  MEMBERS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadMembers() {
   try {
-    allMembers = await apiFetch('/api/admin/members');
+    allMembers=await api('/api/admin/members');
+    document.getElementById('memberCount').textContent=allMembers.length;
     renderMembers(allMembers);
-    // Populate broadcast dropdown
-    const sel = document.getElementById('broadcastTarget');
-    sel.innerHTML = '<option value="">All Members</option>' + allMembers.map(m =>
-      `<option value="${m.id}">${m.firstName} ${m.lastName} (${m.email})</option>`).join('');
-  } catch(e) { toast('Failed to load members: ' + e.message, 'err'); }
+    // populate broadcast dropdown
+    const sel=document.getElementById('bcTarget');
+    if(sel){sel.innerHTML='<option value="">📢 All Members</option>'+allMembers.map(m=>`<option value="${m.id}">${m.firstName} ${m.lastName} (${m.email})</option>`).join('');}
+  } catch(e) { toast('Members error: '+e.message,'err'); }
 }
 
-function renderMembers(members) {
-  document.getElementById('membersBody').innerHTML = members.map(m => `
+function renderMembers(list) {
+  document.getElementById('membersBody').innerHTML=list.map(m=>`
     <tr>
-      <td><strong>${m.firstName} ${m.lastName}</strong></td>
+      <td><div style="display:flex;align-items:center;gap:10px">
+        <div class="user-avatar">${initials(m.firstName,m.lastName)}</div>
+        <div><div style="font-weight:600">${m.firstName} ${m.lastName}</div><div style="font-size:11px;color:var(--text2)">#${m.id.slice(-8)}</div></div>
+      </div></td>
       <td style="color:var(--text2)">${m.email}</td>
       <td style="color:var(--text2)">${m.phone||'—'}</td>
       <td style="color:var(--green);font-weight:700">${k(m.balance)}</td>
       <td>${k(m.totalInvested)}</td>
-      <td><span class="badge badge-${m.status==='active'?'ok':'fail'}">${m.status}</span></td>
+      <td><span class="badge ${m.kycStatus==='verified'?'b-ok':m.kycStatus==='none'?'b-fail':'b-pend'}">${m.kycStatus||'none'}</span></td>
+      <td><span class="badge ${m.status==='active'?'b-ok':'b-fail'}">${m.status}</span></td>
       <td style="color:var(--text2)">${ds(m.createdAt)}</td>
-      <td>
-        <button class="btn btn-blue btn-sm" onclick="openEditMember('${m.id}')">Edit</button>
-        <button class="btn btn-${m.status==='active'?'red':'green'} btn-sm" onclick="toggleMember('${m.id}','${m.status}')">${m.status==='active'?'Suspend':'Activate'}</button>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn btn-blue btn-sm" onclick="openEditMember('${m.id}')">✏️ Edit</button>
+        <button class="btn ${m.status==='active'?'btn-red':'btn-green'} btn-sm" onclick="toggleMember('${m.id}','${m.status}')">${m.status==='active'?'🚫 Suspend':'✅ Activate'}</button>
       </td>
-    </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">No members found</td></tr>';
+    </tr>`).join('') || emptyRow(9,'No members found');
 }
 
 function filterMembers() {
-  const q = document.getElementById('memberSearch').value.toLowerCase();
-  renderMembers(allMembers.filter(m =>
-    (m.firstName+' '+m.lastName).toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
-  ));
-}
-
-async function toggleMember(id, status) {
-  try {
-    await apiFetch(`/api/admin/members/${id}`, {
-      method: 'PUT', body: JSON.stringify({ status: status === 'active' ? 'suspended' : 'active' })
-    });
-    toast('Member status updated', 'ok'); loadMembers();
-  } catch(e) { toast(e.message, 'err'); }
+  const q=document.getElementById('memberSearch').value.toLowerCase();
+  renderMembers(allMembers.filter(m=>(m.firstName+' '+m.lastName+m.email).toLowerCase().includes(q)));
 }
 
 function openEditMember(id) {
-  const m = allMembers.find(x => x.id === id);
-  if (!m) return;
+  const m=allMembers.find(x=>x.id===id); if(!m)return;
   openModal(`
-    <div style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px">Edit Member</div>
-    <div class="fg"><label>First Name</label><input class="fc" id="em-first" value="${m.firstName}"></div>
-    <div class="fg"><label>Last Name</label><input class="fc" id="em-last" value="${m.lastName}"></div>
+    <div class="modal-title">✏️ Edit Member</div>
+    <div class="modal-sub">${m.email}</div>
+    <div class="m-err" id="mErr"></div>
+    <div class="fc-row">
+      <div class="fg"><label>First Name</label><input class="fc" id="em-first" value="${m.firstName}"></div>
+      <div class="fg"><label>Last Name</label><input class="fc" id="em-last" value="${m.lastName}"></div>
+    </div>
     <div class="fg"><label>Email</label><input class="fc" id="em-email" value="${m.email}"></div>
     <div class="fg"><label>Phone</label><input class="fc" id="em-phone" value="${m.phone||''}"></div>
-    <div class="fg"><label>Balance (KES)</label><input class="fc" id="em-balance" type="number" value="${m.balance}"></div>
+    <div class="fg"><label>Balance (KES)</label><input class="fc" id="em-balance" type="number" step="0.01" value="${m.balance}"></div>
+    <div class="fg"><label>Status</label>
+      <select class="fc" id="em-status">
+        <option value="active" ${m.status==='active'?'selected':''}>Active</option>
+        <option value="suspended" ${m.status==='suspended'?'selected':''}>Suspended</option>
+      </select>
+    </div>
     <button class="btn btn-green btn-full" onclick="saveMember('${id}')">Save Changes</button>`);
 }
 
 async function saveMember(id) {
   try {
-    await apiFetch(`/api/admin/members/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify({
-        firstName: document.getElementById('em-first').value,
-        lastName:  document.getElementById('em-last').value,
-        email:     document.getElementById('em-email').value,
-        phone:     document.getElementById('em-phone').value,
-        balance:   parseFloat(document.getElementById('em-balance').value)
-      })
-    });
-    toast('Member updated!', 'ok'); closeModal(); loadMembers();
-  } catch(e) { toast(e.message, 'err'); }
+    await api(`/api/admin/members/${id}`,{method:'PUT',body:JSON.stringify({
+      firstName:document.getElementById('em-first').value,
+      lastName:document.getElementById('em-last').value,
+      email:document.getElementById('em-email').value,
+      phone:document.getElementById('em-phone').value,
+      balance:parseFloat(document.getElementById('em-balance').value),
+      status:document.getElementById('em-status').value
+    })});
+    toast('Member updated!','ok'); closeModal(); loadMembers();
+  } catch(e) { document.getElementById('mErr').textContent=e.message;document.getElementById('mErr').style.display='block'; }
 }
 
-function openAddBalance() {
+async function toggleMember(id,status) {
+  const newStatus=status==='active'?'suspended':'active';
+  if(!confirm(`${newStatus==='suspended'?'Suspend':'Activate'} this member?`))return;
+  try { await api(`/api/admin/members/${id}`,{method:'PUT',body:JSON.stringify({status:newStatus})}); toast('Member status updated','ok'); loadMembers(); }
+  catch(e) { toast(e.message,'err'); }
+}
+
+function openAddMember() {
   openModal(`
-    <div style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px">Adjust Balance</div>
+    <div class="modal-title">➕ Add Member</div>
+    <div class="modal-sub">Manually create a new member account</div>
+    <div class="m-err" id="mErr"></div>
+    <div class="fc-row">
+      <div class="fg"><label>First Name</label><input class="fc" id="nm-first" placeholder="John"></div>
+      <div class="fg"><label>Last Name</label><input class="fc" id="nm-last" placeholder="Doe"></div>
+    </div>
+    <div class="fg"><label>Email</label><input class="fc" id="nm-email" type="email" placeholder="john@email.com"></div>
+    <div class="fg"><label>Phone (M-Pesa)</label><input class="fc" id="nm-phone" placeholder="0712345678"></div>
+    <div class="fg"><label>Password</label><input class="fc" id="nm-pass" type="password" placeholder="Min 8 characters"></div>
+    <div class="fg"><label>Starting Balance (KES)</label><input class="fc" id="nm-bal" type="number" value="0"></div>
+    <button class="btn btn-green btn-full" onclick="addMember()">Create Member</button>`);
+}
+
+async function addMember() {
+  const data={firstName:document.getElementById('nm-first').value.trim(),lastName:document.getElementById('nm-last').value.trim(),email:document.getElementById('nm-email').value.trim(),phone:document.getElementById('nm-phone').value.trim(),password:document.getElementById('nm-pass').value};
+  if(!data.firstName||!data.lastName||!data.email||!data.phone||!data.password){document.getElementById('mErr').textContent='Fill all fields';document.getElementById('mErr').style.display='block';return;}
+  try {
+    await api('/api/auth/register',{method:'POST',body:JSON.stringify(data)});
+    const bal=parseFloat(document.getElementById('nm-bal').value)||0;
+    toast('Member created!','ok'); closeModal(); loadMembers();
+  } catch(e) { document.getElementById('mErr').textContent=e.message;document.getElementById('mErr').style.display='block'; }
+}
+
+function openAdjustBalance() {
+  openModal(`
+    <div class="modal-title">💰 Adjust Balance</div>
+    <div class="modal-sub">Credit or debit a member's balance</div>
+    <div class="m-err" id="mErr"></div>
     <div class="fg"><label>Select Member</label>
-      <select class="fc" id="ab-user">
-        ${allMembers.map(m=>`<option value="${m.id}">${m.firstName} ${m.lastName} — ${k(m.balance)}</option>`).join('')}
-      </select>
+      <select class="fc" id="ab-user">${allMembers.map(m=>`<option value="${m.id}">${m.firstName} ${m.lastName} — ${k(m.balance)}</option>`).join('')}</select>
     </div>
-    <div class="fg"><label>Type</label>
-      <select class="fc" id="ab-type"><option value="credit">Credit (Add)</option><option value="debit">Debit (Remove)</option></select>
+    <div class="fc-row">
+      <div class="fg"><label>Type</label>
+        <select class="fc" id="ab-type"><option value="credit">➕ Credit (Add)</option><option value="debit">➖ Debit (Remove)</option></select>
+      </div>
+      <div class="fg"><label>Amount (KES)</label><input class="fc" id="ab-amt" type="number" placeholder="1000" min="1"></div>
     </div>
-    <div class="fg"><label>Amount (KES)</label><input class="fc" id="ab-amount" type="number" placeholder="1000"></div>
-    <div class="fg"><label>Reason</label><input class="fc" id="ab-reason" placeholder="e.g. Manual deposit correction"></div>
-    <button class="btn btn-green btn-full" onclick="submitBalanceAdjust()">Apply Adjustment</button>`);
+    <div class="fg"><label>Reason / Note</label><input class="fc" id="ab-reason" placeholder="e.g. Manual deposit correction"></div>
+    <button class="btn btn-green btn-full" onclick="doAdjustBalance()">Apply Adjustment</button>`);
 }
 
-async function submitBalanceAdjust() {
-  try {
-    await apiFetch('/api/admin/adjust-balance', {
-      method: 'POST',
-      body: JSON.stringify({
-        userId: document.getElementById('ab-user').value,
-        amount: parseFloat(document.getElementById('ab-amount').value),
-        type:   document.getElementById('ab-type').value,
-        reason: document.getElementById('ab-reason').value
-      })
-    });
-    toast('Balance adjusted!', 'ok'); closeModal(); loadMembers();
-  } catch(e) { toast(e.message, 'err'); }
+async function doAdjustBalance() {
+  const userId=document.getElementById('ab-user').value;
+  const amount=parseFloat(document.getElementById('ab-amt').value);
+  const type=document.getElementById('ab-type').value;
+  const reason=document.getElementById('ab-reason').value.trim();
+  if(!userId||!amount||!reason){document.getElementById('mErr').textContent='Fill all fields';document.getElementById('mErr').style.display='block';return;}
+  try { await api('/api/admin/adjust-balance',{method:'POST',body:JSON.stringify({userId,amount,type,reason})}); toast(`Balance ${type}ed by ${k(amount)}!`,'ok'); closeModal(); loadMembers(); }
+  catch(e) { document.getElementById('mErr').textContent=e.message;document.getElementById('mErr').style.display='block'; }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  DEPOSITS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadDeposits() {
-  try {
-    allDeposits = await apiFetch('/api/admin/deposits');
-    renderDeposits(allDeposits);
-  } catch(e) { toast('Failed to load deposits: ' + e.message, 'err'); }
+  try { allDeposits=await api('/api/admin/deposits'); renderDeposits(allDeposits); }
+  catch(e) { toast('Deposits error: '+e.message,'err'); }
 }
 
-function renderDeposits(deps) {
-  document.getElementById('depositsBody').innerHTML = deps.map(d => `
+function renderDeposits(list) {
+  document.getElementById('depsBody').innerHTML=list.map(d=>`
     <tr>
-      <td><strong>${d.userName||'—'}</strong><div style="font-size:11px;color:var(--text2)">${d.userPhone||''}</div></td>
+      <td><div style="font-weight:600">${d.userName||'—'}</div><div style="font-size:11px;color:var(--text2)">${d.userPhone||''}</div></td>
       <td style="color:var(--green);font-weight:700">${k(d.amount)}</td>
       <td>${d.method||'M-Pesa'}</td>
-      <td style="font-family:monospace;font-size:12px">${d.proofNote||d.mpesaReceiptNo||'—'}</td>
-      <td><span class="badge badge-${d.status==='approved'?'ok':d.status==='pending'?'pend':'fail'}">${d.status}</span></td>
+      <td style="font-family:monospace;font-size:12px;color:var(--text2)">${d.proofNote||d.mpesaReceiptNo||'—'}</td>
+      <td><span class="badge ${d.status==='approved'?'b-ok':d.status==='pending'?'b-pend':'b-fail'}">${d.status}</span></td>
       <td style="color:var(--text2)">${dt(d.createdAt)}</td>
-      <td>
-        ${d.status==='pending' ? `
-          <button class="btn btn-green btn-sm" onclick="approveDeposit('${d.id}')">✓ Approve</button>
-          <button class="btn btn-red btn-sm" onclick="rejectDeposit('${d.id}')">✗ Reject</button>` : '—'}
+      <td style="display:flex;gap:6px">
+        ${d.status==='pending'?`
+          <button class="btn btn-green btn-sm" onclick="approveDeposit('${d.id}')">✅ Approve</button>
+          <button class="btn btn-red btn-sm" onclick="rejectDeposit('${d.id}')">❌ Reject</button>`:
+        d.status==='approved'?`<span style="color:var(--green);font-size:13px">✅ Approved</span>`:
+        `<span style="color:var(--red);font-size:13px">❌ Rejected</span>`}
       </td>
-    </tr>`).join('') || '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text2)">No deposits</td></tr>';
+    </tr>`).join('') || emptyRow(7,'No deposits yet');
 }
 
-function filterDeps(status, btn) {
-  document.querySelectorAll('#page-deposits .btn-ghost').forEach(b => b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderDeposits(status === 'all' ? allDeposits : allDeposits.filter(d => d.status === status));
+function filterDeps(status,btn) {
+  document.querySelectorAll('.filterDepBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderDeposits(status==='all'?allDeposits:allDeposits.filter(d=>d.status===status));
 }
 
 async function approveDeposit(id) {
-  if (!confirm('Approve this deposit and credit the member\'s balance?')) return;
-  try {
-    await apiFetch(`/api/admin/deposits/${id}/approve`, { method: 'PUT' });
-    toast('Deposit approved!', 'ok'); loadDeposits(); loadDashboard();
-  } catch(e) { toast(e.message, 'err'); }
+  if(!confirm('Approve this deposit and credit member balance?'))return;
+  try { await api(`/api/admin/deposits/${id}/approve`,{method:'PUT'}); toast('Deposit approved! Balance credited.','ok'); loadDeposits(); loadDashboard(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
 async function rejectDeposit(id) {
-  const reason = prompt('Reason for rejection:');
-  if (!reason) return;
-  try {
-    await apiFetch(`/api/admin/deposits/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) });
-    toast('Deposit rejected', 'ok'); loadDeposits();
-  } catch(e) { toast(e.message, 'err'); }
+  const reason=prompt('Reason for rejection:'); if(!reason)return;
+  try { await api(`/api/admin/deposits/${id}/reject`,{method:'PUT',body:JSON.stringify({reason})}); toast('Deposit rejected','ok'); loadDeposits(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  WITHDRAWALS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadWithdrawals() {
-  try {
-    allWithdrawals = await apiFetch('/api/admin/withdrawals');
-    renderWithdrawals(allWithdrawals);
-  } catch(e) { toast('Failed to load withdrawals: ' + e.message, 'err'); }
+  try { allWithdrawals=await api('/api/admin/withdrawals'); renderWithdrawals(allWithdrawals); }
+  catch(e) { toast('Withdrawals error: '+e.message,'err'); }
 }
 
-function renderWithdrawals(wds) {
-  document.getElementById('withdrawalsBody').innerHTML = wds.map(w => `
+function renderWithdrawals(list) {
+  document.getElementById('wdsBody').innerHTML=list.map(w=>`
     <tr>
-      <td><strong>${w.userName||'—'}</strong><div style="font-size:11px;color:var(--text2)">${w.userPhone||''}</div></td>
-      <td style="color:var(--gold);font-weight:700">${k(w.amount)}</td>
-      <td style="color:var(--text2)">${k(w.fee)}</td>
+      <td><div style="font-weight:600">${w.userName||'—'}</div><div style="font-size:11px;color:var(--text2)">${w.userPhone||''}</div></td>
+      <td style="font-weight:700">${k(w.amount)}</td>
+      <td style="color:var(--red)">${k(w.fee)}</td>
       <td style="color:var(--green);font-weight:700">${k(w.net)}</td>
       <td>${w.method}</td>
-      <td style="font-family:monospace;font-size:12px">${w.address}</td>
-      <td><span class="badge badge-${w.status==='approved'?'ok':w.status==='pending'?'pend':'fail'}">${w.status}</span></td>
+      <td style="font-family:monospace;font-size:12px;color:var(--text2)">${w.address}</td>
+      <td><span class="badge ${w.status==='approved'?'b-ok':w.status==='pending'?'b-pend':'b-fail'}">${w.status}</span></td>
       <td style="color:var(--text2)">${dt(w.createdAt)}</td>
-      <td>
-        ${w.status==='pending' ? `
-          <button class="btn btn-green btn-sm" onclick="approveWithdrawal('${w.id}')">✓ Pay</button>
-          <button class="btn btn-red btn-sm" onclick="rejectWithdrawal('${w.id}')">✗ Reject</button>` : '—'}
+      <td style="display:flex;gap:6px">
+        ${w.status==='pending'?`
+          <button class="btn btn-green btn-sm" onclick="approveWd('${w.id}')">✅ Pay</button>
+          <button class="btn btn-red btn-sm" onclick="rejectWd('${w.id}')">❌ Reject</button>`:
+        w.status==='approved'?`<span style="color:var(--green);font-size:13px">✅ Paid</span>`:
+        `<span style="color:var(--red);font-size:13px">❌ Rejected</span>`}
       </td>
-    </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;padding:24px;color:var(--text2)">No withdrawals</td></tr>';
+    </tr>`).join('') || emptyRow(9,'No withdrawals yet');
 }
 
-function filterWds(status, btn) {
-  document.querySelectorAll('#page-withdrawals .btn-ghost').forEach(b => b.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  renderWithdrawals(status === 'all' ? allWithdrawals : allWithdrawals.filter(w => w.status === status));
+function filterWds(status,btn) {
+  document.querySelectorAll('.filterWdBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderWithdrawals(status==='all'?allWithdrawals:allWithdrawals.filter(w=>w.status===status));
 }
 
-async function approveWithdrawal(id) {
-  if (!confirm('Mark this withdrawal as paid?')) return;
-  try {
-    await apiFetch(`/api/admin/withdrawals/${id}/approve`, { method: 'PUT' });
-    toast('Withdrawal approved!', 'ok'); loadWithdrawals(); loadDashboard();
-  } catch(e) { toast(e.message, 'err'); }
+async function approveWd(id) {
+  if(!confirm('Mark this withdrawal as paid and sent to member?'))return;
+  try { await api(`/api/admin/withdrawals/${id}/approve`,{method:'PUT'}); toast('Withdrawal approved!','ok'); loadWithdrawals(); loadDashboard(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-async function rejectWithdrawal(id) {
-  const reason = prompt('Reason for rejection (balance will be refunded):');
-  if (!reason) return;
-  try {
-    await apiFetch(`/api/admin/withdrawals/${id}/reject`, { method: 'PUT', body: JSON.stringify({ reason }) });
-    toast('Withdrawal rejected & refunded', 'ok'); loadWithdrawals();
-  } catch(e) { toast(e.message, 'err'); }
+async function rejectWd(id) {
+  const reason=prompt('Reason for rejection (balance will be refunded):'); if(!reason)return;
+  try { await api(`/api/admin/withdrawals/${id}/reject`,{method:'PUT',body:JSON.stringify({reason})}); toast('Withdrawal rejected — balance refunded','ok'); loadWithdrawals(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  INVESTMENTS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadInvestments() {
-  try {
-    const invs = await apiFetch('/api/admin/investments');
-    document.getElementById('investmentsBody').innerHTML = invs.map(i => `
-      <tr>
-        <td><strong>${i.userName||'—'}</strong></td>
-        <td>${i.planName}</td>
-        <td style="color:var(--gold);font-weight:700">${k(i.amount)}</td>
-        <td style="color:var(--green)">${i.roi}%/day</td>
-        <td style="color:var(--green)">${k(i.earned)}</td>
-        <td><span class="badge badge-${i.status==='active'?'ok':i.status==='completed'?'info':'fail'}">${i.status}</span></td>
-        <td style="color:var(--text2)">${ds(i.startDate)}</td>
-        <td style="color:var(--text2)">${ds(i.endDate)}</td>
-      </tr>`).join('') || '<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text2)">No investments</td></tr>';
-  } catch(e) { toast(e.message, 'err'); }
+  try { allInvestments=await api('/api/admin/investments'); renderInvestments(allInvestments); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+function renderInvestments(list) {
+  document.getElementById('invsBody').innerHTML=list.map(i=>{
+    const pct=Math.min(Math.round((Date.now()-new Date(i.startDate).getTime())/(i.period*86400000)*100),100);
+    return `<tr>
+      <td style="font-weight:600">${i.userName||'—'}</td>
+      <td><span class="badge b-blue">${i.planName}</span></td>
+      <td style="color:var(--gold);font-weight:700">${k(i.amount)}</td>
+      <td style="color:var(--green)">${i.roi}%</td>
+      <td style="color:var(--green);font-weight:700">${k(i.earned)}</td>
+      <td style="min-width:100px">
+        <div style="background:var(--bg3);border-radius:100px;height:6px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--green),var(--gold));border-radius:100px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px">${pct}%</div>
+      </td>
+      <td><span class="badge ${i.status==='active'?'b-ok':i.status==='completed'?'b-blue':'b-fail'}">${i.status}</span></td>
+      <td style="color:var(--text2)">${ds(i.startDate)}</td>
+      <td style="color:var(--text2)">${ds(i.endDate)}</td>
+    </tr>`;
+  }).join('') || emptyRow(9,'No investments yet');
+}
+
+function filterInvs(status,btn) {
+  document.querySelectorAll('.filterInvBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderInvestments(status==='all'?allInvestments:allInvestments.filter(i=>i.status===status));
+}
+
+// ══════════════════════════════════════════════════
 //  TRANSACTIONS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadTransactions() {
-  try {
-    const txs = await apiFetch('/api/admin/transactions');
-    document.getElementById('transactionsBody').innerHTML = txs.map(t => `
-      <tr>
-        <td style="text-transform:capitalize;font-weight:600">${t.type}</td>
-        <td style="color:var(--green);font-weight:700">${k(t.amount)}</td>
-        <td style="color:var(--text2);font-size:12px">${t.description||'—'}</td>
-        <td><span class="badge badge-${t.status==='completed'?'ok':t.status==='pending'?'pend':'fail'}">${t.status}</span></td>
-        <td style="color:var(--text2)">${dt(t.createdAt)}</td>
-      </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">No transactions</td></tr>';
-  } catch(e) { toast(e.message, 'err'); }
+  try { allTx=await api('/api/admin/transactions'); renderTx(allTx); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+function renderTx(list) {
+  document.getElementById('txBody').innerHTML=list.map(t=>`
+    <tr>
+      <td><span class="badge ${t.type==='deposit'?'b-ok':t.type==='withdrawal'?'b-fail':t.type==='profit'?'b-purple':t.type==='referral'?'b-blue':'b-pend'}" style="text-transform:capitalize">${t.type}</span></td>
+      <td style="font-weight:700;color:${t.type==='withdrawal'?'var(--red)':'var(--green)'}">${t.type==='withdrawal'?'-':'+'} ${k(t.amount)}</td>
+      <td style="color:var(--text2);font-size:12px;max-width:200px">${t.description||'—'}</td>
+      <td><span class="badge ${t.status==='completed'?'b-ok':t.status==='pending'?'b-pend':'b-fail'}">${t.status}</span></td>
+      <td style="color:var(--text2)">${dt(t.createdAt)}</td>
+    </tr>`).join('') || emptyRow(5,'No transactions');
+}
+
+function filterTx(type,btn) {
+  document.querySelectorAll('.filterTxBtn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTx(type==='all'?allTx:allTx.filter(t=>t.type===type));
+}
+
+// ══════════════════════════════════════════════════
 //  PLANS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadPlans() {
   try {
-    const plans = await apiFetch('/api/admin/plans');
-    document.getElementById('plansGrid').innerHTML = plans.map(p => `
-      <div class="card" style="border-top:3px solid ${p.color||'var(--green)'}">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <div style="font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700">${p.name}</div>
-          <span class="badge badge-${p.active?'ok':'fail'}">${p.active?'Active':'Disabled'}</span>
+    const plans=await api('/api/admin/plans');
+    document.getElementById('plansGrid').innerHTML=plans.map(p=>`
+      <div class="plan-card" style="--pc:${p.color||'var(--green)'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800">${p.name}</div>
+            <div style="font-size:13px;color:var(--text2)">${p.period} days • ${p.referralBonus||5}% referral</div>
+          </div>
+          <span class="badge ${p.active?'b-ok':'b-fail'}">${p.active?'Active':'Disabled'}</span>
         </div>
-        <div style="font-size:40px;font-weight:700;color:${p.color||'var(--green)'};font-family:'Clash Display',sans-serif">${p.roi}%</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Daily ROI • ${p.period} days</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:6px">Min: KES ${(+p.minAmount).toLocaleString()}</div>
-        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">Max: KES ${(+p.maxAmount).toLocaleString()}</div>
+        <div style="font-size:50px;font-weight:800;color:${p.color||'var(--green)'};font-family:'Bricolage Grotesque',sans-serif;line-height:1;margin-bottom:4px">${p.roi}%</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">daily ROI</div>
+        <div style="background:var(--bg3);border-radius:9px;padding:10px 13px;font-size:13px;color:var(--text2);margin-bottom:16px">
+          KES <strong style="color:var(--text)">${(+p.minAmount).toLocaleString()}</strong> – <strong style="color:var(--text)">${(+p.maxAmount).toLocaleString()}</strong>
+        </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-blue btn-sm" onclick="openPlanModal('${p.id}')">Edit</button>
-          <button class="btn btn-${p.active?'red':'green'} btn-sm" onclick="togglePlan('${p.id}',${p.active})">${p.active?'Disable':'Enable'}</button>
-          <button class="btn btn-red btn-sm" onclick="deletePlan('${p.id}')">Delete</button>
+          <button class="btn btn-blue btn-sm" onclick="openPlanModal('${p.id}')">✏️ Edit</button>
+          <button class="btn ${p.active?'btn-red':'btn-green'} btn-sm" onclick="togglePlan('${p.id}',${p.active})">${p.active?'🚫 Disable':'✅ Enable'}</button>
+          <button class="btn btn-red btn-sm" onclick="deletePlan('${p.id}')">🗑 Delete</button>
         </div>
-      </div>`).join('') || '<div style="color:var(--text2)">No plans yet.</div>';
-  } catch(e) { toast(e.message, 'err'); }
+      </div>`).join('') || '<div style="color:var(--text2);padding:20px">No plans yet. Add one!</div>';
+  } catch(e) { toast(e.message,'err'); }
 }
 
 function openPlanModal(id) {
-  const isEdit = !!id;
-  const p = isEdit ? {} : {};
   openModal(`
-    <div style="font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;margin-bottom:20px">${isEdit?'Edit':'Add'} Plan</div>
-    <div class="fg"><label>Plan Name</label><input class="fc" id="pl-name" placeholder="Gold"></div>
+    <div class="modal-title">${id?'✏️ Edit':'➕ Add'} Plan</div>
+    <div class="modal-sub">Investment plan configuration</div>
+    <div class="m-err" id="mErr"></div>
     <div class="fc-row">
-      <div class="fg"><label>ROI % per day</label><input class="fc" id="pl-roi" type="number" placeholder="7"></div>
-      <div class="fg"><label>Duration (days)</label><input class="fc" id="pl-period" type="number" placeholder="21"></div>
+      <div class="fg"><label>Plan Name</label><input class="fc" id="pl-name" placeholder="e.g. Gold" ${id?`data-id="${id}"`:''}></div>
+      <div class="fg"><label>Color</label><input class="fc" id="pl-color" type="color" value="#00e676"></div>
+    </div>
+    <div class="fc-row3">
+      <div class="fg"><label>ROI % / day</label><input class="fc" id="pl-roi" type="number" placeholder="7" step="0.1" min="0.1"></div>
+      <div class="fg"><label>Duration (days)</label><input class="fc" id="pl-period" type="number" placeholder="21" min="1"></div>
+      <div class="fg"><label>Referral Bonus %</label><input class="fc" id="pl-ref" type="number" placeholder="7" step="0.1"></div>
     </div>
     <div class="fc-row">
       <div class="fg"><label>Min Amount (KES)</label><input class="fc" id="pl-min" type="number" placeholder="50000"></div>
       <div class="fg"><label>Max Amount (KES)</label><input class="fc" id="pl-max" type="number" placeholder="199999"></div>
     </div>
-    <div class="fc-row">
-      <div class="fg"><label>Referral Bonus %</label><input class="fc" id="pl-ref" type="number" placeholder="7"></div>
-      <div class="fg"><label>Color</label><input class="fc" id="pl-color" type="color" value="#f59e0b"></div>
-    </div>
-    <div class="fg"><label>Description</label><input class="fc" id="pl-desc" placeholder="High-performance plan"></div>
-    <div class="fg"><label><input type="checkbox" id="pl-popular" style="margin-right:8px">Mark as Popular</label></div>
-    <button class="btn btn-green btn-full" onclick="savePlan(${isEdit?`'${id}'`:null})">Save Plan</button>`);
+    <div class="fg"><label>Description</label><input class="fc" id="pl-desc" placeholder="e.g. High-performance plan for serious investors"></div>
+    <div class="fg"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="pl-pop"> Mark as Popular / Featured</label></div>
+    <button class="btn btn-green btn-full" onclick="savePlan(${id?`'${id}'`:'null'})">Save Plan</button>`);
 }
 
 async function savePlan(id) {
-  const data = {
-    name: document.getElementById('pl-name').value,
-    roi: parseFloat(document.getElementById('pl-roi').value),
-    period: parseInt(document.getElementById('pl-period').value),
-    minAmount: parseFloat(document.getElementById('pl-min').value),
-    maxAmount: parseFloat(document.getElementById('pl-max').value),
-    referralBonus: parseFloat(document.getElementById('pl-ref').value)||5,
-    color: document.getElementById('pl-color').value,
-    description: document.getElementById('pl-desc').value,
-    popular: document.getElementById('pl-popular').checked ? 1 : 0,
-    active: 1
+  const data={
+    name:document.getElementById('pl-name').value.trim(),
+    roi:parseFloat(document.getElementById('pl-roi').value),
+    period:parseInt(document.getElementById('pl-period').value),
+    minAmount:parseFloat(document.getElementById('pl-min').value),
+    maxAmount:parseFloat(document.getElementById('pl-max').value),
+    referralBonus:parseFloat(document.getElementById('pl-ref').value)||5,
+    color:document.getElementById('pl-color').value,
+    description:document.getElementById('pl-desc').value,
+    popular:document.getElementById('pl-pop').checked?1:0,
+    active:1
   };
+  if(!data.name||!data.roi||!data.period||!data.minAmount||!data.maxAmount){document.getElementById('mErr').textContent='Fill all required fields';document.getElementById('mErr').style.display='block';return;}
   try {
-    if (id) await apiFetch(`/api/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-    else await apiFetch('/api/admin/plans', { method: 'POST', body: JSON.stringify(data) });
-    toast('Plan saved!', 'ok'); closeModal(); loadPlans();
-  } catch(e) { toast(e.message, 'err'); }
+    if(id&&id!=='null') await api(`/api/admin/plans/${id}`,{method:'PUT',body:JSON.stringify(data)});
+    else await api('/api/admin/plans',{method:'POST',body:JSON.stringify(data)});
+    toast('Plan saved!','ok'); closeModal(); loadPlans();
+  } catch(e) { document.getElementById('mErr').textContent=e.message;document.getElementById('mErr').style.display='block'; }
 }
 
-async function togglePlan(id, active) {
-  try {
-    await apiFetch(`/api/admin/plans/${id}`, { method: 'PUT', body: JSON.stringify({ active: active ? 0 : 1 }) });
-    toast('Plan updated!', 'ok'); loadPlans();
-  } catch(e) { toast(e.message, 'err'); }
+async function togglePlan(id,active) {
+  try { await api(`/api/admin/plans/${id}`,{method:'PUT',body:JSON.stringify({active:active?0:1})}); toast('Plan updated!','ok'); loadPlans(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
 async function deletePlan(id) {
-  if (!confirm('Delete this plan? This cannot be undone.')) return;
-  try {
-    await apiFetch(`/api/admin/plans/${id}`, { method: 'DELETE' });
-    toast('Plan deleted', 'ok'); loadPlans();
-  } catch(e) { toast(e.message, 'err'); }
+  if(!confirm('Delete this plan permanently?'))return;
+  try { await api(`/api/admin/plans/${id}`,{method:'DELETE'}); toast('Plan deleted','ok'); loadPlans(); }
+  catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  BROADCAST
-// ══════════════════════════════════════════
-async function loadBroadcast() { if (!allMembers.length) await loadMembers(); }
+// ══════════════════════════════════════════════════
+async function loadBroadcast() { if(!allMembers.length) await loadMembers(); }
+
+function setTemplate(msg) { document.getElementById('bcMsg').value=msg; }
 
 async function sendBroadcast() {
-  const msg  = document.getElementById('broadcastMsg').value.trim();
-  const uid  = document.getElementById('broadcastTarget').value;
-  const type = document.getElementById('broadcastType').value;
-  if (!msg) { toast('Enter a message', 'err'); return; }
+  const msg=document.getElementById('bcMsg').value.trim();
+  const userId=document.getElementById('bcTarget').value||undefined;
+  const type=document.getElementById('bcType').value;
+  if(!msg){toast('Enter a message','err');return;}
   try {
-    await apiFetch('/api/admin/broadcast', { method: 'POST', body: JSON.stringify({ userId: uid||undefined, message: msg, type }) });
-    toast('Notification sent!', 'ok');
-    document.getElementById('broadcastMsg').value = '';
-  } catch(e) { toast(e.message, 'err'); }
+    await api('/api/admin/broadcast',{method:'POST',body:JSON.stringify({userId,message:msg,type})});
+    toast(`Notification sent to ${userId?'member':'all members'}!`,'ok');
+    document.getElementById('bcMsg').value='';
+  } catch(e) { toast(e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  SETTINGS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadSettings() {
   try {
-    const s = await apiFetch('/api/admin/settings');
-    const fields = ['siteName','sitePhone','siteEmail','mpesaTill','mpesaName','minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus'];
-    fields.forEach(f => { const el = document.getElementById('set-'+f); if (el) el.value = s[f]||''; });
-  } catch(e) { toast(e.message, 'err'); }
+    const s=await api('/api/admin/settings');
+    ['siteName','sitePhone','siteEmail','mpesaTill','mpesaName',
+     'minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays']
+    .forEach(f=>{ const el=document.getElementById('set-'+f); if(el&&s[f]!=null) el.value=s[f]; });
+  } catch(e) { toast(e.message,'err'); }
 }
 
 async function saveSettings() {
-  const fields = ['siteName','sitePhone','siteEmail','mpesaTill','mpesaName','minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus'];
-  const data = {};
-  fields.forEach(f => { const el = document.getElementById('set-'+f); if (el) data[f] = el.value; });
+  const fields=['siteName','sitePhone','siteEmail','mpesaTill','mpesaName','minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays'];
+  const data={};
+  fields.forEach(f=>{ const el=document.getElementById('set-'+f); if(el&&el.value!=='') data[f]=el.value; });
   try {
-    await apiFetch('/api/admin/settings', { method: 'PUT', body: JSON.stringify(data) });
-    toast('Settings saved! ✅', 'ok');
-  } catch(e) { toast(e.message, 'err'); }
+    await api('/api/admin/settings',{method:'PUT',body:JSON.stringify(data)});
+    toast('Settings saved! ✅','ok');
+  } catch(e) { toast('Error: '+e.message,'err'); }
 }
 
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 //  MPESA LOGS
-// ══════════════════════════════════════════
+// ══════════════════════════════════════════════════
 async function loadMpesaLogs() {
   try {
-    const logs = await apiFetch('/api/admin/mpesa-logs');
-    document.getElementById('mpesaLogsBody').innerHTML = logs.map(l => `
+    const logs=await api('/api/admin/mpesa-logs');
+    document.getElementById('mpBody').innerHTML=logs.map(l=>`
       <tr>
-        <td style="font-family:monospace;font-size:11px">${(l.checkoutId||'—').slice(-16)}</td>
+        <td style="font-family:monospace;font-size:11px;color:var(--text2)">${(l.checkoutId||'—').slice(-18)}</td>
         <td>${l.phone||'—'}</td>
-        <td style="color:var(--green)">${l.amount ? k(l.amount) : '—'}</td>
-        <td><span class="badge badge-${l.resultCode==='0'||l.resultCode===0?'ok':'fail'}">${l.resultCode==='0'||l.resultCode===0?'Success':'Failed'}</span></td>
+        <td style="color:var(--green);font-weight:700">${l.amount?k(l.amount):'—'}</td>
+        <td><span class="badge ${(l.resultCode==='0'||l.resultCode===0)?'b-ok':'b-fail'}">${(l.resultCode==='0'||l.resultCode===0)?'✅ Success':'❌ Failed'}</span></td>
         <td style="font-family:monospace;font-size:12px">${l.receiptNo||'—'}</td>
-        <td style="color:var(--text2)">${l.processedAt ? dt(l.processedAt) : '—'}</td>
-      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text2)">No M-Pesa logs yet</td></tr>';
-  } catch(e) { toast(e.message, 'err'); }
+        <td style="color:var(--text2)">${dt(l.processedAt)}</td>
+      </tr>`).join('') || emptyRow(6,'No M-Pesa logs yet');
+  } catch(e) { toast(e.message,'err'); }
 }
 
 // ── BOOT ──
