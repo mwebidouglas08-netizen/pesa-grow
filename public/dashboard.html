@@ -295,7 +295,7 @@ select.fc option{background:var(--bg3)}
           </select>
         </div>
         <div class="fg"><label>M-Pesa Number / Account</label><input class="fc" id="wdAddr" placeholder="e.g. 0712345678"></div>
-        <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd()"></div>
+        <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd(); updateWdMin()"></div>
         <div id="wdCalc" style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:14px;font-size:14px;display:none">
           <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Processing Fee (2%)</span><span id="wdFeeAmt" style="color:var(--red)"></span></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">You Receive</span><span id="wdNetAmt" style="color:var(--green);font-weight:700"></span></div>
@@ -489,6 +489,8 @@ function doLogout() { localStorage.clear(); window.location.href = 'index.html';
 // ══════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════
+let platformSettings = { minDeposit:1000, minWithdraw:500, withdrawFee:2 };
+
 async function init() {
   try {
     const stored = localStorage.getItem('pg_user');
@@ -497,12 +499,16 @@ async function init() {
     // Refresh from server
     try { currentUser = await apiFetch('/api/auth/me'); localStorage.setItem('pg_user', JSON.stringify(currentUser)); } catch {}
     if (!currentUser) { window.location.href = 'index.html'; return; }
-// Load platform settings
-let platformSettings = {};
-try {
-  const s = await apiFetch('/api/settings/public');
-  platformSettings = s;
-} catch {}
+    // Load live platform settings
+    try {
+      platformSettings = await apiFetch('/api/settings/public');
+      const minDep = parseFloat(platformSettings.minDeposit)||1000;
+      const stkEl = document.getElementById('stkAmt');
+      const manEl = document.getElementById('manAmt');
+      if (stkEl) { stkEl.min = minDep; stkEl.placeholder = `Minimum KES ${minDep.toLocaleString()}`; }
+      if (manEl) { manEl.min = minDep; manEl.placeholder = `Min KES ${minDep.toLocaleString()}`; }
+    } catch {}
+
     const av = (currentUser.firstName||'P')[0] + (currentUser.lastName||'G')[0];
     document.getElementById('userAv').textContent = av.toUpperCase();
     document.getElementById('userName').textContent = currentUser.firstName;
@@ -709,18 +715,18 @@ async function loadDeposit() {
 }
 
 // STK PUSH
-async function doSTK(){
+async function doSTKPush() {
   const phone  = document.getElementById('stkPhone').value.trim();
   const amount = parseFloat(document.getElementById('stkAmt').value);
-
-  // Fetch live min deposit from backend
-  let minDep = 1000;
-  try { const s = await fetch(`${API}/api/settings/public`).then(r=>r.json()); minDep = parseFloat(s.minDeposit)||1000; } catch {}
+  clearMsg('stkErr');
 
   if (!phone) { showErr('stkErr','Enter your M-Pesa phone number'); return; }
+  const minDep = parseFloat(platformSettings.minDeposit)||1000;
   if (!amount || amount < minDep) { showErr('stkErr',`Minimum deposit is KES ${minDep.toLocaleString()}`); return; }
-  // ... rest of function
-}
+
+  const btn = document.getElementById('stkBtn');
+  btn.textContent = 'Sending prompt...'; btn.disabled = true;
+  document.getElementById('stkStatusArea').innerHTML = '';
 
   try {
     const res = await apiFetch('/api/mpesa/stk-push', {
@@ -783,12 +789,11 @@ async function doSTK(){
 
 // MANUAL DEPOSIT
 async function doManualDeposit() {
-  const amount   = parseFloat document.getElementById('stkAmt').placeholder = `Minimum KES ${(platformSettings.minDeposit||1000).toLocaleString()}`;
-document.getElementById('manAmt').placeholder  = `Minimum KES ${(platformSettings.minDeposit||1000).toLocaleString()}`;
+  const amount   = parseFloat(document.getElementById('manAmt').value);
   const method   = document.getElementById('manMethod').value;
   const proofNote = document.getElementById('manRef').value.trim();
-  const minDep = parseFloat(platformSettings.minDeposit) || 1000;
-if (!amount || amount < minDep) { toast(`Minimum deposit is KES ${minDep.toLocaleString()}`,'err'); return; }
+  const minDep = parseFloat(platformSettings.minDeposit)||1000;
+  if (!amount || amount < minDep) { toast(`Minimum deposit is KES ${minDep.toLocaleString()}`,'err'); return; }
   if (!proofNote) { toast('Enter your M-Pesa transaction code','err'); return; }
   try {
     await apiFetch('/api/user/deposit/manual', { method:'POST', body:JSON.stringify({amount, method, proofNote}) });
@@ -826,7 +831,8 @@ function calcWd() {
   const amt = parseFloat(document.getElementById('wdAmt').value);
   const c = document.getElementById('wdCalc');
   if (amt > 0) {
-    const fee = amt * 0.02;
+    const feeRate = parseFloat(platformSettings.withdrawFee||2) / 100;
+    const fee = amt * feeRate;
     c.style.display = 'block';
     document.getElementById('wdFeeAmt').textContent = k(fee);
     document.getElementById('wdNetAmt').textContent = k(amt - fee);
@@ -1001,6 +1007,12 @@ document.addEventListener('click', e => {
 });
 
 setInterval(loadNotifications, 30000);
+
+function updateWdMin() {
+  const minWd = parseFloat(platformSettings.minWithdraw)||500;
+  const el = document.getElementById('wdAmt');
+  if (el) { el.min = minWd; el.placeholder = `Min KES ${minWd.toLocaleString()}`; }
+}
 
 // ── BOOT ──
 init();
