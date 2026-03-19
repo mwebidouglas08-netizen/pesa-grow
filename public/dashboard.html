@@ -513,19 +513,13 @@ async function init() {
       localStorage.setItem('pg_user', JSON.stringify(currentUser));
     } catch(authErr) {
       // Token expired or invalid — clear and redirect to login
-      console.warn('Auth failed:', authErr.message);
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-      window.location.href = 'index.html';
-      return;
-    }
-
-    if (!currentUser || !currentUser.id) {
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-      window.location.href = 'index.html';
-      return;
-    }
+    function doLogout() {
+  localStorage.removeItem('pg_token');
+  localStorage.removeItem('pg_user');
+  sessionStorage.clear();
+  // Force a clean reload of index.html — no cache
+  window.location.replace('index.html');
+}
 
     // Load live platform settings
     try {
