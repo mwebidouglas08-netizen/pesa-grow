@@ -883,144 +883,155 @@ function startVideo() {
 
 <!-- ── PWA ── -->
 <style>
-@keyframes pgSlideUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-.pg-install-bar{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-  background:rgba(5,9,15,.97);
-  border:2px solid #00e676;
-  border-radius:16px;padding:13px 16px;
-  z-index:99999;
-  display:flex;align-items:center;gap:12px;
-  box-shadow:0 0 0 4px rgba(0,230,118,.08),0 16px 60px rgba(0,0,0,.8);
-  max-width:380px;width:92%;
-  animation:pgSlideUp .4s cubic-bezier(.22,1,.36,1) forwards;
-  font-family:'DM Sans',sans-serif;
-}
+@keyframes pgUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes pgFadeIn{from{opacity:0}to{opacity:1}}
+.pg-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(5,9,15,.97);border:2px solid #00e676;border-radius:16px;padding:13px 16px;z-index:99999;display:flex;align-items:center;gap:12px;box-shadow:0 0 0 4px rgba(0,230,118,.08),0 16px 60px rgba(0,0,0,.8);max-width:380px;width:92%;animation:pgUp .4s cubic-bezier(.22,1,.36,1) forwards;font-family:'DM Sans',sans-serif}
+.pg-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;animation:pgFadeIn .3s ease}
+.pg-modal{background:#0a0f18;border:1.5px solid rgba(0,230,118,.3);border-radius:20px;padding:32px 28px;max-width:420px;width:100%;font-family:'DM Sans',sans-serif}
+.pg-step{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.pg-step:last-child{border-bottom:none}
+.pg-num{width:28px;height:28px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#000;flex-shrink:0}
 </style>
 <script>
-// ══ PWA INSTALL ══════════════════════════════════
-let _pwaPrompt = null;
-
-// Step 1 — Register service worker
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js')
-    .then(r => console.log('[SW] ok', r.scope))
-    .catch(e => console.warn('[SW] failed', e.message));
-}
-
-// Step 2 — Catch the browser install prompt (Android/Chrome/Edge)
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  _pwaPrompt = e;
-  console.log('[PWA] prompt ready ✅');
-  // Show install banner after 1.5 seconds
-  setTimeout(pgShowBanner, 1500);
-});
-
-// Step 3 — Show the banner
-function pgShowBanner() {
-  if (document.querySelector('.pg-install-bar')) return;
-
-  const bar = document.createElement('div');
-  bar.className = 'pg-install-bar';
-  bar.id = 'pgInstallBar';
-  bar.innerHTML =
-    '<div style="width:40px;height:40px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:15px;color:#000;flex-shrink:0">PG</div>' +
-    '<div style="flex:1">' +
-      '<div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div>' +
-      '<div style="font-size:11px;color:#7986a8;margin-top:1px">Add to home screen — works offline</div>' +
-    '</div>' +
-    '<button onclick="pgInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:8px 14px;font-weight:800;font-size:13px;cursor:pointer">Install</button>' +
-    '<button onclick="pgDismiss()" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;line-height:1;padding:2px 6px">×</button>';
-
-  document.body.appendChild(bar);
-}
-
-// Step 4 — Trigger native install
-async function pgInstall() {
-  if (!_pwaPrompt) {
-    alert('To install:\nAndroid: tap ⋮ menu → "Add to Home screen"\niPhone: tap Share → "Add to Home Screen"');
-    return;
-  }
-  try {
-    _pwaPrompt.prompt();
-    const res = await _pwaPrompt.userChoice;
-    _pwaPrompt = null;
-    pgDismiss();
-    if (res.outcome === 'accepted') {
-      setTimeout(() => showToast && showToast('Pesa Grow installed! 🎉','ok'), 600);
-    }
-  } catch(e) { console.warn(e); }
-}
-
-// Step 5 — Dismiss banner
-function pgDismiss() {
-  const el = document.getElementById('pgInstallBar');
-  if (el) { el.style.opacity='0'; el.style.transform='translateX(-50%) translateY(20px)'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }
-}
-
-// Step 6 — After install
-window.addEventListener('appinstalled', function() {
-  pgDismiss();
-  setTimeout(()=> showToast && showToast('App installed! 🎉','ok'), 500);
-});
-
-// Step 7 — iOS Safari (no beforeinstallprompt — show manual tip)
 (function(){
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  const standalone = window.navigator.standalone;
-  if (!ios || standalone) return;
-  setTimeout(function(){
-    if (document.querySelector('.pg-install-bar')) return;
-    const bar = document.createElement('div');
-    bar.className = 'pg-install-bar';
-    bar.id = 'pgInstallBar';
-    bar.innerHTML =
-      '<div style="flex:1">' +
-        '<div style="font-weight:700;font-size:14px;color:#eef2ff">📲 Install on iPhone</div>' +
-        '<div style="font-size:12px;color:#7986a8;margin-top:2px">Tap <b style="color:#fff">Share ↑</b> then <b style="color:#fff">Add to Home Screen</b></div>' +
-      '</div>' +
-      '<button onclick="pgDismiss()" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;padding:2px 6px;line-height:1">×</button>';
-    document.body.appendChild(bar);
-  }, 2000);
-})();
+  var _prompt = null;
+  var _isIOS  = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var _isStandalone = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone;
 
-// Step 8 — Add a persistent Install button to the nav for users who missed the banner
-window.addEventListener('load', function(){
-  // Only show nav install button if NOT already installed
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  if (isStandalone) return; // already installed, don't show
+  // ── Register SW ──────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(function(r){ console.log('[SW] registered'); })
+      .catch(function(e){ console.warn('[SW]', e.message); });
+  }
 
-  // Add install button to nav after a short delay
-  setTimeout(function(){
-    const navCta = document.getElementById('navCta');
-    if (!navCta) return;
-    // Only add if not already there
-    if (document.getElementById('navInstallBtn')) return;
+  // ── Catch install prompt (Android/Chrome/Edge) ───
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    _prompt = e;
+    console.log('[PWA] prompt captured ✅');
+    setTimeout(showBar, 1200);
+  });
 
-    const btn = document.createElement('button');
-    btn.id = 'navInstallBtn';
-    btn.className = 'btn btn-ghost';
-    btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.3);color:var(--green)';
-    btn.innerHTML = '📲 Install App';
-    btn.onclick = function() {
-      if (_pwaPrompt) {
-        pgInstall();
-      } else {
-        // Show manual instructions modal
-        const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-        if (isIOS) {
-          alert('To install on iPhone:\n1. Tap the Share button ↑ at the bottom\n2. Tap "Add to Home Screen"\n3. Tap "Add"');
-        } else {
-          alert('To install:\n1. Tap the ⋮ menu in your browser\n2. Tap "Add to Home screen" or "Install app"\n3. Tap "Install"');
+  window.addEventListener('appinstalled', function() {
+    removeBar();
+    removeInstallBtn();
+    try { showToast('Pesa Grow installed! 🎉', 'ok'); } catch(e){}
+  });
+
+  // ── Show bottom bar ──────────────────────────────
+  function showBar() {
+    if (document.getElementById('pgBar')) return;
+    if (_isStandalone) return;
+    var el = document.createElement('div');
+    el.className = 'pg-bar'; el.id = 'pgBar';
+    el.innerHTML =
+      '<div style="width:38px;height:38px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:14px;color:#000;flex-shrink:0">PG</div>' +
+      '<div style="flex:1"><div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div><div style="font-size:11px;color:#7986a8;margin-top:1px">Add to home screen</div></div>' +
+      '<button onclick="pgDoInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:8px 16px;font-weight:800;font-size:13px;cursor:pointer;flex-shrink:0">Install</button>' +
+      '<button onclick="pgRemoveBar()" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;padding:0 4px;line-height:1;flex-shrink:0">×</button>';
+    document.body.appendChild(el);
+  }
+
+  function removeBar() {
+    var el = document.getElementById('pgBar');
+    if (el) { el.style.opacity='0'; el.style.transition='.3s'; setTimeout(function(){el.remove();},300); }
+  }
+  window.pgRemoveBar = removeBar;
+
+  function removeInstallBtn() {
+    var el = document.getElementById('pgNavBtn');
+    if (el) el.remove();
+  }
+
+  // ── Main install function ────────────────────────
+  window.pgDoInstall = async function() {
+    if (_prompt) {
+      // Native prompt available — use it
+      try {
+        await _prompt.prompt();
+        var result = await _prompt.userChoice;
+        _prompt = null;
+        removeBar();
+        if (result.outcome === 'accepted') {
+          setTimeout(function(){ try{ showToast('Pesa Grow installed! 🎉','ok'); }catch(e){} }, 500);
         }
-      }
-    };
+      } catch(e) { console.warn('[PWA]', e); }
+    } else {
+      // No native prompt — show step-by-step modal
+      pgShowModal();
+    }
+  };
 
-    // Insert before first child
-    navCta.insertBefore(btn, navCta.firstChild);
-  }, 1000);
-});
+  // ── Step-by-step install modal ───────────────────
+  function pgShowModal() {
+    if (document.getElementById('pgModal')) return;
+
+    var steps, title, icon;
+    if (_isIOS) {
+      title = '📲 Install on iPhone / iPad';
+      steps = [
+        ['🌐', 'Make sure you are using <strong>Safari</strong> browser (not Chrome)'],
+        ['⬆️', 'Tap the <strong>Share</strong> button at the bottom of Safari'],
+        ['➕', 'Scroll down and tap <strong>"Add to Home Screen"</strong>'],
+        ['✅', 'Tap <strong>"Add"</strong> — Pesa Grow appears on your home screen!']
+      ];
+    } else {
+      title = '📲 Install Pesa Grow';
+      steps = [
+        ['🌐', 'Make sure you are using <strong>Chrome</strong> or <strong>Edge</strong> browser'],
+        ['⋮', 'Tap the <strong>3-dot menu</strong> (⋮) in the top right of your browser'],
+        ['➕', 'Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>'],
+        ['✅', 'Tap <strong>"Install"</strong> — Pesa Grow is added to your home screen!']
+      ];
+    }
+
+    var bg = document.createElement('div');
+    bg.className = 'pg-modal-bg'; bg.id = 'pgModal';
+    bg.onclick = function(e){ if(e.target===bg) pgCloseModal(); };
+
+    var stepsHtml = steps.map(function(s, i) {
+      return '<div class="pg-step"><div class="pg-num">'+(i+1)+'</div><div style="font-size:14px;color:#c8cfe8;line-height:1.5;padding-top:3px">'+s[0]+' '+s[1]+'</div></div>';
+    }).join('');
+
+    bg.innerHTML =
+      '<div class="pg-modal">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">' +
+          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">'+title+'</div>' +
+          '<button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;line-height:1">×</button>' +
+        '</div>' +
+        stepsHtml +
+        '<div style="margin-top:20px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#7986a8;text-align:center">' +
+          '💡 After installing, open the app from your home screen for the best experience' +
+        '</div>' +
+        '<button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button>' +
+      '</div>';
+
+    document.body.appendChild(bg);
+  }
+
+  window.pgCloseModal = function() {
+    var el = document.getElementById('pgModal');
+    if (el) { el.style.opacity='0'; el.style.transition='.3s'; setTimeout(function(){el.remove();},300); }
+  };
+
+  // ── Add Install button to navbar ─────────────────
+  window.addEventListener('load', function() {
+    if (_isStandalone) return;
+    setTimeout(function() {
+      var nav = document.getElementById('navCta');
+      if (!nav || document.getElementById('pgNavBtn')) return;
+      var btn = document.createElement('button');
+      btn.id = 'pgNavBtn';
+      btn.className = 'btn btn-ghost';
+      btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.3);color:#00e676';
+      btn.innerHTML = '📲 Install';
+      btn.onclick = window.pgDoInstall;
+      nav.insertBefore(btn, nav.firstChild);
+    }, 800);
+  });
+
+})();
 </script>
 </body>
 </html>
