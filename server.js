@@ -345,11 +345,12 @@ app.post('/api/auth/login', (req, res) => {
 app.get('/api/auth/me', authUser, (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
-    if (!user) return res.status(401).json({ error: 'Session expired — please login again' });
-    const { password: _, ...safe } = user;
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    const { password:_, ...safe } = user;
     res.json(safe);
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
+
 // ══════════════════════════════════════════════════
 //  M-PESA ROUTES
 // ══════════════════════════════════════════════════
@@ -443,15 +444,15 @@ app.post('/api/mpesa/callback', (req, res) => {
 app.get('/api/user/dashboard', authUser, (req, res) => {
   try {
     const u = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
-    if (!u) return res.status(401).json({ error: 'Session expired — please login again' });
-    const { password: _, ...safe } = u;
-    const invs   = db.prepare('SELECT * FROM investments WHERE userId=? ORDER BY startDate DESC').all(u.id);
-    const txs    = db.prepare('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50').all(u.id);
-    const deps   = db.prepare('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(u.id);
-    const wds    = db.prepare('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(u.id);
-    const refs   = db.prepare('SELECT * FROM referrals WHERE referrerId=?').all(u.id);
-    const notifs = db.prepare('SELECT * FROM notifications WHERE userId=? ORDER BY createdAt DESC LIMIT 30').all(u.id);
-    res.json({ user: safe, investments: invs, transactions: txs, deposits: deps, withdrawals: wds, referrals: refs, notifications: notifs });
+    if (!u) return res.status(404).json({ error: 'User not found' });
+    const invs   = db.prepare('SELECT * FROM investments WHERE userId=? ORDER BY startDate DESC').all(req.user.id);
+    const txs    = db.prepare('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50').all(req.user.id);
+    const deps   = db.prepare('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(req.user.id);
+    const wds    = db.prepare('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(req.user.id);
+    const refs   = db.prepare('SELECT * FROM referrals WHERE referrerId=?').all(req.user.id);
+    const notifs = db.prepare('SELECT * FROM notifications WHERE userId=? ORDER BY createdAt DESC LIMIT 30').all(req.user.id);
+    const { password:_, ...safe } = u;
+    res.json({ user:safe, investments:invs, transactions:txs, deposits:deps, withdrawals:wds, referrals:refs, notifications:notifs });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -779,6 +780,104 @@ function creditProfits() {
 }
 creditProfits();
 setInterval(creditProfits, 10 * 60 * 1000);
+
+// ══════════════════════════════════════════════════
+//  AUTO DEPOSIT CHECKER (every 30 seconds)
+//  Checks pending STK Push deposits with Safaricom
+//  and auto-credits balance if payment confirmed
+// ══════════════════════════════════════════════════
+async function autoCheckDeposits() {
+  try {
+    // Only check deposits pending for more than 30s and less than 10 mins
+    const pending = db.prepare(`
+      SELECT * FROM deposits
+      WHERE status='pending'
+      AND mpesaCheckoutId IS NOT NULL
+      AND mpesaCheckoutId != ''
+      AND createdAt > datetime('now', '-10 minutes')
+      AND createdAt < datetime('now', '-30 seconds')
+    `).all();
+
+    if (!pending.length) return;
+
+    for (const dep of pending) {
+      try {
+        const token = await getMpesaToken();
+        const { password, timestamp } = getMpesaPassword();
+
+        const result = await axios.post(
+          `${MPESA_BASE}/mpesa/stkpushquery/v1/query`,
+          {
+            BusinessShortCode: process.env.MPESA_SHORTCODE,
+            Password: password,
+            Timestamp: timestamp,
+            CheckoutRequestID: dep.mpesaCheckoutId
+          },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        const rc = result.data.ResultCode;
+
+        if (rc === 0 || rc === '0') {
+          // ✅ Payment confirmed — credit balance
+          const amount = dep.amount;
+          db.prepare("UPDATE deposits SET status='approved',reviewedAt=? WHERE id=?")
+            .run(now(), dep.id);
+          db.prepare('UPDATE users SET balance=balance+? WHERE id=?')
+            .run(amount, dep.userId);
+          db.prepare("UPDATE transactions SET status='completed' WHERE userId=? AND type='deposit' AND status='pending'")
+            .run(dep.userId);
+          addNotif(dep.userId, `✅ Deposit of KES ${(+amount).toFixed(2)} confirmed and credited!`, 'success');
+          console.log(`✅ Auto-confirmed deposit ${dep.id} — KES ${amount} for user ${dep.userId}`);
+
+          // Handle referral commission
+          const user = db.prepare('SELECT * FROM users WHERE id=?').get(dep.userId);
+          if (user?.referredBy) {
+            const ref = db.prepare('SELECT * FROM referrals WHERE refereeId=?').get(dep.userId);
+            if (ref) {
+              const commission = amount * (parseFloat(getSetting('referralRate')||5) / 100);
+              db.prepare('UPDATE users SET balance=balance+? WHERE id=?').run(commission, user.referredBy);
+              db.prepare('UPDATE referrals SET earnings=earnings+? WHERE id=?').run(commission, ref.id);
+              addTx(user.referredBy, 'referral', commission, `Referral commission from ${user.firstName}`, 'completed');
+              addNotif(user.referredBy, `💰 Referral commission KES ${commission.toFixed(2)} from ${user.firstName}!`, 'success');
+            }
+          }
+
+        } else if (rc === 1032 || rc === '1032') {
+          // Cancelled by user
+          db.prepare("UPDATE deposits SET status='failed',rejectionReason='Cancelled by user' WHERE id=?").run(dep.id);
+          addNotif(dep.userId, `❌ M-Pesa payment was cancelled. Try again.`, 'error');
+
+        } else if (rc === 1037 || rc === '1037') {
+          // Timeout — mark failed
+          db.prepare("UPDATE deposits SET status='failed',rejectionReason='Payment timed out' WHERE id=?").run(dep.id);
+          addNotif(dep.userId, `❌ M-Pesa payment timed out. Please try again.`, 'error');
+        }
+        // Other codes = still processing, leave as pending
+
+      } catch(depErr) {
+        // Safaricom query failed — leave deposit as pending, try next cycle
+        console.log(`⚠️ Could not query deposit ${dep.id}: ${depErr.message}`);
+      }
+    }
+  } catch(e) {
+    console.error('Auto deposit checker error:', e.message);
+  }
+}
+
+// Run auto checker every 30 seconds
+autoCheckDeposits();
+setInterval(autoCheckDeposits, 30 * 1000);
+
+// Also add a new API endpoint the dashboard polls for instant balance updates
+app.get('/api/user/balance', authUser, (req, res) => {
+  try {
+    const user = db.prepare('SELECT balance,totalInvested,totalProfits,totalWithdrawn FROM users WHERE id=?').get(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const pendingDeps = db.prepare("SELECT COUNT(*) as c FROM deposits WHERE userId=? AND status='pending'").get(req.user.id).c;
+    res.json({ ...user, pendingDeps });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
 // ══════════════════════════════════════════════════
 //  START
