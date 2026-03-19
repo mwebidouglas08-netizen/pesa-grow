@@ -194,7 +194,7 @@ function seedDefaults() {
       siteName:'Pesa Grow', sitePhone:'0796820013', siteEmail:'support@pesagrow.co.ke',
       currency:'KES', minDeposit:300, minWithdraw:100, withdrawFee:2,
       referralRate:5, welcomeBonus:15,
-      mpesa number: process.env.MPESA_SHORTCODE||'0796820013',
+      mpesaNumber: process.env.MPESA_SHORTCODE||'0796820013',
       mpesaName:'Douglas Mwebi',
       maintenanceMode:'false'
       minHoldingDays: 90,
