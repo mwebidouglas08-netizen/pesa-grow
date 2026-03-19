@@ -345,12 +345,11 @@ app.post('/api/auth/login', (req, res) => {
 app.get('/api/auth/me', authUser, (req, res) => {
   try {
     const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
-    if (!user) return res.status(404).json({ error: 'Not found' });
-    const { password:_, ...safe } = user;
+    if (!user) return res.status(401).json({ error: 'Session expired — please login again' });
+    const { password: _, ...safe } = user;
     res.json(safe);
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
-
 // ══════════════════════════════════════════════════
 //  M-PESA ROUTES
 // ══════════════════════════════════════════════════
@@ -444,15 +443,15 @@ app.post('/api/mpesa/callback', (req, res) => {
 app.get('/api/user/dashboard', authUser, (req, res) => {
   try {
     const u = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
-    if (!u) return res.status(404).json({ error: 'User not found' });
-    const invs   = db.prepare('SELECT * FROM investments WHERE userId=? ORDER BY startDate DESC').all(req.user.id);
-    const txs    = db.prepare('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50').all(req.user.id);
-    const deps   = db.prepare('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(req.user.id);
-    const wds    = db.prepare('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(req.user.id);
-    const refs   = db.prepare('SELECT * FROM referrals WHERE referrerId=?').all(req.user.id);
-    const notifs = db.prepare('SELECT * FROM notifications WHERE userId=? ORDER BY createdAt DESC LIMIT 30').all(req.user.id);
-    const { password:_, ...safe } = u;
-    res.json({ user:safe, investments:invs, transactions:txs, deposits:deps, withdrawals:wds, referrals:refs, notifications:notifs });
+    if (!u) return res.status(401).json({ error: 'Session expired — please login again' });
+    const { password: _, ...safe } = u;
+    const invs   = db.prepare('SELECT * FROM investments WHERE userId=? ORDER BY startDate DESC').all(u.id);
+    const txs    = db.prepare('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50').all(u.id);
+    const deps   = db.prepare('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(u.id);
+    const wds    = db.prepare('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20').all(u.id);
+    const refs   = db.prepare('SELECT * FROM referrals WHERE referrerId=?').all(u.id);
+    const notifs = db.prepare('SELECT * FROM notifications WHERE userId=? ORDER BY createdAt DESC LIMIT 30').all(u.id);
+    res.json({ user: safe, investments: invs, transactions: txs, deposits: deps, withdrawals: wds, referrals: refs, notifications: notifs });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
