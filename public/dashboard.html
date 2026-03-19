@@ -461,49 +461,34 @@ async function apiFetch(url, opts={}) {
     headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token() },
     ...opts
   });
-  const d = await r.json();
+  // Handle non-JSON responses
+  const text = await r.text();
+  let d;
+  try { d = JSON.parse(text); }
+  catch { throw new Error('Server error — please refresh'); }
+
+  // If token rejected or user not found — logout and redirect cleanly
+  if (r.status === 401 || r.status === 403) {
+    localStorage.removeItem('pg_token');
+    localStorage.removeItem('pg_user');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  // If user record missing — clear and redirect
+  if (r.status === 404 && d.error && (
+    d.error.toLowerCase().includes('not found') ||
+    d.error.toLowerCase().includes('account')
+  )) {
+    localStorage.removeItem('pg_token');
+    localStorage.removeItem('pg_user');
+    window.location.href = 'index.html';
+    return;
+  }
+
   if (!r.ok) throw new Error(d.error || 'Request failed');
   return d;
 }
-
-const k = n => 'KES ' + (+(n||0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
-const ds = s => s ? new Date(s).toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
-const dt = s => s ? new Date(s).toLocaleString('en-KE',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
-
-function toast(msg, type='ok') {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.className = 'toast '+type+' show';
-  setTimeout(()=>t.classList.remove('show'), 4000);
-}
-
-function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg; el.style.display = 'block';
-  const ok = document.getElementById(id.replace('Err','Ok'));
-  if (ok) ok.style.display = 'none';
-}
-function showOk(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.textContent = msg; el.style.display = 'block';
-  const err = document.getElementById(id.replace('Ok','Err'));
-  if (err) err.style.display = 'none';
-}
-function clearMsg(errId) {
-  const e = document.getElementById(errId); if(e) e.style.display='none';
-  const o = document.getElementById(errId.replace('Err','Ok')); if(o) o.style.display='none';
-}
-
-function doLogout() {
-  // Only clear auth keys — don't wipe everything
-  // This prevents "account not found" on next login
-  localStorage.removeItem('pg_token');
-  localStorage.removeItem('pg_user');
-  sessionStorage.clear();
-  window.location.href = 'index.html';
-}
-
 // ══════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════
