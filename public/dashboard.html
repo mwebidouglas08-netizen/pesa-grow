@@ -928,7 +928,16 @@ async function init() {
   } catch(e) {
     console.error('Init error:', e);
     window.location.href = 'index.html';
+  } 
+  getMe() {
+  try {
+    const u = localStorage.getItem('pg_user');
+    return u ? JSON.parse(u) : null;
+  } catch {
+    localStorage.removeItem('pg_user');
+    return null;
   }
+}
 }
 </script>
 </body>
