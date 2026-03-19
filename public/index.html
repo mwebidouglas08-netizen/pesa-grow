@@ -667,20 +667,27 @@ function renderModal(type){
 function showErr(msg){const e=document.getElementById('mErr');if(e){e.textContent=msg;e.style.display='block';}const o=document.getElementById('mOk');if(o)o.style.display='none';}
 function showOk(msg){const e=document.getElementById('mOk');if(e){e.textContent=msg;e.style.display='block';}const r=document.getElementById('mErr');if(r)r.style.display='none';}
 
-// LOGIN
-async function doLogin(){
-  const email=document.getElementById('lEmail').value.trim();
-  const pass=document.getElementById('lPass').value;
-  if(!email||!pass){showErr('Please fill all fields');return;}
-  const btn=document.querySelector('#modalBody .btn-green');
-  btn.textContent='Logging in...';btn.disabled=true;
-  try{
-    const user=await PG.Auth.login(email,pass);
+async function doLogin() {
+  const email = document.getElementById('lEmail').value.trim();
+  const pass  = document.getElementById('lPass').value;
+  if (!email || !pass) { showErr('Please fill all fields'); return; }
+  const btn = document.querySelector('#modalBody .btn-green');
+  btn.textContent = 'Logging in...'; btn.disabled = true;
+  try {
+    // Always clear old tokens before logging in
+    localStorage.removeItem('pg_token');
+    localStorage.removeItem('pg_user');
+
+    const user = await PG.Auth.login(email, pass);
     closeModal();
-    showToast('Welcome back, '+user.firstName+'! 👋','ok');
+    showToast('Welcome back, ' + user.firstName + '! 👋', 'ok');
     updateNav(user);
-    setTimeout(()=>location.href=user.role==='admin'?'admin.html':'dashboard.html',700);
-  }catch(e){showErr(e.message);btn.textContent='Login to Account';btn.disabled=false;}
+    setTimeout(() => location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html', 700);
+  } catch(e) {
+    showErr(e.message);
+    btn.textContent = 'Login to Account';
+    btn.disabled = false;
+  }
 }
 
 // REGISTER
