@@ -192,11 +192,12 @@ function seedDefaults() {
   if (!settingCount) {
     const defs = {
       siteName:'Pesa Grow', sitePhone:'0796820013', siteEmail:'support@pesagrow.co.ke',
-      currency:'KES', minDeposit:1000, minWithdraw:500, withdrawFee:2,
-      referralRate:5, welcomeBonus:0,
-      mpesaTill: process.env.MPESA_SHORTCODE||'174379',
-      mpesaName:'PESA GROW LTD',
+      currency:'KES', minDeposit:300, minWithdraw:100, withdrawFee:2,
+      referralRate:5, welcomeBonus:15,
+      mpesa number: process.env.MPESA_SHORTCODE||'0796820013',
+      mpesaName:'Douglas Mwebi',
       maintenanceMode:'false'
+      minHoldingDays: 90,
     };
     const ins = db.prepare('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)');
     Object.entries(defs).forEach(([k,v]) => ins.run(k, String(v)));
@@ -489,6 +490,19 @@ app.post('/api/user/withdraw', authUser, (req, res) => {
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
   const minWd   = parseFloat(getSetting('minWithdraw')||500);
   const feeRate = parseFloat(getSetting('withdrawFee')||2) / 100;
+  // Minimum holding period check
+  const holdDays = parseFloat(getSetting('minHoldingDays')||0);
+  if (holdDays > 0) {
+    const firstDep = db.prepare(
+      "SELECT createdAt FROM deposits WHERE userId=? AND status='approved' ORDER BY createdAt ASC LIMIT 1"
+    ).get(user.id);
+    if (!firstDep) return res.status(400).json({ error: 'You must make a deposit before withdrawing.' });
+    const daysSinceDeposit = (Date.now() - new Date(firstDep.createdAt).getTime()) / 86400000;
+    if (daysSinceDeposit < holdDays) {
+      const daysLeft = Math.ceil(holdDays - daysSinceDeposit);
+      return res.status(400).json({ error: `Withdrawals unlock in ${daysLeft} day(s). Minimum holding period is ${holdDays} days.` });
+    }
+  }
   if (amount < minWd) return res.status(400).json({ error: `Minimum withdrawal is KES ${minWd}` });
   if (!address)       return res.status(400).json({ error: 'Provide M-Pesa number or account' });
   if (user.balance < amount) return res.status(400).json({ error: 'Insufficient balance' });
