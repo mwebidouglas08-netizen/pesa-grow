@@ -165,6 +165,25 @@ db.exec(`
     rawCallback TEXT,
     processedAt TEXT
   );
+
+  CREATE TABLE IF NOT EXISTS b2c_logs (
+    id                     TEXT PRIMARY KEY,
+    withdrawalId           TEXT,
+    conversationId         TEXT,
+    originatorConvId       TEXT,
+    phone                  TEXT,
+    amount                 REAL,
+    status                 TEXT DEFAULT 'pending',
+    resultCode             TEXT,
+    resultDesc             TEXT,
+    transactionId          TEXT,
+    transactionAmount      REAL,
+    b2cRecipientIsRegCust  TEXT,
+    b2cChargesPaidAcct     TEXT,
+    rawResult              TEXT,
+    createdAt              TEXT,
+    completedAt            TEXT
+  );
 `);
 
 // ── PATCH MISSING COLUMNS (safe for existing DBs) ──
@@ -185,9 +204,12 @@ addCol('deposits', 'rejectionReason', 'TEXT');
 addCol('deposits', 'reviewedBy',      'TEXT');
 addCol('deposits', 'reviewedAt',      'TEXT');
 addCol('deposits', 'proofNote',       'TEXT');
-addCol('withdrawals', 'rejectionReason', 'TEXT');
-addCol('withdrawals', 'reviewedBy',      'TEXT');
-addCol('withdrawals', 'reviewedAt',      'TEXT');
+addCol('withdrawals', 'rejectionReason',    'TEXT');
+addCol('withdrawals', 'reviewedBy',         'TEXT');
+addCol('withdrawals', 'reviewedAt',         'TEXT');
+addCol('withdrawals', 'mpesaConversationId','TEXT');
+addCol('withdrawals', 'b2cTransactionId',   'TEXT');
+addCol('withdrawals', 'b2cError',           'TEXT');
 addCol('investments', 'planName',     'TEXT');
 addCol('investments', 'lastCredited', 'TEXT');
 addCol('investments', 'earned',       'REAL DEFAULT 0');
@@ -288,6 +310,41 @@ function sanitizePhone(phone) {
   if (phone.startsWith('+'))    phone = phone.slice(1);
   if (!phone.startsWith('254')) phone = '254' + phone;
   return phone;
+}
+
+// ══════════════════════════════════════════════════
+//  M-PESA B2C — Send money to user's phone
+//  Used when admin approves a withdrawal
+// ══════════════════════════════════════════════════
+async function sendB2CPayment({ phone, amount, withdrawalId, remarks }) {
+  const token = await getMpesaToken();
+
+  // B2C security credential — base64 encoded with Safaricom public cert
+  // Set MPESA_B2C_SECURITY_CREDENTIAL in Railway env vars
+  const securityCredential = process.env.MPESA_B2C_SECURITY_CREDENTIAL;
+  if (!securityCredential) throw new Error('B2C not configured. Set MPESA_B2C_SECURITY_CREDENTIAL in Railway env vars.');
+
+  const payload = {
+    InitiatorName:          process.env.MPESA_B2C_INITIATOR_NAME || 'testapi',
+    SecurityCredential:     securityCredential,
+    CommandID:              'BusinessPayment',   // Direct payment to customer
+    Amount:                 Math.floor(amount),  // Whole numbers only
+    PartyA:                 process.env.MPESA_SHORTCODE,
+    PartyB:                 sanitizePhone(phone),
+    Remarks:                remarks || `Withdrawal #${(withdrawalId||'').slice(-6)}`,
+    QueueTimeOutURL:        `${process.env.BASE_URL}/api/mpesa/b2c/timeout`,
+    ResultURL:              `${process.env.BASE_URL}/api/mpesa/b2c/result`,
+    Occasion:               'Withdrawal',
+  };
+
+  const r = await axios.post(
+    `${MPESA_BASE}/mpesa/b2c/v3/paymentrequest`,
+    payload,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+
+  return r.data;
+  // Returns { ConversationID, OriginatorConversationID, ResponseCode, ResponseDescription }
 }
 
 async function initiateSTKPush({ phone, amount, depositId }) {
@@ -656,17 +713,199 @@ app.get('/api/admin/withdrawals', authAdmin, (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-app.put('/api/admin/withdrawals/:id/approve', authAdmin, (req, res) => {
+// ── WITHDRAWAL APPROVE WITH AUTO B2C PAYMENT ──────
+app.put('/api/admin/withdrawals/:id/approve', authAdmin, async (req, res) => {
   try {
     const wd = db.prepare('SELECT * FROM withdrawals WHERE id=?').get(req.params.id);
     if (!wd) return res.status(404).json({ error: 'Not found' });
     if (wd.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
-    db.prepare("UPDATE withdrawals SET status='approved',reviewedBy=?,reviewedAt=? WHERE id=?").run(req.user.id,now(),wd.id);
-    db.prepare('UPDATE users SET totalWithdrawn=totalWithdrawn+? WHERE id=?').run(wd.net,wd.userId);
-    db.prepare("UPDATE transactions SET status='completed' WHERE userId=? AND type='withdrawal' AND status='pending'").run(wd.userId);
-    addNotif(wd.userId,`✅ Withdrawal of KES ${(+wd.net).toFixed(2)} sent to ${wd.address}!`,'success');
-    res.json({ success:true });
+
+    const user = db.prepare('SELECT * FROM users WHERE id=?').get(wd.userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Check if B2C is configured
+    const b2cConfigured = !!(
+      process.env.MPESA_B2C_SECURITY_CREDENTIAL &&
+      process.env.MPESA_B2C_INITIATOR_NAME &&
+      process.env.MPESA_SHORTCODE
+    );
+
+    if (b2cConfigured && wd.method === 'M-Pesa') {
+      // ── AUTO B2C PAYMENT ──────────────────────────
+      try {
+        const phone = wd.address || user.phone;
+        const b2cRes = await sendB2CPayment({
+          phone,
+          amount: wd.net,
+          withdrawalId: wd.id,
+          remarks: `Pesa Grow withdrawal for ${user.firstName}`
+        });
+
+        if (b2cRes.ResponseCode === '0') {
+          // Payment request sent — mark as processing
+          // Will be fully confirmed when B2C result callback arrives
+          const b2cId = uuidv4();
+          db.prepare(`INSERT INTO b2c_logs
+            (id,withdrawalId,conversationId,originatorConvId,phone,amount,status,createdAt)
+            VALUES (?,?,?,?,?,?,?,?)`)
+            .run(b2cId, wd.id, b2cRes.ConversationID, b2cRes.OriginatorConversationID,
+                 phone, wd.net, 'pending', now());
+
+          // Mark withdrawal as processing (not yet fully approved — wait for callback)
+          db.prepare("UPDATE withdrawals SET status='processing',reviewedBy=?,reviewedAt=?,mpesaConversationId=? WHERE id=?")
+            .run(req.user.id, now(), b2cRes.ConversationID, wd.id);
+
+          addNotif(wd.userId,
+            `⏳ Your withdrawal of KES ${(+wd.net).toFixed(2)} is being sent to ${phone} via M-Pesa...`,
+            'info');
+
+          return res.json({
+            success: true,
+            b2c: true,
+            message: `M-Pesa B2C payment of KES ${wd.net} initiated to ${phone}. Awaiting confirmation.`,
+            conversationId: b2cRes.ConversationID
+          });
+
+        } else {
+          throw new Error(b2cRes.ResponseDescription || 'B2C request failed');
+        }
+
+      } catch(b2cErr) {
+        console.error('B2C error:', b2cErr.response?.data || b2cErr.message);
+        // B2C failed — fall through to manual approval
+        // Admin must send money manually
+        db.prepare("UPDATE withdrawals SET status='approved',reviewedBy=?,reviewedAt=?,b2cError=? WHERE id=?")
+          .run(req.user.id, now(), b2cErr.message, wd.id);
+        db.prepare('UPDATE users SET totalWithdrawn=totalWithdrawn+? WHERE id=?').run(wd.net, wd.userId);
+        db.prepare("UPDATE transactions SET status='completed' WHERE userId=? AND type='withdrawal' AND status='pending'").run(wd.userId);
+        addNotif(wd.userId, `✅ Withdrawal of KES ${(+wd.net).toFixed(2)} approved. Being sent to ${wd.address}.`, 'success');
+
+        return res.status(200).json({
+          success: true,
+          b2c: false,
+          warning: `B2C auto-payment failed: ${b2cErr.message}. Withdrawal marked approved — please send KES ${wd.net} manually to ${wd.address}.`
+        });
+      }
+
+    } else {
+      // ── MANUAL APPROVAL (no B2C config or non-M-Pesa method) ──
+      db.prepare("UPDATE withdrawals SET status='approved',reviewedBy=?,reviewedAt=? WHERE id=?")
+        .run(req.user.id, now(), wd.id);
+      db.prepare('UPDATE users SET totalWithdrawn=totalWithdrawn+? WHERE id=?').run(wd.net, wd.userId);
+      db.prepare("UPDATE transactions SET status='completed' WHERE userId=? AND type='withdrawal' AND status='pending'").run(wd.userId);
+      addNotif(wd.userId, `✅ Withdrawal of KES ${(+wd.net).toFixed(2)} approved and sent to ${wd.address}!`, 'success');
+
+      return res.json({
+        success: true,
+        b2c: false,
+        message: b2cConfigured
+          ? `Approved. Note: B2C only works for M-Pesa withdrawals.`
+          : `Approved. B2C not configured — please send KES ${wd.net} manually to ${wd.address}.`
+      });
+    }
+
   } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ── B2C RESULT CALLBACK ────────────────────────────
+// Safaricom calls this when B2C payment completes/fails
+app.post('/api/mpesa/b2c/result', (req, res) => {
+  res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
+  try {
+    const result = req.body?.Result;
+    if (!result) return;
+
+    const convId      = result.ConversationID;
+    const origConvId  = result.OriginatorConversationID;
+    const resultCode  = result.ResultCode;
+    const resultDesc  = result.ResultDesc;
+
+    // Extract result parameters
+    let transactionId = null, amount = null, phone = null, charges = null;
+    if (result.ResultParameters?.ResultParameter) {
+      const params = result.ResultParameters.ResultParameter;
+      const get = name => params.find(p => p.Key === name)?.Value;
+      transactionId = get('TransactionID');
+      amount        = get('TransactionAmount');
+      phone         = get('ReceiverPartyPublicName');
+      charges       = get('B2CChargesPaidAccountAvailableFunds');
+    }
+
+    // Find matching b2c log by conversationId
+    const log = db.prepare('SELECT * FROM b2c_logs WHERE conversationId=?').get(convId);
+    if (!log) { console.log('⚠️ B2C result for unknown conv:', convId); return; }
+
+    // Update b2c log
+    db.prepare(`UPDATE b2c_logs SET
+      status=?, resultCode=?, resultDesc=?, transactionId=?,
+      transactionAmount=?, rawResult=?, completedAt=?
+      WHERE conversationId=?`)
+      .run(
+        resultCode === 0 ? 'success' : 'failed',
+        resultCode, resultDesc, transactionId,
+        amount, JSON.stringify(req.body), now(),
+        convId
+      );
+
+    // Find the withdrawal
+    const wd = db.prepare('SELECT * FROM withdrawals WHERE id=?').get(log.withdrawalId);
+    if (!wd) return;
+
+    if (resultCode === 0) {
+      // ✅ Payment successful
+      console.log(`✅ B2C success: ${transactionId} — KES ${amount} to ${phone}`);
+      db.prepare("UPDATE withdrawals SET status='approved',b2cTransactionId=? WHERE id=?")
+        .run(transactionId, wd.id);
+      db.prepare('UPDATE users SET totalWithdrawn=totalWithdrawn+? WHERE id=?')
+        .run(wd.net, wd.userId);
+      db.prepare("UPDATE transactions SET status='completed' WHERE userId=? AND type='withdrawal' AND status='pending'")
+        .run(wd.userId);
+      addNotif(wd.userId,
+        `✅ KES ${(+wd.net).toFixed(2)} sent to your M-Pesa (${transactionId})! Check your phone.`,
+        'success');
+
+    } else {
+      // ❌ Payment failed — refund user
+      console.log(`❌ B2C failed: ${resultDesc}`);
+      db.prepare("UPDATE withdrawals SET status='failed',rejectionReason=? WHERE id=?")
+        .run(resultDesc, wd.id);
+      db.prepare('UPDATE users SET balance=balance+? WHERE id=?')
+        .run(wd.amount, wd.userId); // refund full amount
+      db.prepare("UPDATE transactions SET status='failed' WHERE userId=? AND type='withdrawal' AND status='pending'")
+        .run(wd.userId);
+      addNotif(wd.userId,
+        `❌ Withdrawal failed: ${resultDesc}. KES ${(+wd.amount).toFixed(2)} has been refunded to your balance.`,
+        'error');
+    }
+
+  } catch(e) { console.error('B2C result error:', e.message); }
+});
+
+// ── B2C TIMEOUT CALLBACK ───────────────────────────
+// Called if Safaricom can't process in time
+app.post('/api/mpesa/b2c/timeout', (req, res) => {
+  res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
+  try {
+    const convId = req.body?.Result?.ConversationID;
+    if (!convId) return;
+    const log = db.prepare('SELECT * FROM b2c_logs WHERE conversationId=?').get(convId);
+    if (!log) return;
+    db.prepare("UPDATE b2c_logs SET status='timeout',completedAt=? WHERE conversationId=?").run(now(), convId);
+    const wd = db.prepare('SELECT * FROM withdrawals WHERE id=?').get(log.withdrawalId);
+    if (!wd) return;
+    // Refund on timeout
+    db.prepare("UPDATE withdrawals SET status='failed',rejectionReason='M-Pesa timeout' WHERE id=?").run(wd.id);
+    db.prepare('UPDATE users SET balance=balance+? WHERE id=?').run(wd.amount, wd.userId);
+    addNotif(wd.userId,
+      `⚠️ Withdrawal timed out. KES ${(+wd.amount).toFixed(2)} refunded to your balance. Please try again.`,
+      'error');
+  } catch(e) { console.error('B2C timeout error:', e.message); }
+});
+
+// ── GET B2C LOGS (admin) ───────────────────────────
+app.get('/api/admin/b2c-logs', authAdmin, (req, res) => {
+  try { res.json(db.prepare('SELECT * FROM b2c_logs ORDER BY createdAt DESC LIMIT 100').all()); }
+  catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.put('/api/admin/withdrawals/:id/reject', authAdmin, (req, res) => {
