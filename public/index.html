@@ -525,22 +525,40 @@ const API = window.location.origin;
 window.PG = {
   Auth: {
     async login(email, password) {
-      const r = await fetch(`${API}/api/auth/login`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({email, password})
-      });
-      const d = await r.json();
+      // Always clear old stale tokens before fresh login
+      localStorage.removeItem('pg_token');
+      localStorage.removeItem('pg_user');
+
+      let r, d;
+      try {
+        r = await fetch(`${API}/api/auth/login`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({email, password})
+        });
+      } catch { throw new Error('Cannot connect to server. Check your internet.'); }
+
+      try { d = await r.json(); } catch { throw new Error('Server error. Please try again.'); }
+
       if (!r.ok) throw new Error(d.error || 'Login failed');
       localStorage.setItem('pg_token', d.token);
       localStorage.setItem('pg_user', JSON.stringify(d.user));
       return d.user;
     },
     async register(data) {
-      const r = await fetch(`${API}/api/auth/register`, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify(data)
-      });
-      const d = await r.json();
+      // Always clear old stale tokens before fresh register
+      localStorage.removeItem('pg_token');
+      localStorage.removeItem('pg_user');
+
+      let r, d;
+      try {
+        r = await fetch(`${API}/api/auth/register`, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(data)
+        });
+      } catch { throw new Error('Cannot connect to server. Check your internet.'); }
+
+      try { d = await r.json(); } catch { throw new Error('Server error. Please try again.'); }
+
       if (!r.ok) throw new Error(d.error || 'Registration failed');
       localStorage.setItem('pg_token', d.token);
       localStorage.setItem('pg_user', JSON.stringify(d.user));
@@ -553,7 +571,7 @@ window.PG = {
       localStorage.removeItem('pg_token');
       localStorage.removeItem('pg_user');
       sessionStorage.clear();
-      location.reload();
+      window.location.replace(window.location.origin + '/index.html');
     }
   },
   token: () => localStorage.getItem('pg_token'),
@@ -793,10 +811,34 @@ function showToast(msg,type='ok'){
   setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-// INIT — check login state
-(()=>{
-  const user=PG.Auth.getMe();
-  if(user) updateNav(user);
+// INIT — check login state on landing page
+(async ()=>{
+  const tok  = localStorage.getItem('pg_token');
+  const user = PG.Auth.getMe();
+
+  if (!tok || !user) {
+    // Not logged in — show login/register buttons (default nav)
+    return;
+  }
+
+  // Token exists — verify it's still valid with server
+  try {
+    const r = await fetch(`${API}/api/auth/me`, {
+      headers: { 'Authorization': 'Bearer ' + tok }
+    });
+    if (r.ok) {
+      const fresh = await r.json();
+      localStorage.setItem('pg_user', JSON.stringify(fresh));
+      updateNav(fresh);
+    } else {
+      // Token rejected — clear it silently
+      localStorage.removeItem('pg_token');
+      localStorage.removeItem('pg_user');
+    }
+  } catch {
+    // Network error — use cached user for nav display
+    if (user) updateNav(user);
+  }
 })();
 
 // ── VIDEO PLAYER ──────────────────────────────────
