@@ -2,30 +2,29 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
 <title>Pesa Grow — Kenya's #1 Investment Platform</title>
 
-<!-- ── PWA INSTALL SUPPORT ── -->
-<link rel="manifest" href="/manifest.json">
+<!-- ── PWA ── -->
+<link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
 <meta name="theme-color" content="#00e676">
+<meta name="description" content="Kenya's #1 Daily Investment Platform. Earn up to 10% daily via M-Pesa.">
+
+<!-- Android -->
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Pesa Grow">
+
+<!-- iOS Safari -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Pesa Grow">
-<meta name="application-name" content="Pesa Grow">
-<meta name="description" content="Kenya's #1 Daily Investment Platform. Earn up to 10% daily via M-Pesa.">
-
-<!-- Apple touch icons -->
-<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
-
-<!-- Splash screens for iPhone -->
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192.png">
 
 <!-- Favicon -->
-<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+<link rel="icon" type="image/png" href="/icons/icon-192.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -882,81 +881,119 @@ function startVideo() {
 }
 </script>
 
-<!-- ── PWA SERVICE WORKER + INSTALL PROMPT ── -->
+</script>
+
+<!-- ── PWA ── -->
+<style>
+@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(24px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+#installBanner{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:rgba(8,12,18,.98);border:1.5px solid rgba(0,230,118,.45);border-radius:18px;padding:14px 18px;z-index:9999;display:flex;align-items:center;gap:13px;box-shadow:0 12px 50px rgba(0,0,0,.7),0 0 0 1px rgba(0,230,118,.1);max-width:400px;width:92%;animation:slideUp .35s cubic-bezier(.22,1,.36,1)}
+</style>
 <script>
-// Register service worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('✅ SW registered:', reg.scope))
-      .catch(err => console.log('SW error:', err));
-  });
-}
+(function(){
+  'use strict';
+  let deferredPrompt = null;
+  let swReady = false;
 
-// Install prompt — shows "Add to Home Screen" button
-let deferredPrompt = null;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Show install banner after 3 seconds
-  setTimeout(showInstallBanner, 3000);
-});
-
-function showInstallBanner() {
-  if (!deferredPrompt) return;
-  if (document.getElementById('installBanner')) return;
-
-  const banner = document.createElement('div');
-  banner.id = 'installBanner';
-  banner.style.cssText = `
-    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-    background:rgba(10,15,24,0.97);border:1.5px solid rgba(0,230,118,0.4);
-    border-radius:16px;padding:16px 20px;z-index:999;
-    display:flex;align-items:center;gap:14px;
-    box-shadow:0 8px 40px rgba(0,0,0,0.6);max-width:380px;width:90%;
-    animation:slideUp .4s ease;
-  `;
-  banner.innerHTML = `
-    <div style="width:44px;height:44px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#000;flex-shrink:0">PG</div>
-    <div style="flex:1">
-      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#eef2ff">Install Pesa Grow</div>
-      <div style="font-size:12px;color:#7986a8;margin-top:2px">Add to home screen for the best experience</div>
-    </div>
-    <button onclick="doInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:9px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Install</button>
-    <button onclick="dismissInstall()" style="background:none;border:none;color:#7986a8;font-size:20px;cursor:pointer;padding:4px;line-height:1">×</button>
-  `;
-  document.body.appendChild(banner);
-}
-
-async function doInstall() {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const result = await deferredPrompt.userChoice;
-  deferredPrompt = null;
-  const banner = document.getElementById('installBanner');
-  if (banner) banner.remove();
-  if (result.outcome === 'accepted') {
-    showToast('Pesa Grow installed! 🎉', 'ok');
+  // ── 1. Register Service Worker ──────────────────
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(reg => {
+        swReady = true;
+        console.log('[PWA] SW registered, scope:', reg.scope);
+        // Force update if waiting
+        if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      })
+      .catch(err => console.warn('[PWA] SW failed:', err));
   }
-}
 
-function dismissInstall() {
-  const banner = document.getElementById('installBanner');
-  if (banner) banner.remove();
-  deferredPrompt = null;
-}
+  // ── 2. Catch install prompt ─────────────────────
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log('[PWA] Install prompt ready');
+    // Show banner after 2s delay
+    setTimeout(showBanner, 2000);
+  });
 
-// Add slideUp animation
-const pwaStyle = document.createElement('style');
-pwaStyle.textContent = `@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}`;
-document.head.appendChild(pwaStyle);
+  // ── 3. Show install banner ──────────────────────
+  function showBanner() {
+    if (!deferredPrompt) return;
+    if (document.getElementById('installBanner')) return;
 
-// Track when app is installed
-window.addEventListener('appinstalled', () => {
-  showToast('Pesa Grow installed successfully! 🎉', 'ok');
-  deferredPrompt = null;
-});
+    const el = document.createElement('div');
+    el.id = 'installBanner';
+    el.innerHTML = `
+      <img src="/icons/icon-192.png" style="width:42px;height:42px;border-radius:10px;flex-shrink:0" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#eef2ff;white-space:nowrap">Install Pesa Grow App</div>
+        <div style="font-size:11px;color:#7986a8;margin-top:2px">Faster, offline-ready, home screen access</div>
+      </div>
+      <button id="installBtn" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:9px;padding:9px 15px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0">Install</button>
+      <button onclick="dismissBanner()" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0">×</button>
+    `;
+    document.body.appendChild(el);
+    document.getElementById('installBtn').addEventListener('click', triggerInstall);
+  }
+
+  // ── 4. Trigger native install prompt ───────────
+  async function triggerInstall() {
+    if (!deferredPrompt) return;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      dismissBanner();
+      if (outcome === 'accepted') {
+        setTimeout(() => {
+          if (typeof showToast === 'function') showToast('Pesa Grow installed! 🎉', 'ok');
+        }, 500);
+      }
+    } catch(e) { console.warn('[PWA] Install error:', e); }
+  }
+
+  function dismissBanner() {
+    const el = document.getElementById('installBanner');
+    if (el) { el.style.opacity='0'; el.style.transition='.3s'; setTimeout(()=>el.remove(),300); }
+    // Remember dismissed for this session
+    sessionStorage.setItem('pwa_dismissed', '1');
+    deferredPrompt = null;
+  }
+
+  // Don't show again if dismissed this session
+  if (sessionStorage.getItem('pwa_dismissed')) {
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+  }
+
+  // ── 5. Already installed? ───────────────────────
+  window.addEventListener('appinstalled', () => {
+    console.log('[PWA] App installed!');
+    dismissBanner();
+    setTimeout(() => {
+      if (typeof showToast === 'function') showToast('Pesa Grow installed! 🎉', 'ok');
+    }, 500);
+  });
+
+  // ── 6. iOS manual guide ─────────────────────────
+  // iOS doesn't fire beforeinstallprompt — show manual guide
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isInStandalone = window.navigator.standalone === true;
+  if (isIOS && !isInStandalone && !sessionStorage.getItem('ios_hint_shown')) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.id = 'installBanner';
+      el.innerHTML = `
+        <div style="flex:1">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#eef2ff">Install on iPhone</div>
+          <div style="font-size:11px;color:#7986a8;margin-top:3px">Tap <strong style="color:#eef2ff">Share</strong> → <strong style="color:#eef2ff">Add to Home Screen</strong></div>
+        </div>
+        <button onclick="document.getElementById('installBanner').remove();sessionStorage.setItem('ios_hint_shown','1')" style="background:none;border:none;color:#7986a8;font-size:22px;cursor:pointer;padding:2px 4px;line-height:1">×</button>
+      `;
+      document.body.appendChild(el);
+      sessionStorage.setItem('ios_hint_shown', '1');
+    }, 3000);
+  }
+
+})();
 </script>
 </body>
 </html>
