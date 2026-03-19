@@ -304,10 +304,13 @@ select.fc option{background:var(--bg3)}
           </select>
         </div>
         <div class="fg"><label>M-Pesa Number / Account</label><input class="fc" id="wdAddr" placeholder="e.g. 0712345678"></div>
-        <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd(); updateWdMin()"></div>
+        <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd()"></div>
         <div id="wdCalc" style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:14px;font-size:14px;display:none">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Processing Fee (2%)</span><span id="wdFeeAmt" style="color:var(--red)"></span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Processing Fee (<span id="wdInfoFee">2</span>%)</span><span id="wdFeeAmt" style="color:var(--red)"></span></div>
           <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">You Receive</span><span id="wdNetAmt" style="color:var(--green);font-weight:700"></span></div>
+        </div>
+        <div style="background:rgba(255,193,7,.05);border:1px solid rgba(255,193,7,.15);border-radius:9px;padding:10px 14px;font-size:13px;color:var(--text2);margin-bottom:14px">
+          Minimum withdrawal: <strong style="color:var(--text)" id="wdInfoMin">KES 500</strong> · Fee: <strong style="color:var(--text)" id="wdInfoFee2"><span id="wdFeeRate">2</span>%</strong>
         </div>
         <button class="btn btn-green btn-full" onclick="doWithdraw()">Request Withdrawal</button>
       </div>
@@ -884,10 +887,24 @@ async function doManualDeposit() {
 //  WITHDRAW
 // ══════════════════════════════════════════════════
 async function loadWithdraw() {
-  document.getElementById('wdBalance').textContent = k(currentUser.balance);
-  document.getElementById('wdSumInv').textContent    = k(currentUser.totalInvested);
-  document.getElementById('wdSumProfit').textContent = k(currentUser.totalProfits);
-  document.getElementById('wdSumWd').textContent     = k(currentUser.totalWithdrawn);
+  // Apply live settings to withdrawal form
+  const minWd   = parseFloat(platformSettings.minWithdraw)||500;
+  const feeRate = parseFloat(platformSettings.withdrawFee)||2;
+  const wdEl    = document.getElementById('wdAmt');
+  if (wdEl) { wdEl.min = minWd; wdEl.placeholder = `Min KES ${minWd.toLocaleString()}`; }
+
+  // Update the info card with live values
+  const infoMinEl  = document.getElementById('wdInfoMin');
+  const infoFeeEl  = document.getElementById('wdInfoFee');
+  const infoFeeEl2 = document.getElementById('wdFeeRate');
+  if (infoMinEl)  infoMinEl.textContent  = `KES ${minWd.toLocaleString()}`;
+  if (infoFeeEl)  infoFeeEl.textContent  = feeRate;
+  if (infoFeeEl2) infoFeeEl2.textContent = feeRate;
+
+  document.getElementById('wdBalance').textContent    = k(currentUser.balance);
+  document.getElementById('wdSumInv').textContent     = k(currentUser.totalInvested);
+  document.getElementById('wdSumProfit').textContent  = k(currentUser.totalProfits);
+  document.getElementById('wdSumWd').textContent      = k(currentUser.totalWithdrawn);
   clearMsg('wdErr');
   try {
     const data = await apiFetch('/api/user/dashboard');
@@ -919,8 +936,9 @@ async function doWithdraw() {
   const amount  = parseFloat(document.getElementById('wdAmt').value);
   const method  = document.getElementById('wdMethod').value;
   const address = document.getElementById('wdAddr').value.trim();
+  const minWd   = parseFloat(platformSettings.minWithdraw)||500;
   clearMsg('wdErr');
-  if (!amount || amount < 500) { showErr('wdErr','Minimum withdrawal is KES 500'); return; }
+  if (!amount || amount < minWd) { showErr('wdErr',`Minimum withdrawal is KES ${minWd.toLocaleString()}`); return; }
   if (!address) { showErr('wdErr','Enter your M-Pesa number or account details'); return; }
   const btn = document.querySelector('#page-withdraw .btn-green');
   btn.textContent = 'Submitting...'; btn.disabled = true;
