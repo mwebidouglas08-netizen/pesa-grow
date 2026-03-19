@@ -191,14 +191,20 @@ function seedDefaults() {
   const settingCount = db.prepare('SELECT COUNT(*) as c FROM settings').get().c;
   if (!settingCount) {
     const defs = {
-      siteName:'Pesa Grow', sitePhone:'0796820013', siteEmail:'support@pesagrow.co.ke',
-      currency:'KES', minDeposit:300, minWithdraw:100, withdrawFee:2,
-      referralRate:5, welcomeBonus:15,
-      mpesaNumber: process.env.MPESA_SHORTCODE||'0796820013',
-      mpesaName:'Douglas Mwebi',
-      maintenanceMode:'false'
-      minHoldingDays: 90,
-    };
+  siteName: 'Pesa Grow',
+  sitePhone: '0796820013',
+  siteEmail: 'support@pesagrow.co.ke',
+  currency: 'KES',
+  minDeposit: 1000,
+  minWithdraw: 500,
+  withdrawFee: 2,
+  referralRate: 5,
+  welcomeBonus: 0,
+  mpesaTill: process.env.MPESA_SHORTCODE||'174379',
+  mpesaName: 'PESA GROW LTD',
+  maintenanceMode: 'false',
+  minHoldingDays: 3
+};
     const ins = db.prepare('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)');
     Object.entries(defs).forEach(([k,v]) => ins.run(k, String(v)));
     console.log('✅ Default settings seeded');
