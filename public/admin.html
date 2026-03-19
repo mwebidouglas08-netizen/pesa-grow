@@ -381,6 +381,8 @@ select.fc option{background:var(--bg3)}
         <div class="fg"><label>Default Referral Rate (%)</label><input class="fc" id="set-referralRate" type="number" placeholder="5"></div>
         <div class="fg"><label>Welcome Bonus (KES)</label><input class="fc" id="set-welcomeBonus" type="number" placeholder="0"></div>
         <div class="fg"><label>Minimum Holding Period (days)</label><input class="fc" id="set-minHoldingDays" type="number" placeholder="3"></div>
+        <div class="fg"><label>Principal Lock Period (days)</label><input class="fc" id="set-principalLockDays" type="number" placeholder="90"></div>
+        <div class="fg"><label>Max Withdrawals Per Day</label><input class="fc" id="set-maxDailyWithdrawals" type="number" placeholder="3"></div>
       </div>
     </div>
     <button class="btn btn-green" style="padding:14px 36px;font-size:15px" onclick="saveSettings()">💾 Save All Settings</button>
@@ -1031,13 +1033,13 @@ async function loadSettings() {
   try {
     const s=await api('/api/admin/settings');
     ['siteName','sitePhone','siteEmail','mpesaTill','mpesaName',
-     'minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays']
+     'minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays','principalLockDays','maxDailyWithdrawals']
     .forEach(f=>{ const el=document.getElementById('set-'+f); if(el&&s[f]!=null) el.value=s[f]; });
   } catch(e) { toast(e.message,'err'); }
 }
 
 async function saveSettings() {
-  const fields=['siteName','sitePhone','siteEmail','mpesaTill','mpesaName','minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays'];
+  const fields=['siteName','sitePhone','siteEmail','mpesaTill','mpesaName','minDeposit','minWithdraw','withdrawFee','referralRate','welcomeBonus','minHoldingDays','principalLockDays','maxDailyWithdrawals'];
   const data={};
   fields.forEach(f=>{ const el=document.getElementById('set-'+f); if(el&&el.value!=='') data[f]=el.value; });
   try {
