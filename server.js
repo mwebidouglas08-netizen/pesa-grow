@@ -598,7 +598,23 @@ app.get('/api/admin/stats', authAdmin, (req, res) => {
 });
 
 app.get('/api/admin/members', authAdmin, (req, res) => {
-  res.json(db.prepare("SELECT id,firstName,lastName,email,phone,balance,totalInvested,totalProfits,totalWithdrawn,status,refCode,kycStatus,createdAt,lastLogin FROM users WHERE role!='admin' ORDER BY createdAt DESC").all());
+  try {
+    const members = db.prepare(
+      "SELECT id,firstName,lastName,email,phone,balance,totalInvested,totalProfits,totalWithdrawn,status,refCode,kycStatus,createdAt,lastLogin FROM users WHERE role!='admin' ORDER BY createdAt DESC"
+    ).all();
+    res.json(members);
+  } catch(err) {
+    console.error('Members error:', err.message);
+    // Try with fewer columns if some don't exist
+    try {
+      const members = db.prepare(
+        "SELECT id,firstName,lastName,email,phone,balance,status,refCode,createdAt FROM users WHERE role!='admin' ORDER BY createdAt DESC"
+      ).all();
+      res.json(members);
+    } catch(err2) {
+      res.status(500).json({ error: err2.message });
+    }
+  }
 });
 app.put('/api/admin/members/:id', authAdmin, (req, res) => {
   const { firstName, lastName, email, phone, balance, status } = req.body;
