@@ -1,0 +1,101 @@
+{
+  "name": "Pesa Grow",
+  "short_name": "Pesa Grow",
+  "description": "Kenya's #1 Daily Investment Platform. Earn up to 10% daily via M-Pesa.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#030508",
+  "theme_color": "#00e676",
+  "lang": "en",
+  "categories": ["finance", "business"],
+  "icons": [
+    {
+      "src": "https://placehold.co/72x72/00e676/000000?text=PG&font=montserrat",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/96x96/00e676/000000?text=PG&font=montserrat",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/128x128/00e676/000000?text=PG&font=montserrat",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/144x144/00e676/000000?text=PG&font=montserrat",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/152x152/00e676/000000?text=PG&font=montserrat",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/180x180/00e676/000000?text=PG&font=montserrat",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/192x192/00e676/000000?text=PG&font=montserrat",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/256x256/00e676/000000?text=PG&font=montserrat",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/512x512/00e676/000000?text=PG&font=montserrat",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "https://placehold.co/390x844/030508/00e676?text=Pesa+Grow",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pesa Grow Home Screen"
+    },
+    {
+      "src": "https://placehold.co/1280x800/030508/00e676?text=Pesa+Grow+Dashboard",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Pesa Grow Dashboard"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Invest Now",
+      "short_name": "Invest",
+      "description": "Go to investment plans",
+      "url": "/dashboard.html",
+      "icons": [{ "src": "https://placehold.co/96x96/00e676/000000?text=📈", "sizes": "96x96" }]
+    },
+    {
+      "name": "Deposit",
+      "short_name": "Deposit",
+      "description": "Deposit via M-Pesa",
+      "url": "/dashboard.html",
+      "icons": [{ "src": "https://placehold.co/96x96/00e676/000000?text=💰", "sizes": "96x96" }]
+    }
+  ]
+}
