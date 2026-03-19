@@ -16,22 +16,34 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', 1);
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve PWA files with correct headers
+// ── PWA FILES — must come BEFORE express.static ──────
+// Service worker needs Service-Worker-Allowed header
+// Manifest needs correct Content-Type
+// Both need no-cache so browser always gets latest version
 app.get('/sw.js', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript');
+  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
   res.setHeader('Service-Worker-Allowed', '/');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
   res.sendFile(path.join(__dirname, 'public', 'sw.js'));
 });
 app.get('/manifest.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/manifest+json');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 });
-// Serve icons folder
-app.use('/icons', express.static(path.join(__dirname, 'public', 'icons')));
+
+// Static files (index.html, dashboard.html, icons, etc.)
+app.use(express.static(path.join(__dirname, 'public'), {
+  setHeaders: function(res, filePath) {
+    // PNG icons — allow caching
+    if (filePath.endsWith('.png')) {
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+    }
+  }
+}));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true });
 app.use('/api/', limiter);
 
