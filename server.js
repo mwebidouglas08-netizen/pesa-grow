@@ -259,6 +259,8 @@ function seedDefaults() {
       siteName:'Pesa Grow', sitePhone:'0796820013', siteEmail:'support@pesagrow.co.ke',
       currency:'KES', minDeposit:1000, minWithdraw:500, withdrawFee:2,
       referralRate:5, welcomeBonus:0, minHoldingDays:3,
+      principalLockDays:90,
+      maxDailyWithdrawals:3,
       mpesaTill: process.env.MPESA_SHORTCODE||'174379',
       mpesaName:'PESA GROW LTD',
       maintenanceMode:'false'
@@ -567,29 +569,159 @@ app.post('/api/user/withdraw', authUser, (req, res) => {
     const user    = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
     const minWd   = parseFloat(getSetting('minWithdraw')||500);
     const feeRate = parseFloat(getSetting('withdrawFee')||2) / 100;
-    const holdDays = parseFloat(getSetting('minHoldingDays')||0);
+
     if (!user) return res.status(404).json({ error: 'User not found' });
-    if (amount < minWd) return res.status(400).json({ error: `Minimum withdrawal is KES ${minWd}` });
-    if (!address)       return res.status(400).json({ error: 'Enter your M-Pesa number or account' });
+    if (!amount || amount < minWd) return res.status(400).json({ error: `Minimum withdrawal is KES ${minWd.toLocaleString()}` });
+    if (!address) return res.status(400).json({ error: 'Enter your M-Pesa number or account' });
     if (user.balance < amount) return res.status(400).json({ error: 'Insufficient balance' });
-    if (holdDays > 0) {
-      const firstDep = db.prepare("SELECT createdAt FROM deposits WHERE userId=? AND status='approved' ORDER BY createdAt ASC LIMIT 1").get(user.id);
-      if (!firstDep) return res.status(400).json({ error: 'You must make a deposit before withdrawing.' });
-      const daysSince = (Date.now() - new Date(firstDep.createdAt).getTime()) / 86400000;
-      if (daysSince < holdDays) {
-        const daysLeft = Math.ceil(holdDays - daysSince);
-        return res.status(400).json({ error: `Withdrawals unlock in ${daysLeft} day(s). Minimum holding period is ${holdDays} days.` });
-      }
+
+    // ── RULE 1: Max 3 withdrawals per day ──────────────────
+    const todayStart = new Date();
+    todayStart.setHours(0,0,0,0);
+    const todayWds = db.prepare(`
+      SELECT COUNT(*) as c FROM withdrawals
+      WHERE userId=? AND status != 'rejected'
+      AND createdAt >= ?
+    `).get(user.id, todayStart.toISOString()).c;
+
+    const maxDailyWds = parseInt(getSetting('maxDailyWithdrawals')||3);
+    if (todayWds >= maxDailyWds) {
+      return res.status(400).json({
+        error: `Daily withdrawal limit reached. You can withdraw up to ${maxDailyWds} times per day. Resets at midnight.`
+      });
     }
+
+    // ── RULE 2: Only profits can be withdrawn ──────────────
+    // Principal is locked for 90 days from first investment
+    // Calculate withdrawable profit balance
+    const LOCK_DAYS = parseInt(getSetting('principalLockDays')||90);
+
+    // Total profits earned (from profit transactions)
+    const totalProfitsEarned = db.prepare(`
+      SELECT COALESCE(SUM(amount),0) as s FROM transactions
+      WHERE userId=? AND type='profit' AND status='completed'
+    `).get(user.id).s;
+
+    // Total referral bonuses earned
+    const totalReferralEarned = db.prepare(`
+      SELECT COALESCE(SUM(amount),0) as s FROM transactions
+      WHERE userId=? AND type IN ('referral','bonus') AND status='completed'
+    `).get(user.id).s;
+
+    // Total already withdrawn (approved withdrawals)
+    const totalWithdrawnSoFar = db.prepare(`
+      SELECT COALESCE(SUM(amount),0) as s FROM withdrawals
+      WHERE userId=? AND status='approved'
+    `).get(user.id).s;
+
+    // Withdrawable balance = profits + bonuses - already withdrawn
+    const withdrawableBalance = Math.max(0,
+      totalProfitsEarned + totalReferralEarned - totalWithdrawnSoFar
+    );
+
+    // Check if any principal is still locked (investment < 90 days old)
+    const lockedInvestments = db.prepare(`
+      SELECT COUNT(*) as c FROM investments
+      WHERE userId=? AND status='active'
+      AND (julianday('now') - julianday(startDate)) < ?
+    `).get(user.id, LOCK_DAYS).c;
+
+    const hasPrincipalLocked = lockedInvestments > 0;
+
+    // If principal is locked, user can only withdraw up to withdrawable (profit) balance
+    if (hasPrincipalLocked && amount > withdrawableBalance) {
+      const daysInfo = db.prepare(`
+        SELECT startDate,
+               ? - (julianday('now') - julianday(startDate)) as daysLeft
+        FROM investments
+        WHERE userId=? AND status='active'
+        ORDER BY startDate ASC LIMIT 1
+      `).get(LOCK_DAYS, user.id);
+
+      const daysLeft = daysInfo ? Math.ceil(daysInfo.daysLeft) : LOCK_DAYS;
+
+      return res.status(400).json({
+        error: `Your initial investment is locked for ${LOCK_DAYS} days. ` +
+               `You can only withdraw profits. ` +
+               `Available profit balance: KES ${withdrawableBalance.toFixed(2)}. ` +
+               `Principal unlocks in ${daysLeft} day(s).`,
+        withdrawableBalance,
+        daysLeft,
+        principalLocked: true
+      });
+    }
+
+    // All checks passed — process withdrawal
     const fee = amount * feeRate;
     const net = amount - fee;
-    db.prepare('UPDATE users SET balance=balance-? WHERE id=?').run(amount,user.id);
+    db.prepare('UPDATE users SET balance=balance-? WHERE id=?').run(amount, user.id);
     const wdId = uuidv4();
     db.prepare(`INSERT INTO withdrawals (id,userId,amount,fee,net,method,address,status,createdAt) VALUES (?,?,?,?,?,?,?,?,?)`)
-      .run(wdId,user.id,amount,fee,net,method||'M-Pesa',address,'pending',now());
-    addTx(user.id,'withdrawal',amount,`${method||'M-Pesa'} withdrawal — pending`,'pending');
-    addNotif(user.id,`⏳ Withdrawal of KES ${amount.toFixed(2)} submitted. Processing within 2 hours.`,'info');
-    res.json({ success:true, withdrawalId:wdId, net, fee });
+      .run(wdId, user.id, amount, fee, net, method||'M-Pesa', address, 'pending', now());
+    addTx(user.id, 'withdrawal', amount, `${method||'M-Pesa'} withdrawal — pending`, 'pending');
+
+    const remaining = maxDailyWds - todayWds - 1;
+    addNotif(user.id,
+      `⏳ Withdrawal of KES ${amount.toFixed(2)} submitted. ` +
+      `You have ${remaining} withdrawal(s) remaining today.`,
+      'info'
+    );
+
+    res.json({ success:true, withdrawalId:wdId, net, fee, withdrawalsRemainingToday: remaining });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/user/withdraw-info — returns withdrawal limits for the dashboard
+app.get('/api/user/withdraw-info', authUser, (req, res) => {
+  try {
+    const user = db.prepare('SELECT * FROM users WHERE id=?').get(req.user.id);
+    if (!user) return res.status(404).json({ error: 'Not found' });
+
+    const LOCK_DAYS   = parseInt(getSetting('principalLockDays')||90);
+    const maxDailyWds = parseInt(getSetting('maxDailyWithdrawals')||3);
+    const feeRate     = parseFloat(getSetting('withdrawFee')||2);
+    const minWd       = parseFloat(getSetting('minWithdraw')||500);
+
+    // Today's withdrawal count
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    const todayWds = db.prepare(`
+      SELECT COUNT(*) as c FROM withdrawals
+      WHERE userId=? AND status != 'rejected' AND createdAt >= ?
+    `).get(user.id, todayStart.toISOString()).c;
+
+    // Profit balance calculation
+    const totalProfitsEarned  = db.prepare(`SELECT COALESCE(SUM(amount),0) as s FROM transactions WHERE userId=? AND type='profit' AND status='completed'`).get(user.id).s;
+    const totalReferralEarned = db.prepare(`SELECT COALESCE(SUM(amount),0) as s FROM transactions WHERE userId=? AND type IN ('referral','bonus') AND status='completed'`).get(user.id).s;
+    const totalWithdrawnSoFar = db.prepare(`SELECT COALESCE(SUM(amount),0) as s FROM withdrawals WHERE userId=? AND status='approved'`).get(user.id).s;
+    const withdrawableBalance = Math.max(0, totalProfitsEarned + totalReferralEarned - totalWithdrawnSoFar);
+
+    // Locked investments
+    const lockedInvs = db.prepare(`
+      SELECT id, amount, startDate,
+             ? - (julianday('now') - julianday(startDate)) as daysLeft,
+             julianday('now') - julianday(startDate) as daysIn
+      FROM investments
+      WHERE userId=? AND status='active'
+      ORDER BY startDate ASC
+    `).all(LOCK_DAYS, user.id);
+
+    const totalLocked = lockedInvs.reduce((s,i)=>s+(+i.amount||0),0);
+    const earliestUnlock = lockedInvs.length > 0 ? Math.ceil(lockedInvs[0].daysLeft) : 0;
+
+    res.json({
+      withdrawableBalance,
+      totalBalance: user.balance,
+      totalLocked,
+      principalLocked: lockedInvs.length > 0,
+      earliestUnlockDays: earliestUnlock,
+      lockDays: LOCK_DAYS,
+      todayWithdrawals: todayWds,
+      maxDailyWithdrawals: maxDailyWds,
+      withdrawalsRemaining: Math.max(0, maxDailyWds - todayWds),
+      feeRate,
+      minWithdraw: minWd,
+      lockedInvestments: lockedInvs
+    });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
