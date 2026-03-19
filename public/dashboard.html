@@ -911,7 +911,25 @@ const spinStyle = document.createElement('style');
 spinStyle.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(spinStyle);
 
-init();
+async function init() {
+  try {
+    currentUser = await PG.Auth.getMe();
+    if (!currentUser) {
+      window.location.href = 'index.html';
+      return;
+    }
+    const nameEl = document.getElementById('userName');
+    const avEl   = document.getElementById('userAv');
+    if (nameEl) nameEl.textContent = currentUser.firstName;
+    if (avEl)   avEl.textContent   = (currentUser.firstName||'?')[0] + (currentUser.lastName||'?')[0];
+    loadPage('overview');
+    loadNotifications();
+    startLiveTicker();
+  } catch(e) {
+    console.error('Init error:', e);
+    window.location.href = 'index.html';
+  }
+}
 </script>
 </body>
 </html>
