@@ -457,38 +457,85 @@ let allTx = [];
 function token() { return localStorage.getItem('pg_token'); }
 
 async function apiFetch(url, opts={}) {
-  const r = await fetch(API + url, {
-    headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token() },
-    ...opts
-  });
-  // Handle non-JSON responses
-  const text = await r.text();
-  let d;
-  try { d = JSON.parse(text); }
-  catch { throw new Error('Server error — please refresh'); }
+  try {
+    const r = await fetch(API + url, {
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token() },
+      ...opts
+    });
 
-  // If token rejected or user not found — logout and redirect cleanly
-  if (r.status === 401 || r.status === 403) {
-    localStorage.removeItem('pg_token');
-    localStorage.removeItem('pg_user');
-    window.location.href = 'index.html';
-    return;
+    // Parse response safely
+    let d;
+    try { d = await r.json(); }
+    catch { throw new Error('Server returned invalid response — please refresh'); }
+
+    // Auth failed — token expired or invalid
+    if (r.status === 401 || r.status === 403) {
+      clearAuthAndRedirect();
+      return;
+    }
+
+    // User record missing from DB (happens when Railway resets DB)
+    if (r.status === 404) {
+      clearAuthAndRedirect();
+      return;
+    }
+
+    if (!r.ok) throw new Error(d.error || 'Request failed');
+    return d;
+  } catch(e) {
+    // Network errors — don't clear auth, just throw
+    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
+      throw new Error('No internet connection. Please check your network.');
+    }
+    throw e;
   }
-
-  // If user record missing — clear and redirect
-  if (r.status === 404 && d.error && (
-    d.error.toLowerCase().includes('not found') ||
-    d.error.toLowerCase().includes('account')
-  )) {
-    localStorage.removeItem('pg_token');
-    localStorage.removeItem('pg_user');
-    window.location.href = 'index.html';
-    return;
-  }
-
-  if (!r.ok) throw new Error(d.error || 'Request failed');
-  return d;
 }
+
+function clearAuthAndRedirect() {
+  localStorage.removeItem('pg_token');
+  localStorage.removeItem('pg_user');
+  sessionStorage.clear();
+  // Use replace so back button doesn't return to broken dashboard
+  window.location.replace('index.html');
+}
+
+const k = n => 'KES ' + (+(n||0)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+const ds = s => s ? new Date(s).toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'2-digit'}) : '—';
+const dt = s => s ? new Date(s).toLocaleString('en-KE',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '—';
+
+function toast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'), 4000);
+}
+
+function showErr(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg; el.style.display = 'block';
+  const ok = document.getElementById(id.replace('Err','Ok'));
+  if (ok) ok.style.display = 'none';
+}
+function showOk(id, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg; el.style.display = 'block';
+  const err = document.getElementById(id.replace('Ok','Err'));
+  if (err) err.style.display = 'none';
+}
+function clearMsg(errId) {
+  const e = document.getElementById(errId); if(e) e.style.display='none';
+  const o = document.getElementById(errId.replace('Err','Ok')); if(o) o.style.display='none';
+}
+
+function doLogout() {
+  localStorage.removeItem('pg_token');
+  localStorage.removeItem('pg_user');
+  sessionStorage.clear();
+  // replace() prevents user going back to dashboard with back button
+  window.location.replace('index.html');
+}
+
 // ══════════════════════════════════════════════════
 //  INIT
 // ══════════════════════════════════════════════════
@@ -496,32 +543,34 @@ let platformSettings = { minDeposit:1000, minWithdraw:500, withdrawFee:2 };
 
 async function init() {
   try {
+    const tok = token();
+    if (!tok) { window.location.replace('index.html'); return; }
+
+    // Use stored user for instant display
     const stored = localStorage.getItem('pg_user');
-    const tok    = token();
-
-    // No token at all — go to login
-    if (!tok) { window.location.href = 'index.html'; return; }
-
-    // Use stored user immediately for fast load
     if (stored) {
       try { currentUser = JSON.parse(stored); } catch {}
     }
 
-    // Always verify token with server — catches expired/invalid tokens
-    try {
-      currentUser = await apiFetch('/api/auth/me');
-      localStorage.setItem('pg_user', JSON.stringify(currentUser));
-    } catch(authErr) {
-      // Token expired or invalid — clear and redirect to login
-    function doLogout() {
-  localStorage.removeItem('pg_token');
-  localStorage.removeItem('pg_user');
-  sessionStorage.clear();
-  // Force a clean reload of index.html — no cache
-  window.location.replace('index.html');
-}
+    // Always verify with server — this is the source of truth
+    const me = await fetch(API + '/api/auth/me', {
+      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok }
+    });
 
-    // Load live platform settings
+    if (me.status === 401 || me.status === 403 || me.status === 404) {
+      // Token invalid, expired, or user deleted — clear and go to login
+      clearAuthAndRedirect(); return;
+    }
+
+    let meData;
+    try { meData = await me.json(); } catch { clearAuthAndRedirect(); return; }
+
+    if (!meData || !meData.id) { clearAuthAndRedirect(); return; }
+
+    currentUser = meData;
+    localStorage.setItem('pg_user', JSON.stringify(currentUser));
+
+    // Load platform settings
     try {
       platformSettings = await apiFetch('/api/settings/public');
       const minDep = parseFloat(platformSettings.minDeposit)||1000;
@@ -531,20 +580,22 @@ async function init() {
       if (manEl) { manEl.min = minDep; manEl.placeholder = `Min KES ${minDep.toLocaleString()}`; }
     } catch {}
 
-    // Set nav user info
-    const av = ((currentUser.firstName||'P')[0] + (currentUser.lastName||'G')[0]).toUpperCase();
-    document.getElementById('userAv').textContent  = av;
+    // Set nav
+    const av = ((currentUser.firstName||'P')[0]+(currentUser.lastName||'G')[0]).toUpperCase();
+    document.getElementById('userAv').textContent   = av;
     document.getElementById('userName').textContent = currentUser.firstName;
 
     await loadOverview();
     loadNotifications();
     startLiveTicker();
-    startDepositPoller(); // ← auto-checks pending deposits every 10s
+    startDepositPoller();
+
   } catch(e) {
-    console.error('Init error:', e);
-    localStorage.removeItem('pg_token');
-    localStorage.removeItem('pg_user');
-    window.location.href = 'index.html';
+    console.error('Init error:', e.message);
+    // Only redirect if it's an auth error, not a network blip
+    if (!e.message.includes('internet') && !e.message.includes('network')) {
+      clearAuthAndRedirect();
+    }
   }
 }
 
