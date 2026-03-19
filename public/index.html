@@ -4,6 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pesa Grow — Kenya's #1 Investment Platform</title>
+
+<!-- ── PWA INSTALL SUPPORT ── -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#00e676">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pesa Grow">
+<meta name="application-name" content="Pesa Grow">
+<meta name="description" content="Kenya's #1 Daily Investment Platform. Earn up to 10% daily via M-Pesa.">
+
+<!-- Apple touch icons -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180.png">
+
+<!-- Splash screens for iPhone -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Favicon -->
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -667,27 +689,20 @@ function renderModal(type){
 function showErr(msg){const e=document.getElementById('mErr');if(e){e.textContent=msg;e.style.display='block';}const o=document.getElementById('mOk');if(o)o.style.display='none';}
 function showOk(msg){const e=document.getElementById('mOk');if(e){e.textContent=msg;e.style.display='block';}const r=document.getElementById('mErr');if(r)r.style.display='none';}
 
-async function doLogin() {
-  const email = document.getElementById('lEmail').value.trim();
-  const pass  = document.getElementById('lPass').value;
-  if (!email || !pass) { showErr('Please fill all fields'); return; }
-  const btn = document.querySelector('#modalBody .btn-green');
-  btn.textContent = 'Logging in...'; btn.disabled = true;
-  try {
-    // Always clear old tokens before logging in
-    localStorage.removeItem('pg_token');
-    localStorage.removeItem('pg_user');
-
-    const user = await PG.Auth.login(email, pass);
+// LOGIN
+async function doLogin(){
+  const email=document.getElementById('lEmail').value.trim();
+  const pass=document.getElementById('lPass').value;
+  if(!email||!pass){showErr('Please fill all fields');return;}
+  const btn=document.querySelector('#modalBody .btn-green');
+  btn.textContent='Logging in...';btn.disabled=true;
+  try{
+    const user=await PG.Auth.login(email,pass);
     closeModal();
-    showToast('Welcome back, ' + user.firstName + '! 👋', 'ok');
+    showToast('Welcome back, '+user.firstName+'! 👋','ok');
     updateNav(user);
-    setTimeout(() => location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html', 700);
-  } catch(e) {
-    showErr(e.message);
-    btn.textContent = 'Login to Account';
-    btn.disabled = false;
-  }
+    setTimeout(()=>location.href=user.role==='admin'?'admin.html':'dashboard.html',700);
+  }catch(e){showErr(e.message);btn.textContent='Login to Account';btn.disabled=false;}
 }
 
 // REGISTER
@@ -823,6 +838,83 @@ function startVideo() {
     allowfullscreen>
   </iframe>`;
 }
+</script>
+
+<!-- ── PWA SERVICE WORKER + INSTALL PROMPT ── -->
+<script>
+// Register service worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('✅ SW registered:', reg.scope))
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// Install prompt — shows "Add to Home Screen" button
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show install banner after 3 seconds
+  setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  if (document.getElementById('installBanner')) return;
+
+  const banner = document.createElement('div');
+  banner.id = 'installBanner';
+  banner.style.cssText = `
+    position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+    background:rgba(10,15,24,0.97);border:1.5px solid rgba(0,230,118,0.4);
+    border-radius:16px;padding:16px 20px;z-index:999;
+    display:flex;align-items:center;gap:14px;
+    box-shadow:0 8px 40px rgba(0,0,0,0.6);max-width:380px;width:90%;
+    animation:slideUp .4s ease;
+  `;
+  banner.innerHTML = `
+    <div style="width:44px;height:44px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;color:#000;flex-shrink:0">PG</div>
+    <div style="flex:1">
+      <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;color:#eef2ff">Install Pesa Grow</div>
+      <div style="font-size:12px;color:#7986a8;margin-top:2px">Add to home screen for the best experience</div>
+    </div>
+    <button onclick="doInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:9px;padding:9px 16px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Install</button>
+    <button onclick="dismissInstall()" style="background:none;border:none;color:#7986a8;font-size:20px;cursor:pointer;padding:4px;line-height:1">×</button>
+  `;
+  document.body.appendChild(banner);
+}
+
+async function doInstall() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const result = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.remove();
+  if (result.outcome === 'accepted') {
+    showToast('Pesa Grow installed! 🎉', 'ok');
+  }
+}
+
+function dismissInstall() {
+  const banner = document.getElementById('installBanner');
+  if (banner) banner.remove();
+  deferredPrompt = null;
+}
+
+// Add slideUp animation
+const pwaStyle = document.createElement('style');
+pwaStyle.textContent = `@keyframes slideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}`;
+document.head.appendChild(pwaStyle);
+
+// Track when app is installed
+window.addEventListener('appinstalled', () => {
+  showToast('Pesa Grow installed successfully! 🎉', 'ok');
+  deferredPrompt = null;
+});
 </script>
 </body>
 </html>
