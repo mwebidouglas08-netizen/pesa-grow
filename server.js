@@ -408,7 +408,6 @@ app.get('/api/mpesa/status/:checkoutId', authUser, (req, res) => {
   if (!dep) return res.status(404).json({ error: 'Deposit not found' });
   res.json({ status: dep.status, receiptNo: dep.mpesaReceiptNo });
 });
-
 app.post('/api/mpesa/callback', (req, res) => {
   res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
   try {
