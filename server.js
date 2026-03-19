@@ -20,6 +20,7 @@ const app  = express();
 const PORT = process.env.PORT || 3000;
 
 // ── MIDDLEWARE ──────────────────────────────────────────
+app.set('trust proxy', 1);
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
