@@ -18,8 +18,7 @@ app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve sw.js and manifest.json from root with correct headers
-// These MUST be at / for PWA to work
+// Serve PWA files with correct headers
 app.get('/sw.js', (req, res) => {
   res.setHeader('Content-Type', 'application/javascript');
   res.setHeader('Service-Worker-Allowed', '/');
@@ -31,6 +30,8 @@ app.get('/manifest.json', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
 });
+// Serve icons folder
+app.use('/icons', express.static(path.join(__dirname, 'public', 'icons')));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true });
 app.use('/api/', limiter);
 
