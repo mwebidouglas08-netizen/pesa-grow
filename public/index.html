@@ -885,6 +885,7 @@ function startVideo() {
 <style>
 @keyframes pgUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes pgFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pgPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.4)}50%{box-shadow:0 0 0 6px rgba(0,230,118,0)}}
 .pg-bar{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:rgba(5,9,15,.97);border:2px solid #00e676;border-radius:16px;padding:13px 16px;z-index:99999;display:flex;align-items:center;gap:12px;box-shadow:0 0 0 4px rgba(0,230,118,.08),0 16px 60px rgba(0,0,0,.8);max-width:380px;width:92%;animation:pgUp .4s cubic-bezier(.22,1,.36,1) forwards;font-family:'DM Sans',sans-serif}
 .pg-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(12px);z-index:99998;display:flex;align-items:center;justify-content:center;padding:20px;animation:pgFadeIn .3s ease}
 .pg-modal{background:#0a0f18;border:1.5px solid rgba(0,230,118,.3);border-radius:20px;padding:32px 28px;max-width:420px;width:100%;font-family:'DM Sans',sans-serif}
@@ -964,45 +965,79 @@ function startVideo() {
   };
 
   // ── Step-by-step install modal ───────────────────
+  var _isDesktop = !_isIOS && !/android|mobile|phone/i.test(navigator.userAgent);
+
   function pgShowModal() {
     if (document.getElementById('pgModal')) return;
 
-    var steps, title, icon;
-    if (_isIOS) {
-      title = '📲 Install on iPhone / iPad';
+    var title, steps, tip;
+
+    if (_isDesktop) {
+      // ── DESKTOP (Windows / Mac / Linux) ────────────
+      var isEdge   = /edg/i.test(navigator.userAgent);
+      var isChrome = /chrome/i.test(navigator.userAgent) && !isEdge;
+      var browser  = isEdge ? 'Edge' : isChrome ? 'Chrome' : 'Chrome or Edge';
+
+      title = '🖥️ Install on Computer';
+      tip   = 'Once installed, Pesa Grow opens like a normal desktop app — no browser needed!';
       steps = [
-        ['🌐', 'Make sure you are using <strong>Safari</strong> browser (not Chrome)'],
-        ['⬆️', 'Tap the <strong>Share</strong> button at the bottom of Safari'],
+        ['🌐', 'Make sure you are using <strong>' + browser + '</strong> browser'],
+        ['⊕',  'Look at the <strong>address bar</strong> (URL bar) at the top — you will see a <strong style="color:#00e676">⊕ install icon</strong> on the right side'],
+        ['🖱️', 'Click that <strong>install icon</strong> (⊕) in the address bar'],
+        ['✅',  'Click <strong>"Install"</strong> in the popup — Pesa Grow opens as a desktop app!']
+      ];
+    } else if (_isIOS) {
+      // ── iOS (iPhone / iPad) ─────────────────────────
+      title = '📱 Install on iPhone / iPad';
+      tip   = 'You must use Safari — Chrome on iPhone cannot install PWAs.';
+      steps = [
+        ['🌐', 'Open this page in <strong>Safari</strong> (not Chrome)'],
+        ['⬆️', 'Tap the <strong>Share</strong> button <strong style="color:#00e676">↑</strong> at the bottom of Safari'],
         ['➕', 'Scroll down and tap <strong>"Add to Home Screen"</strong>'],
         ['✅', 'Tap <strong>"Add"</strong> — Pesa Grow appears on your home screen!']
       ];
     } else {
-      title = '📲 Install Pesa Grow';
+      // ── Android ─────────────────────────────────────
+      title = '📲 Install on Android';
+      tip   = 'Works on Chrome, Samsung Internet and Edge browsers.';
       steps = [
-        ['🌐', 'Make sure you are using <strong>Chrome</strong> or <strong>Edge</strong> browser'],
-        ['⋮', 'Tap the <strong>3-dot menu</strong> (⋮) in the top right of your browser'],
+        ['🌐', 'Make sure you are using <strong>Chrome</strong> browser'],
+        ['⋮',  'Tap the <strong>3-dot menu</strong> (⋮) in the top right corner'],
         ['➕', 'Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>'],
         ['✅', 'Tap <strong>"Install"</strong> — Pesa Grow is added to your home screen!']
       ];
     }
 
-    var bg = document.createElement('div');
-    bg.className = 'pg-modal-bg'; bg.id = 'pgModal';
-    bg.onclick = function(e){ if(e.target===bg) pgCloseModal(); };
-
     var stepsHtml = steps.map(function(s, i) {
-      return '<div class="pg-step"><div class="pg-num">'+(i+1)+'</div><div style="font-size:14px;color:#c8cfe8;line-height:1.5;padding-top:3px">'+s[0]+' '+s[1]+'</div></div>';
+      return '<div class="pg-step">' +
+        '<div class="pg-num">' + (i+1) + '</div>' +
+        '<div style="font-size:14px;color:#c8cfe8;line-height:1.6;padding-top:2px">' + s[0] + ' ' + s[1] + '</div>' +
+        '</div>';
     }).join('');
 
+    // Desktop: show address bar visual hint
+    var desktopHint = _isDesktop ?
+      '<div style="margin:16px 0;background:#0f1520;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px">' +
+        '<div style="flex:1;background:#1a2030;border-radius:6px;padding:8px 12px;font-size:12px;color:#7986a8;font-family:monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">' + (window.location.hostname) + '</div>' +
+        '<div style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border-radius:6px;padding:6px 10px;font-weight:800;font-size:13px;white-space:nowrap;animation:pgPulse 1.5s infinite">⊕ Install</div>' +
+      '</div>' +
+      '<div style="font-size:12px;color:#7986a8;text-align:center;margin-bottom:8px">👆 This is what the install icon looks like in your address bar</div>'
+      : '';
+
+    var bg = document.createElement('div');
+    bg.className = 'pg-modal-bg';
+    bg.id = 'pgModal';
+    bg.onclick = function(e) { if (e.target === bg) pgCloseModal(); };
     bg.innerHTML =
       '<div class="pg-modal">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">' +
-          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">'+title+'</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">' +
+          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">' + title + '</div>' +
           '<button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;line-height:1">×</button>' +
         '</div>' +
+        desktopHint +
         stepsHtml +
-        '<div style="margin-top:20px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#7986a8;text-align:center">' +
-          '💡 After installing, open the app from your home screen for the best experience' +
+        '<div style="margin-top:18px;background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:11px 14px;font-size:13px;color:#7986a8;text-align:center">' +
+          '💡 ' + tip +
         '</div>' +
         '<button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button>' +
       '</div>';
@@ -1025,7 +1060,7 @@ function startVideo() {
       btn.id = 'pgNavBtn';
       btn.className = 'btn btn-ghost';
       btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.3);color:#00e676';
-      btn.innerHTML = '📲 Install';
+      btn.innerHTML = _isDesktop ? '🖥️ Install App' : '📲 Install';
       btn.onclick = window.pgDoInstall;
       nav.insertBefore(btn, nav.firstChild);
     }, 800);
