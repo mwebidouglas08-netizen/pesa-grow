@@ -182,6 +182,7 @@ select.fc option{background:var(--bg3)}
   <div class="sb-item" data-page="broadcast" onclick="showPage('broadcast')"><span class="ic">📣</span> Broadcast</div>
   <div class="sb-item" data-page="settings" onclick="showPage('settings')"><span class="ic">⚙️</span> Settings</div>
   <div class="sb-item" data-page="mplogs" onclick="showPage('mplogs')"><span class="ic">📱</span> M-Pesa Logs</div>
+  <div class="sb-item" data-page="b2clogs" onclick="showPage('b2clogs')"><span class="ic">💸</span> B2C Payments</div>
   <div class="sb-bottom">
     <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.12);border-radius:12px;padding:14px;text-align:center">
       <div style="font-size:20px;margin-bottom:6px">📞</div>
@@ -267,6 +268,7 @@ select.fc option{background:var(--bg3)}
     <div class="tbl-tools">
       <button class="btn btn-ghost btn-sm filterWdBtn active" onclick="filterWds('all',this)">All</button>
       <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('pending',this)">⏳ Pending</button>
+      <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('processing',this)">📤 Sending</button>
       <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('approved',this)">✅ Approved</button>
       <button class="btn btn-ghost btn-sm filterWdBtn" onclick="filterWds('rejected',this)">❌ Rejected</button>
       <button class="btn btn-ghost btn-sm" onclick="loadWithdrawals()">🔄 Refresh</button>
@@ -386,14 +388,31 @@ select.fc option{background:var(--bg3)}
 
   <!-- ── MPESA LOGS ─────────────────────────────── -->
   <div class="page" id="page-mplogs">
-    <div class="page-title">M-Pesa Callback Logs</div>
-    <div class="page-sub">All Daraja STK Push payment records</div>
+    <div class="page-title">M-Pesa STK Push Logs</div>
+    <div class="page-sub">All Daraja STK Push deposit records</div>
     <div class="tbl-tools">
       <button class="btn btn-ghost btn-sm" onclick="loadMpesaLogs()">🔄 Refresh</button>
     </div>
     <div class="tbl-wrap"><table class="tbl">
       <thead><tr><th>Checkout ID</th><th>Phone</th><th>Amount</th><th>Result</th><th>Receipt No.</th><th>Processed At</th></tr></thead>
       <tbody id="mpBody"></tbody>
+    </table></div>
+  </div>
+
+  <!-- ── B2C PAYMENTS ──────────────────────────────── -->
+  <div class="page" id="page-b2clogs">
+    <div class="page-title">B2C Withdrawal Payments</div>
+    <div class="page-sub">Automatic M-Pesa B2C payment history — money sent to members</div>
+
+    <!-- B2C Setup Status -->
+    <div id="b2cStatus" style="margin-bottom:20px"></div>
+
+    <div class="tbl-tools">
+      <button class="btn btn-ghost btn-sm" onclick="loadB2CLogs()">🔄 Refresh</button>
+    </div>
+    <div class="tbl-wrap"><table class="tbl">
+      <thead><tr><th>Member</th><th>Phone</th><th>Amount Sent</th><th>Status</th><th>M-Pesa ID</th><th>Conversation ID</th><th>Initiated</th><th>Completed</th></tr></thead>
+      <tbody id="b2cBody"></tbody>
     </table></div>
   </div>
 
@@ -490,7 +509,7 @@ function showPage(name) {
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.toggle('active',s.dataset.page===name));
   ({dashboard:loadDashboard,members:loadMembers,deposits:loadDeposits,withdrawals:loadWithdrawals,
     investments:loadInvestments,transactions:loadTransactions,plans:loadPlans,
-    broadcast:loadBroadcast,settings:loadSettings,mplogs:loadMpesaLogs})[name]?.();
+    broadcast:loadBroadcast,settings:loadSettings,mplogs:loadMpesaLogs,b2clogs:loadB2CLogs})[name]?.();
 }
 
 // ══════════════════════════════════════════════════
@@ -725,42 +744,120 @@ async function loadWithdrawals() {
 }
 
 function renderWithdrawals(list) {
-  document.getElementById('wdsBody').innerHTML=list.map(w=>`
-    <tr>
-      <td><div style="font-weight:600">${w.userName||'—'}</div><div style="font-size:11px;color:var(--text2)">${w.userPhone||''}</div></td>
+  document.getElementById('wdsBody').innerHTML = list.map(w => {
+    const statusBadge = {
+      pending:    '<span class="badge b-pend">⏳ Pending</span>',
+      processing: '<span class="badge b-blue">📤 Sending...</span>',
+      approved:   '<span class="badge b-ok">✅ Paid</span>',
+      failed:     '<span class="badge b-fail">❌ Failed</span>',
+      rejected:   '<span class="badge b-fail">❌ Rejected</span>',
+    }[w.status] || `<span class="badge b-pend">${w.status}</span>`;
+
+    const b2cInfo = w.b2cTransactionId
+      ? `<div style="font-size:10px;color:var(--green);font-family:monospace">${w.b2cTransactionId}</div>` : '';
+
+    const actions = w.status === 'pending' ? `
+      <button class="btn btn-green btn-sm" onclick="approveWd('${w.id}','${w.address}',${w.net})">
+        📲 Send via M-Pesa
+      </button>
+      <button class="btn btn-red btn-sm" onclick="rejectWd('${w.id}')">❌ Reject</button>` :
+      w.status === 'processing' ? `<span style="color:var(--blue);font-size:12px">📤 Sending...</span>` :
+      w.status === 'approved'   ? `<span style="color:var(--green);font-size:12px">✅ Paid</span>${b2cInfo}` :
+      `<span style="color:var(--red);font-size:12px">❌ ${w.status}</span>`;
+
+    return `<tr>
+      <td>
+        <div style="font-weight:600">${w.userName||'—'}</div>
+        <div style="font-size:11px;color:var(--text2)">${w.userPhone||''}</div>
+      </td>
       <td style="font-weight:700">${k(w.amount)}</td>
       <td style="color:var(--red)">${k(w.fee)}</td>
       <td style="color:var(--green);font-weight:700">${k(w.net)}</td>
       <td>${w.method}</td>
-      <td style="font-family:monospace;font-size:12px;color:var(--text2)">${w.address}</td>
-      <td><span class="badge ${w.status==='approved'?'b-ok':w.status==='pending'?'b-pend':'b-fail'}">${w.status}</span></td>
-      <td style="color:var(--text2)">${dt(w.createdAt)}</td>
-      <td style="display:flex;gap:6px">
-        ${w.status==='pending'?`
-          <button class="btn btn-green btn-sm" onclick="approveWd('${w.id}')">✅ Pay</button>
-          <button class="btn btn-red btn-sm" onclick="rejectWd('${w.id}')">❌ Reject</button>`:
-        w.status==='approved'?`<span style="color:var(--green);font-size:13px">✅ Paid</span>`:
-        `<span style="color:var(--red);font-size:13px">❌ Rejected</span>`}
+      <td>
+        <div style="font-family:monospace;font-size:12px;color:var(--text)">${w.address}</div>
+        ${w.rejectionReason ? `<div style="font-size:10px;color:var(--red)">${w.rejectionReason}</div>` : ''}
       </td>
-    </tr>`).join('') || emptyRow(9,'No withdrawals yet');
+      <td>${statusBadge}</td>
+      <td style="color:var(--text2)">${dt(w.createdAt)}</td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap">${actions}</td>
+    </tr>`;
+  }).join('') || emptyRow(9,'No withdrawals yet');
 }
 
-function filterWds(status,btn) {
+function filterWds(status, btn) {
   document.querySelectorAll('.filterWdBtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  renderWithdrawals(status==='all'?allWithdrawals:allWithdrawals.filter(w=>w.status===status));
+  renderWithdrawals(status==='all' ? allWithdrawals : allWithdrawals.filter(w=>w.status===status));
 }
 
-async function approveWd(id) {
-  if(!confirm('Mark this withdrawal as paid and sent to member?'))return;
-  try { await api(`/api/admin/withdrawals/${id}/approve`,{method:'PUT'}); toast('Withdrawal approved!','ok'); loadWithdrawals(); loadDashboard(); }
-  catch(e) { toast(e.message,'err'); }
+async function approveWd(id, address, net) {
+  // Show confirmation with B2C context
+  const b2cReady = true; // Always try — server decides if B2C is configured
+  const msg = `Send KES ${(+net).toLocaleString()} to ${address} via M-Pesa B2C?\n\nThis will automatically transfer the money to the member's phone.`;
+  if (!confirm(msg)) return;
+
+  // Show loading state
+  toast('Initiating M-Pesa payment...', 'ok');
+
+  try {
+    const result = await api(`/api/admin/withdrawals/${id}/approve`, { method:'PUT' });
+
+    if (result.b2c) {
+      // B2C initiated successfully
+      openModal(`
+        <div class="modal-title">📲 M-Pesa Payment Initiated</div>
+        <div class="modal-sub">B2C payment is being processed by Safaricom</div>
+        <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:12px;padding:20px;text-align:center;margin:16px 0">
+          <div style="font-size:40px;margin-bottom:10px">📤</div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--green);margin-bottom:6px">Payment Sent!</div>
+          <div style="font-size:14px;color:var(--text2)">KES ${(+net).toLocaleString()} is being transferred to <strong style="color:var(--text)">${address}</strong></div>
+          <div style="font-size:12px;color:var(--text2);margin-top:10px">Conversation ID: <code style="color:var(--green)">${result.conversationId||'—'}</code></div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);text-align:center">
+          The member will receive an M-Pesa confirmation SMS. Status updates automatically when Safaricom confirms.
+        </div>
+        <button class="btn btn-green btn-full" style="margin-top:16px" onclick="closeModal();loadWithdrawals()">Done</button>
+      `);
+    } else if (result.warning) {
+      // B2C failed — manual needed
+      openModal(`
+        <div class="modal-title">⚠️ Manual Payment Required</div>
+        <div class="modal-sub">B2C auto-payment failed. Please send manually.</div>
+        <div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.2);border-radius:12px;padding:20px;margin:16px 0">
+          <div style="font-size:13px;color:var(--text2);margin-bottom:14px">${result.warning}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px">
+            <div style="background:var(--bg3);padding:12px;border-radius:9px">
+              <div style="color:var(--text2);font-size:11px;margin-bottom:4px">SEND TO</div>
+              <div style="font-weight:700;font-size:18px">${address}</div>
+            </div>
+            <div style="background:var(--bg3);padding:12px;border-radius:9px">
+              <div style="color:var(--text2);font-size:11px;margin-bottom:4px">AMOUNT</div>
+              <div style="font-weight:700;font-size:18px;color:var(--green)">KES ${(+net).toLocaleString()}</div>
+            </div>
+          </div>
+        </div>
+        <a href="tel:${address}" class="btn btn-green btn-full" style="margin-top:4px;text-decoration:none;justify-content:center">📞 Open M-Pesa (${address})</a>
+        <button class="btn btn-ghost btn-full" style="margin-top:10px" onclick="closeModal();loadWithdrawals()">Close</button>
+      `);
+    } else {
+      toast('Withdrawal approved!', 'ok');
+      loadWithdrawals();
+      loadDashboard();
+    }
+  } catch(e) {
+    toast('Error: ' + e.message, 'err');
+  }
 }
 
 async function rejectWd(id) {
-  const reason=prompt('Reason for rejection (balance will be refunded):'); if(!reason)return;
-  try { await api(`/api/admin/withdrawals/${id}/reject`,{method:'PUT',body:JSON.stringify({reason})}); toast('Withdrawal rejected — balance refunded','ok'); loadWithdrawals(); }
-  catch(e) { toast(e.message,'err'); }
+  const reason = prompt('Reason for rejection (balance will be refunded to member):');
+  if (!reason) return;
+  try {
+    await api(`/api/admin/withdrawals/${id}/reject`, { method:'PUT', body:JSON.stringify({reason}) });
+    toast('Withdrawal rejected — balance refunded to member', 'ok');
+    loadWithdrawals();
+  } catch(e) { toast(e.message, 'err'); }
 }
 
 // ══════════════════════════════════════════════════
@@ -965,6 +1062,74 @@ async function loadMpesaLogs() {
         <td style="color:var(--text2)">${dt(l.processedAt)}</td>
       </tr>`).join('') || emptyRow(6,'No M-Pesa logs yet');
   } catch(e) { toast(e.message,'err'); }
+}
+
+// ══════════════════════════════════════════════════
+//  B2C PAYMENTS LOG
+// ══════════════════════════════════════════════════
+async function loadB2CLogs() {
+  // Show B2C setup status card
+  const statusEl = document.getElementById('b2cStatus');
+  if (statusEl) {
+    try {
+      const settings = await api('/api/admin/settings');
+      const configured = !!(settings.mpesaB2cInitiatorName && settings.mpesaB2cSecurityCredential);
+      statusEl.innerHTML = configured ? `
+        <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:13px;padding:18px 22px;display:flex;align-items:center;gap:14px">
+          <div style="font-size:28px">✅</div>
+          <div>
+            <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin-bottom:3px">B2C Auto-Payment Active</div>
+            <div style="font-size:13px;color:var(--text2)">Withdrawals are sent automatically via M-Pesa when you click "Send via M-Pesa". Initiator: <strong>${settings.mpesaB2cInitiatorName}</strong></div>
+          </div>
+        </div>` : `
+        <div style="background:rgba(255,193,7,.05);border:1px solid rgba(255,193,7,.2);border-radius:13px;padding:18px 22px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+            <div style="font-size:28px">⚠️</div>
+            <div>
+              <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin-bottom:3px">B2C Not Configured</div>
+              <div style="font-size:13px;color:var(--text2)">Add your Daraja B2C credentials in Railway env vars to enable automatic payments.</div>
+            </div>
+          </div>
+          <div style="background:var(--bg3);border-radius:10px;padding:14px;font-size:13px">
+            <div style="font-weight:700;margin-bottom:8px;color:var(--gold)">Required Railway Environment Variables:</div>
+            <div style="display:grid;gap:6px;font-family:monospace">
+              <div><span style="color:var(--green)">MPESA_B2C_INITIATOR_NAME</span> = your Daraja initiator username</div>
+              <div><span style="color:var(--green)">MPESA_B2C_SECURITY_CREDENTIAL</span> = encrypted credential from Daraja portal</div>
+              <div><span style="color:var(--text2);font-size:11px">(Also ensure MPESA_SHORTCODE and MPESA_ENV=live are set)</span></div>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:13px;color:var(--text2)">
+            📋 <strong>How to get B2C credentials:</strong>
+            Go to <a href="https://developer.safaricom.co.ke" target="_blank" style="color:var(--green)">developer.safaricom.co.ke</a> → Your App → B2C API → Copy Initiator Name and generate Security Credential.
+          </div>
+        </div>`;
+    } catch { statusEl.innerHTML = ''; }
+  }
+
+  // Load B2C payment logs
+  try {
+    const logs = await api('/api/admin/b2c-logs');
+    document.getElementById('b2cBody').innerHTML = logs.length ? logs.map(l => {
+      const statusBadge = {
+        pending: '<span class="badge b-pend">⏳ Pending</span>',
+        success: '<span class="badge b-ok">✅ Sent</span>',
+        failed:  '<span class="badge b-fail">❌ Failed</span>',
+        timeout: '<span class="badge b-fail">⏱ Timeout</span>',
+      }[l.status] || `<span class="badge b-pend">${l.status}</span>`;
+
+      // Get withdrawal info
+      return `<tr>
+        <td style="font-weight:600">${l.withdrawalId ? l.withdrawalId.slice(-8) : '—'}</td>
+        <td style="font-family:monospace">${l.phone||'—'}</td>
+        <td style="color:var(--green);font-weight:700">${l.amount ? k(l.amount) : '—'}</td>
+        <td>${statusBadge}</td>
+        <td style="font-family:monospace;font-size:11px;color:var(--green)">${l.transactionId||'—'}</td>
+        <td style="font-family:monospace;font-size:10px;color:var(--text2)">${(l.conversationId||'—').slice(-16)}</td>
+        <td style="color:var(--text2)">${dt(l.createdAt)}</td>
+        <td style="color:var(--text2)">${l.completedAt ? dt(l.completedAt) : '—'}</td>
+      </tr>`;
+    }).join('') : emptyRow(8,'No B2C payments yet. Approving a withdrawal will trigger one.');
+  } catch(e) { toast('B2C logs error: '+e.message,'err'); }
 }
 
 // ── BOOT ──
