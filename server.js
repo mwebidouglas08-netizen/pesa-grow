@@ -14,7 +14,10 @@ const PORT = process.env.PORT || 3000;
 
 // ── MIDDLEWARE ──────────────────────────────────────
 app.set('trust proxy', 1);
-app.use(cors({ origin: '*', credentials: true }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
 app.use(express.json());
 
 // ── PWA FILES — must come BEFORE express.static ──────
@@ -50,8 +53,7 @@ app.use('/api/', limiter);
 // ── DATABASE ────────────────────────────────────────
 const db = new Database(process.env.DB_PATH || './pesagrow.db');
 db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = OFF');
-
+db.pragma('foreign_keys = ON');
 // ── SCHEMA ──────────────────────────────────────────
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
@@ -273,6 +275,17 @@ function seedDefaults() {
 seedDefaults();
 
 // ── HELPERS ─────────────────────────────────────────
+function validateAmount(amount, min = 1, max = 10000000) {
+  if (typeof amount !== 'number' || isNaN(amount)) {
+    throw new Error('Amount must be a number');
+  }
+  if (amount < min) {
+    throw new Error(`Amount must be at least ${min}`);
+  }
+  if (amount > max) {
+    throw new Error(`Amount too large`);
+  }
+}
 const now = () => new Date().toISOString();
 const genRef = () => 'REF' + Math.random().toString(36).substring(2,7).toUpperCase();
 const getSetting = key => { try { return db.prepare('SELECT value FROM settings WHERE key=?').get(key)?.value; } catch { return null; } };
@@ -285,7 +298,11 @@ function addNotif(userId, message, type='info') {
 }
 
 // ── AUTH MIDDLEWARE ──────────────────────────────────
-const JWT_SECRET = process.env.JWT_SECRET || 'pesagrow_secret_key_2026';
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET is not set in environment variables');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authUser(req, res, next) {
   const token = req.headers.authorization?.split(' ')[1];
@@ -498,11 +515,23 @@ app.post('/api/mpesa/callback', (req, res) => {
 
     const deposit = db.prepare('SELECT * FROM deposits WHERE mpesaCheckoutId=?').get(checkoutId);
     if (!deposit) return;
+    if (deposit.status === 'approved') return; // prevent double credit
 
     if (resultCode === 0) {
       const credit = amount || deposit.amount;
       db.prepare("UPDATE deposits SET status='approved',mpesaReceiptNo=?,mpesaPhone=?,reviewedAt=? WHERE id=?").run(receiptNo,phone,now(),deposit.id);
-      db.prepare('UPDATE users SET balance=balance+? WHERE id=?').run(credit,deposit.userId);
+     const trx = db.transaction(() => {
+  db.prepare('UPDATE deposits SET status="approved",mpesaReceiptNo=?,mpesaPhone=?,reviewedAt=? WHERE id=?')
+    .run(receiptNo, phone, now(), deposit.id);
+
+  db.prepare('UPDATE users SET balance=balance+? WHERE id=?')
+    .run(credit, deposit.userId);
+
+  db.prepare("UPDATE transactions SET status='completed',description=? WHERE userId=? AND type='deposit' AND status='pending'")
+    .run(`M-Pesa ${receiptNo}`, deposit.userId);
+});
+
+trx();
       db.prepare("UPDATE transactions SET status='completed',description=? WHERE userId=? AND type='deposit' AND status='pending'").run(`M-Pesa ${receiptNo}`,deposit.userId);
       addNotif(deposit.userId,`✅ KES ${(+credit).toFixed(2)} deposited via M-Pesa (${receiptNo})`,'success');
       const user = db.prepare('SELECT * FROM users WHERE id=?').get(deposit.userId);
@@ -654,12 +683,20 @@ app.post('/api/user/withdraw', authUser, (req, res) => {
     // All checks passed — process withdrawal
     const fee = amount * feeRate;
     const net = amount - fee;
-    db.prepare('UPDATE users SET balance=balance-? WHERE id=?').run(amount, user.id);
     const wdId = uuidv4();
-    db.prepare(`INSERT INTO withdrawals (id,userId,amount,fee,net,method,address,status,createdAt) VALUES (?,?,?,?,?,?,?,?,?)`)
-      .run(wdId, user.id, amount, fee, net, method||'M-Pesa', address, 'pending', now());
-    addTx(user.id, 'withdrawal', amount, `${method||'M-Pesa'} withdrawal — pending`, 'pending');
 
+const trx = db.transaction(() => {
+  db.prepare('UPDATE users SET balance=balance-? WHERE id=?')
+    .run(amount, user.id);
+
+  db.prepare(`INSERT INTO withdrawals (id,userId,amount,fee,net,method,address,status,createdAt)
+    VALUES (?,?,?,?,?,?,?,?,?)`)
+    .run(wdId, user.id, amount, fee, net, method||'M-Pesa', address, 'pending', now());
+
+  addTx(user.id, 'withdrawal', amount, `${method||'M-Pesa'} withdrawal — pending`, 'pending');
+});
+
+trx();
     const remaining = maxDailyWds - todayWds - 1;
     addNotif(user.id,
       `⏳ Withdrawal of KES ${amount.toFixed(2)} submitted. ` +
@@ -1160,7 +1197,13 @@ function creditProfits() {
         const nowTs  = Date.now();
         const endTs  = new Date(inv.endDate).getTime();
         const lastTs = new Date(inv.lastCredited || inv.startDate).getTime();
-        const credit = (inv.amount * (inv.roi/100) / 86400) * ((nowTs - lastTs) / 1000);
+      let credit = (inv.amount * (inv.roi/100) / 86400) * ((nowTs - lastTs) / 1000);
+
+const maxProfit = inv.amount * (inv.roi/100) * inv.period;
+
+if ((inv.earned + credit) > maxProfit) {
+  credit = maxProfit - inv.earned;
+};
         if (nowTs >= endTs) {
           const total = (inv.earned||0) + credit;
           db.prepare("UPDATE investments SET status='completed',earned=?,lastCredited=? WHERE id=?").run(total,now(),inv.id);
@@ -1218,6 +1261,7 @@ async function autoCheckDeposits() {
 
         if (rc === 0 || rc === '0') {
           // ✅ Payment confirmed — credit balance
+       if (dep.status === 'approved') continue;
           const amount = dep.amount;
           db.prepare("UPDATE deposits SET status='approved',reviewedAt=? WHERE id=?")
             .run(now(), dep.id);
@@ -1276,7 +1320,12 @@ app.get('/api/user/balance', authUser, (req, res) => {
     res.json({ ...user, pendingDeps });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
-
+db.exec(`
+  CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+  CREATE INDEX IF NOT EXISTS idx_tx_userId ON transactions(userId);
+  CREATE INDEX IF NOT EXISTS idx_dep_status ON deposits(status);
+  CREATE INDEX IF NOT EXISTS idx_wd_status ON withdrawals(status);
+`);
 // ══════════════════════════════════════════════════
 //  START
 // ══════════════════════════════════════════════════
