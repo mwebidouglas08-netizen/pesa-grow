@@ -1,11 +1,11 @@
 {
-  "name": "Pesa Grow",
+  "name": "Pesa Grow - Investment Platform",
   "short_name": "PesaGrow",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
-  "description": "Investment and finance growth platform",
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -18,5 +18,4 @@
       "type": "image/png"
     }
   ]
-]
-<link rel="manifest" href="/manifest.json">
+}
