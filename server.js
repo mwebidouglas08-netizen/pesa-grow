@@ -47,6 +47,7 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
   }
 }));
+app.use(express.static('public'));
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true });
 app.use('/api/', limiter);
 
