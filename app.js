@@ -169,10 +169,26 @@ function animateStats() {
 
 // ===================== AUTH =====================
 function checkAutoLogin() {
-  const saved = localStorage.getItem('luminavest_user');
-  if (saved) {
-    state.user = JSON.parse(saved);
-    loadUserData();
+  try {
+    const savedUser = JSON.parse(localStorage.getItem('luminavest_user'));
+    const users = JSON.parse(localStorage.getItem('luminavest_users') || '[]');
+
+    if (savedUser) {
+      // Ensure user still exists in users list
+      const exists = users.find(u => u.id === savedUser.id);
+
+      if (!exists) {
+        // Reinsert user if missing (prevents "account not found")
+        users.push(savedUser);
+        localStorage.setItem('luminavest_users', JSON.stringify(users));
+      }
+
+      state.user = savedUser;
+      loadUserData();
+    }
+  } catch (err) {
+    console.error('AutoLogin Error:', err);
+    localStorage.removeItem('luminavest_user');
   }
 }
 
@@ -243,7 +259,13 @@ function register() {
   const ref = document.getElementById('regRef').value.trim();
   if (!first || !last || !email || !pass) { showToast('Please fill all required fields', 'error'); return; }
   if (pass.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
-  const users = JSON.parse(localStorage.getItem('luminavest_users') || '[]');
+// Ensure users array is always valid
+let users;
+try {
+  users = JSON.parse(localStorage.getItem('luminavest_users') || '[]');
+} catch {
+  users = [];
+}
   if (users.find(u => u.email === email)) { showToast('Email already registered', 'error'); return; }
   const newUser = { id: Date.now(), firstName: first, lastName: last, email, phone, password: pass, refCode: 'LV' + Math.random().toString(36).substring(2,8).toUpperCase(), joinDate: new Date().toISOString() };
   users.push(newUser);
@@ -265,9 +287,13 @@ function forgotPassword() {
 
 function logout() {
   state.user = null;
+
+  // Only remove session, not users
   localStorage.removeItem('luminavest_user');
+
   document.getElementById('dashboardOverlay').classList.remove('active');
   document.body.style.overflow = '';
+
   showToast('Logged out successfully', 'success');
 }
 
