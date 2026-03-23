@@ -1,4 +1,5 @@
 const express = require("express");
+const axios = require("axios");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -6,9 +7,102 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Test route
-app.get("/", (req, res) => {
-  res.send("Pesa Grow Backend Running ✅");
+// ====================== CONFIG ======================
+const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY;
+const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET;
+const SHORTCODE = "5321672"; // YOUR TILL NUMBER
+const PASSKEY = process.env.MPESA_PASSKEY;
+const CALLBACK_URL = process.env.CALLBACK_URL;
+
+// ====================== ACCESS TOKEN ======================
+async function getAccessToken() {
+  const url =
+    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+
+  const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString(
+    "base64"
+  );
+
+  const response = await axios.get(url, {
+    headers: {
+      Authorization: `Basic ${auth}`,
+    },
+  });
+
+  return response.data.access_token;
+}
+
+// ====================== STK PUSH ======================
+app.post("/stkpush", async (req, res) => {
+  try {
+    let { phone, amount } = req.body;
+
+    // format phone: 07... → 2547...
+    if (phone.startsWith("0")) {
+      phone = "254" + phone.substring(1);
+    }
+
+    const accessToken = await getAccessToken();
+
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[-T:.Z]/g, "")
+      .slice(0, 14);
+
+    const password = Buffer.from(
+      SHORTCODE + PASSKEY + timestamp
+    ).toString("base64");
+
+    const url =
+      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+
+    const payload = {
+      BusinessShortCode: SHORTCODE,
+      Password: password,
+      Timestamp: timestamp,
+      TransactionType: "CustomerPayBillOnline",
+      Amount: amount,
+      PartyA: phone,
+      PartyB: SHORTCODE,
+      PhoneNumber: phone,
+      CallBackURL: CALLBACK_URL,
+      AccountReference: "PesaGrow",
+      TransactionDesc: "Investment Payment",
+    };
+
+    const response = await axios.post(url, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    res.json({
+      success: true,
+      message: "STK Push sent successfully",
+      data: response.data,
+    });
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    res.status(500).json({
+      success: false,
+      message: "STK Push failed",
+      error: error.response?.data || error.message,
+    });
+  }
+});
+
+// ====================== CALLBACK ======================
+app.post("/callback", (req, res) => {
+  console.log("M-Pesa Callback:", JSON.stringify(req.body, null, 2));
+
+  res.json({ ResultCode: 0, ResultDesc: "Accepted" });
+});
+
+// ====================== SERVER ======================
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 // ── MIDDLEWARE ──────────────────────────────────────
