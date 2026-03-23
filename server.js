@@ -1,11 +1,11 @@
+const path = require('path');
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
 app.use(cors());
-app.use(express.json());
-
+app.use(express.static(path.join(__dirname, 'public')));
 // Test route
 app.get("/", (req, res) => {
   res.send("Pesa Grow Backend Running ✅");
@@ -105,9 +105,7 @@ app.post("/callback", (req, res) => {
 
 // ====================== SERVER ======================
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // ── MIDDLEWARE ──────────────────────────────────────
 app.set('trust proxy', 1);
