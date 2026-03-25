@@ -1,138 +1,153 @@
-require("dotenv").config();
-
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 
 const app = express();
 
-// ================= MIDDLEWARE =================
-app.use(cors());
+/**
+ * -----------------------
+ * CORE MIDDLEWARE
+ * -----------------------
+ */
+app.use(cors({
+  origin: "*"
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ================= DATABASE SAFETY =================
-const MONGO_URI = process.env.MONGO_URI;
+/**
+ * -----------------------
+ * STATIC FRONTEND
+ * -----------------------
+ * Ensure your frontend files are in /public
+ */
+app.use(express.static(path.join(__dirname, "public")));
 
-// DO NOT CRASH SERVER IF DB FAILS
-mongoose
-  .connect(MONGO_URI || "mongodb://127.0.0.1:27017/fallback")
-  .then(() => console.log("DB connected"))
-  .catch((err) => console.log("DB error:", err.message));
-
-// ================= MODEL =================
-const UserSchema = new mongoose.Schema(
-  {
-    email: String,
-    password: String,
-  },
-  { timestamps: true }
-);
-
-const User = mongoose.model("User", UserSchema);
-
-// ================= HEALTH CHECK =================
+/**
+ * -----------------------
+ * BASIC HEALTH CHECK
+ * -----------------------
+ */
 app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    message: "Server is running correctly"
+  });
 });
 
-// ================= REGISTER =================
-app.post("/api/auth/register", async (req, res) => {
-  console.log("REGISTER BODY:", req.body);
+/**
+ * -----------------------
+ * EXAMPLE AUTH ROUTES
+ * (Replace logic with your DB later)
+ * -----------------------
+ */
 
-  const { email, password } = req.body || {};
-
-  if (!email || !password) {
-    return res.status(400).json({
-      error: "Missing email or password",
-      received: req.body
-    });
-  }
-
+app.post("/api/register", async (req, res) => {
   try {
-    const existing = await User.findOne({ email });
+    const { email, password } = req.body;
 
-    if (existing) {
-      return res.status(400).json({ error: "User already exists" });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
     }
 
-    const user = await User.create({ email, password });
-
-    return res.json({
-      message: "User created",
-      userId: user._id
+    // TODO: replace with DB logic
+    return res.status(200).json({
+      success: true,
+      message: "Account created successfully"
     });
 
   } catch (err) {
-    console.error("REGISTER CRASH:", err);
-
+    console.error("REGISTER ERROR:", err);
     return res.status(500).json({
-      error: "Database or server failure",
-      details: err.message
+      success: false,
+      message: "Internal server error"
     });
   }
 });
 
-// ================= LOGIN =================
-app.post("/api/auth/login", async (req, res) => {
+app.post("/api/login", async (req, res) => {
   try {
-    console.log("LOGIN BODY:", req.body);
+    const { email, password } = req.body;
 
-    const { email, password } = req.body || {};
-
-    const user = await User.findOne({ email });
-
-    if (!user || user.password !== password) {
-      return res.status(400).json({ error: "Invalid credentials" });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
     }
 
-    return res.json({
+    return res.status(200).json({
+      success: true,
       message: "Login successful",
-      userId: user._id,
+      token: "demo-token"
     });
- catch (err) {
-  console.error("🔥 FULL BACKEND ERROR:", err);
 
-  return res.status(500).json({
-    error: err.message,
-    stack: err.stack,
-  });
-}
-  
+  } catch (err) {
+    console.error("LOGIN ERROR:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
+  }
 });
 
-// ================= FRONTEND =================
-const publicPath = path.join(__dirname, "public");
-
-app.use(express.static(publicPath));
+/**
+ * -----------------------
+ * FRONTEND ROUTES
+ * -----------------------
+ * Fixes:
+ * - Cannot GET /admin.html issue
+ */
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-app.get("/admin", (req, res) => {
-  res.sendFile(path.join(publicPath, "admin.html"));
-});
-
-// ================= DEBUG CATCH =================
+/**
+ * -----------------------
+ * 404 HANDLER (IMPORTANT)
+ * Prevents HTML being returned to API calls
+ * -----------------------
+ */
 app.use((req, res) => {
-  res.status(404).json({
-    error: "Route not found",
-    path: req.originalUrl,
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(404).json({
+      success: false,
+      message: "API route not found"
+    });
+  }
+
+  res.status(404).send("Page not found");
+});
+
+/**
+ * -----------------------
+ * GLOBAL ERROR HANDLER
+ * -----------------------
+ */
+app.use((err, req, res, next) => {
+  console.error("GLOBAL ERROR:", err);
+
+  res.status(500).json({
+    success: false,
+    message: "Internal server error"
   });
 });
-app.post("/api/debug", (req, res) => {
-  console.log("DEBUG BODY:", req.body);
 
-  res.json({
-    body: req.body,
-    headers: req.headers
-  });
-});
-// ================= START =================
-const PORT = process.env.PORT || 8080;
+/**
+ * -----------------------
+ * START SERVER
+ * -----------------------
+ */
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port", PORT);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
