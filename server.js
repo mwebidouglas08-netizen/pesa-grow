@@ -89,13 +89,15 @@ app.post("/api/auth/login", async (req, res) => {
       message: "Login successful",
       userId: user._id,
     });
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    return res.status(500).json({
-      error: "Internal server error",
-      details: err.message,
-    });
-  }
+ catch (err) {
+  console.error("🔥 FULL BACKEND ERROR:", err);
+
+  return res.status(500).json({
+    error: err.message,
+    stack: err.stack,
+  });
+}
+  
 });
 
 // ================= FRONTEND =================
