@@ -120,7 +120,14 @@ app.use((req, res) => {
     path: req.originalUrl,
   });
 });
+app.post("/api/debug", (req, res) => {
+  console.log("DEBUG BODY:", req.body);
 
+  res.json({
+    body: req.body,
+    headers: req.headers
+  });
+});
 // ================= START =================
 const PORT = process.env.PORT || 8080;
 
