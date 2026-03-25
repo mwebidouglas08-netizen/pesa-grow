@@ -39,21 +39,21 @@ app.get("/api/health", (req, res) => {
 
 // ================= REGISTER =================
 app.post("/api/auth/register", async (req, res) => {
+  console.log("REGISTER BODY:", req.body);
+
+  const { email, password } = req.body || {};
+
+  if (!email || !password) {
+    return res.status(400).json({
+      error: "Missing email or password",
+      received: req.body
+    });
+  }
+
   try {
-    console.log("REGISTER BODY:", req.body);
+    const existing = await User.findOne({ email });
 
-    const { email, password } = req.body || {};
-
-    if (!email || !password) {
-      return res.status(400).json({
-        error: "Missing email or password",
-        received: req.body,
-      });
-    }
-
-    const exists = await User.findOne({ email });
-
-    if (exists) {
+    if (existing) {
       return res.status(400).json({ error: "User already exists" });
     }
 
@@ -61,13 +61,15 @@ app.post("/api/auth/register", async (req, res) => {
 
     return res.json({
       message: "User created",
-      userId: user._id,
+      userId: user._id
     });
+
   } catch (err) {
-    console.error("REGISTER ERROR:", err);
+    console.error("REGISTER CRASH:", err);
+
     return res.status(500).json({
-      error: "Internal server error",
-      details: err.message,
+      error: "Database or server failure",
+      details: err.message
     });
   }
 });
