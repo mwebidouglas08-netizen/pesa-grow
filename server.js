@@ -1,20 +1,20 @@
-require("dotenv").config();
-
-const express = require("express");
-const mongoose = require("mongoose");
 const path = require("path");
 
-const app = express();
+// ================= API ROUTES FIRST =================
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
 
-// ================= MIDDLEWARE =================
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Example API safety fallback
+app.all("/api/*", (req, res) => {
+  res.status(404).json({ error: "API route not found" });
+});
 
-// ================= STATIC FILES =================
+// ================= FRONTEND =================
 const publicPath = path.join(__dirname, "public");
+
 app.use(express.static(publicPath));
 
-// ================= ROUTES =================
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
@@ -22,7 +22,6 @@ app.get("/", (req, res) => {
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(publicPath, "admin.html"));
 });
-
 // fallback (critical for Railway)
 app.get("*", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
