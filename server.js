@@ -30,6 +30,23 @@ app.get("/api/health", (req, res) => {
 /**
  * REGISTER
  */
+async function register(email, password) {
+  const res = await fetch("/api/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  return data;
+}
 app.post("/api/register", (req, res) => {
   const { email, password } = req.body;
 
