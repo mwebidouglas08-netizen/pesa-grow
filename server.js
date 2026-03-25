@@ -12,6 +12,25 @@ app.use(cors({ origin: "*" }));
 /**
  * JSON parsing (critical for register/login)
  */
+async function login(email, password) {
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!data.success) {
+    throw new Error(data.message);
+  }
+
+  localStorage.setItem("token", data.token);
+
+  return data;
+}
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
