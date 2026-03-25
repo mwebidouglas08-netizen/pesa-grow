@@ -110,14 +110,21 @@ app.listen(PORT, () => {
 });
 const path = require("path");
 
-// Serve frontend
+// Serve static files
 app.use(express.static(path.join(__dirname, "public")));
 
 // Explicit routes (important for Railway)
+// Home
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
+// Admin panel
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
+});
+
+// fallback (important for Railway)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
