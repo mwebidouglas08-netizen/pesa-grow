@@ -1,9 +1,8 @@
 {
-  "name": "your-app-name",
+  "name": "pesa-grow",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
-  },
-  "dependencies": {}
+  }
 }
