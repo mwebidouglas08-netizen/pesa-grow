@@ -13,55 +13,6 @@ app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// ====================== SERVER ======================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-// ── MIDDLEWARE ──────────────────────────────────────
-app.set('trust proxy', 1);
-app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
-  credentials: true
-}));
-app.use(express.json());
-
-// ── PWA FILES — must come BEFORE express.static ──────
-// Service worker needs Service-Worker-Allowed header
-// Manifest needs correct Content-Type
-// Both need no-cache so browser always gets latest version
-app.get('/sw.js', (req, res) => {
-  res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
-  res.setHeader('Service-Worker-Allowed', '/');
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.sendFile(path.join(__dirname, 'public', 'sw.js'));
-});
-app.get('/manifest.json', (req, res) => {
-  res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.sendFile(path.join(__dirname, 'public', 'manifest.json'));
-});
-
-// Static files (index.html, dashboard.html, icons, etc.)
-app.use(express.static(path.join(__dirname, 'public'), {
-  setHeaders: function(res, filePath) {
-    // PNG icons — allow caching
-    if (filePath.endsWith('.png')) {
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-    }
-  }
-}));
-app.use(express.static('public'));
-const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 300, standardHeaders: true });
-app.use('/api/', limiter);
-
-// ── DATABASE ────────────────────────────────────────
-const db = new Database(process.env.DB_PATH || './pesagrow.db');
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
-// ── SCHEMA ──────────────────────────────────────────
-db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id             TEXT PRIMARY KEY,
     firstName      TEXT NOT NULL,
