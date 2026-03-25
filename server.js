@@ -6,11 +6,12 @@ const app = express();
 
 /**
  * -----------------------
- * CORE MIDDLEWARE
+ * SECURITY + MIDDLEWARE
  * -----------------------
  */
 app.use(cors({
-  origin: "*"
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
 }));
 
 app.use(express.json());
@@ -18,113 +19,157 @@ app.use(express.urlencoded({ extended: true }));
 
 /**
  * -----------------------
- * STATIC FRONTEND
+ * IN-MEMORY USER STORE (TEMP FIX)
+ * Replace with DB later (Mongo/Postgres)
  * -----------------------
- * Ensure your frontend files are in /public
  */
-app.use(express.static(path.join(__dirname, "public")));
+const users = [];
 
 /**
  * -----------------------
- * BASIC HEALTH CHECK
+ * HEALTH CHECK (IMPORTANT)
  * -----------------------
  */
 app.get("/api/health", (req, res) => {
   res.json({
-    status: "ok",
-    message: "Server is running correctly"
+    success: true,
+    message: "Backend is running",
   });
 });
 
 /**
  * -----------------------
- * EXAMPLE AUTH ROUTES
- * (Replace logic with your DB later)
+ * REGISTER
  * -----------------------
  */
-
-app.post("/api/register", async (req, res) => {
+app.post("/api/register", (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email and password required",
       });
     }
 
-    // TODO: replace with DB logic
-    return res.status(200).json({
+    const exists = users.find(u => u.email === email);
+
+    if (exists) {
+      return res.status(409).json({
+        success: false,
+        message: "User already exists",
+      });
+    }
+
+    const newUser = {
+      id: Date.now(),
+      email,
+      password, // NOTE: plain text for now (upgrade later)
+    };
+
+    users.push(newUser);
+
+    return res.status(201).json({
       success: true,
-      message: "Account created successfully"
+      message: "Account created successfully",
+      user: {
+        id: newUser.id,
+        email: newUser.email,
+      },
     });
 
   } catch (err) {
     console.error("REGISTER ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 });
 
-app.post("/api/login", async (req, res) => {
+/**
+ * -----------------------
+ * LOGIN
+ * -----------------------
+ */
+app.post("/api/login", (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required"
+        message: "Email and password required",
+      });
+    }
+
+    const user = users.find(
+      u => u.email === email && u.password === password
+    );
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials",
       });
     }
 
     return res.status(200).json({
       success: true,
       message: "Login successful",
-      token: "demo-token"
+      token: "demo-token-" + user.id,
+      user: {
+        id: user.id,
+        email: user.email,
+      },
     });
 
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Internal server error"
+      message: "Internal server error",
     });
   }
 });
 
 /**
  * -----------------------
- * FRONTEND ROUTES
+ * STATIC FRONTEND
  * -----------------------
- * Fixes:
- * - Cannot GET /admin.html issue
+ */
+app.use(express.static(path.join(__dirname, "public")));
+
+/**
+ * FIX: correct admin routing
  */
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "admin.html"));
 });
 
+/**
+ * FIX: homepage
+ */
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
 /**
  * -----------------------
- * 404 HANDLER (IMPORTANT)
- * Prevents HTML being returned to API calls
+ * CRITICAL FIX:
+ * Prevent HTML responses on API routes
  * -----------------------
  */
 app.use((req, res) => {
-  if (req.originalUrl.startsWith("/api")) {
+  if (req.path.startsWith("/api")) {
     return res.status(404).json({
       success: false,
-      message: "API route not found"
+      message: "API endpoint not found",
     });
   }
 
-  res.status(404).send("Page not found");
+  return res.status(404).send("Not found");
 });
 
 /**
@@ -137,7 +182,7 @@ app.use((err, req, res, next) => {
 
   res.status(500).json({
     success: false,
-    message: "Internal server error"
+    message: "Server crashed unexpectedly",
   });
 });
 
