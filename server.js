@@ -63,11 +63,13 @@ app.post("/api/auth/register", async (req, res) => {
       message: "Account created successfully",
       user,
     });
-  } catch (err) {
-    console.error("REGISTER ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
+  catch (err) {
+  console.error("FULL ERROR:", err); // IMPORTANT
+  return res.status(500).json({
+    error: err.message,
+    stack: err.stack,
+  });
+}
 
 // LOGIN
 app.post("/api/auth/login", async (req, res) => {
@@ -84,11 +86,13 @@ app.post("/api/auth/login", async (req, res) => {
       message: "Login successful",
       userId: user._id,
     });
-  } catch (err) {
-    console.error("LOGIN ERROR:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
+catch (err) {
+  console.error("FULL ERROR:", err); // IMPORTANT
+  return res.status(500).json({
+    error: err.message,
+    stack: err.stack,
+  });
+};
 
 // ================= STATIC FRONTEND =================
 const publicPath = path.join(__dirname, "public");
