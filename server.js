@@ -23,9 +23,6 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(publicPath, "admin.html"));
 });
 // fallback (critical for Railway)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
-});
 
 // ================= DATABASE =================
 if (process.env.MONGO_URI) {
