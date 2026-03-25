@@ -1,260 +1,212 @@
-// ====================== IMPORTS ======================
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
-const axios = require("axios");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const rateLimit = require("express-rate-limit");
-const { v4: uuidv4 } = require("uuid");
-const Database = require("better-sqlite3");
+const mongoose = require("mongoose");
 
-// ====================== INIT ======================
+// OPTIONAL SAFE RATE LIMIT (no external dependency)
+const rateLimitStore = {};
+
+const simpleRateLimiter = (req, res, next) => {
+  const ip = req.ip;
+  const now = Date.now();
+
+  if (!rateLimitStore[ip]) {
+    rateLimitStore[ip] = { count: 1, time: now };
+    return next();
+  }
+
+  const diff = now - rateLimitStore[ip].time;
+
+  // reset every 1 minute
+  if (diff > 60000) {
+    rateLimitStore[ip] = { count: 1, time: now };
+    return next();
+  }
+
+  rateLimitStore[ip].count++;
+
+  if (rateLimitStore[ip].count > 60) {
+    return res.status(429).json({ msg: "Too many requests" });
+  }
+
+  next();
+};
+
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// ====================== MIDDLEWARE ======================
-app.set("trust proxy", 1);
-
-app.use(cors({
-  origin: "*",
-  credentials: true
-}));
-
+// middleware
 app.use(express.json());
+app.use(cors());
+app.use(simpleRateLimiter);
 
-app.use("/api/", rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 300
-}));
+// ================= DATABASE =================
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => {
+    console.error("DB ERROR:", err.message);
+    process.exit(1);
+  });
 
-// ====================== STATIC ======================
-app.use(express.static(path.join(__dirname, "public")));
+// ================= ROUTES =================
 
+// HEALTH CHECK
 app.get("/", (req, res) => {
-  res.send("Pesa Grow API running...");
+  res.send("API running...");
 });
 
-// ====================== DATABASE ======================
-const db = new Database("./pesagrow.db");
+// ================= AUTH =================
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
-db.exec(`
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  email TEXT UNIQUE,
-  password TEXT,
-  balance REAL DEFAULT 0,
-  createdAt TEXT
-);
+const UserSchema = new mongoose.Schema({
+  email: String,
+  password: String
+});
 
-CREATE TABLE IF NOT EXISTS deposits (
-  id TEXT PRIMARY KEY,
-  userId TEXT,
-  amount REAL,
-  status TEXT,
-  mpesaCheckoutId TEXT,
-  createdAt TEXT
-);
+const User = mongoose.model("User", UserSchema);
 
-CREATE TABLE IF NOT EXISTS withdrawals (
-  id TEXT PRIMARY KEY,
-  userId TEXT,
-  amount REAL,
-  status TEXT,
-  createdAt TEXT
-);
-`);
-
-// ====================== HELPERS ======================
-const now = () => new Date().toISOString();
-
-function sanitizePhone(phone) {
-  phone = String(phone).replace(/\D/g, "");
-  if (phone.startsWith("0")) phone = "254" + phone.slice(1);
-  if (!phone.startsWith("254")) phone = "254" + phone;
-  return phone;
-}
-
-// ====================== AUTH ======================
-const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret";
-
-function auth(req, res, next) {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-  try {
-    req.user = jwt.verify(token, JWT_SECRET);
-    next();
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
-  }
-}
-
-// ====================== AUTH ROUTES ======================
+// REGISTER
 app.post("/api/auth/register", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (!email || !password)
-      return res.status(400).json({ error: "Missing fields" });
+    const hashed = await bcrypt.hash(password, 10);
 
-    const hash = bcrypt.hashSync(password, 10);
+    const user = await User.create({
+      email,
+      password: hashed
+    });
 
-    const id = uuidv4();
-
-    db.prepare(`
-      INSERT INTO users (id,email,password,createdAt)
-      VALUES (?,?,?,?)
-    `).run(id, email, hash, now());
-
-    const token = jwt.sign({ id }, JWT_SECRET);
-
-    res.json({ token });
-
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
   }
 });
 
-app.post("/api/auth/login", (req, res) => {
-  const { email, password } = req.body;
+// LOGIN
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  const user = db.prepare("SELECT * FROM users WHERE email=?").get(email);
+    const user = await User.findOne({ email });
 
-  if (!user || !bcrypt.compareSync(password, user.password))
-    return res.status(400).json({ error: "Invalid credentials" });
+    if (!user) return res.status(400).json({ msg: "User not found" });
 
-  const token = jwt.sign({ id: user.id }, JWT_SECRET);
+    const match = await bcrypt.compare(password, user.password);
 
-  res.json({ token });
+    if (!match) return res.status(400).json({ msg: "Invalid password" });
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+
+    res.json({ token });
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 });
 
-// ====================== M-PESA ======================
-const MPESA_BASE = process.env.MPESA_ENV === "live"
-  ? "https://api.safaricom.co.ke"
-  : "https://sandbox.safaricom.co.ke";
+// ================= MPESA STK =================
+const axios = require("axios");
 
-async function getToken() {
-  const auth = Buffer.from(
-    `${process.env.MPESA_CONSUMER_KEY}:${process.env.MPESA_CONSUMER_SECRET}`
-  ).toString("base64");
-
+const getMpesaToken = async () => {
   const res = await axios.get(
-    `${MPESA_BASE}/oauth/v1/generate?grant_type=client_credentials`,
-    { headers: { Authorization: `Basic ${auth}` } }
+    "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials",
+    {
+      auth: {
+        username: process.env.MPESA_CONSUMER_KEY,
+        password: process.env.MPESA_CONSUMER_SECRET
+      }
+    }
   );
-
   return res.data.access_token;
-}
+};
 
-function getPassword() {
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[^0-9]/g, "")
-    .slice(0, 14);
-
-  const raw = `${process.env.MPESA_SHORTCODE}${process.env.MPESA_PASSKEY}${timestamp}`;
-
-  return {
-    password: Buffer.from(raw).toString("base64"),
-    timestamp
-  };
-}
-
-// ====================== STK PUSH ======================
-app.post("/api/mpesa/stk", auth, async (req, res) => {
+app.post("/api/stk/push", async (req, res) => {
   try {
-    const { phone, amount } = req.body;
+    const token = await getMpesaToken();
 
-    const token = await getToken();
-    const { password, timestamp } = getPassword();
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[^0-9]/g, "")
+      .slice(0, -3);
 
-    const depositId = uuidv4();
-
-    db.prepare(`
-      INSERT INTO deposits (id,userId,amount,status,createdAt)
-      VALUES (?,?,?,?,?)
-    `).run(depositId, req.user.id, amount, "pending", now());
+    const password = Buffer.from(
+      process.env.MPESA_SHORTCODE +
+        process.env.MPESA_PASSKEY +
+        timestamp
+    ).toString("base64");
 
     const response = await axios.post(
-      `${MPESA_BASE}/mpesa/stkpush/v1/processrequest`,
+      "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest",
       {
         BusinessShortCode: process.env.MPESA_SHORTCODE,
         Password: password,
         Timestamp: timestamp,
-        TransactionType: "CustomerBuyGoodsOnline",
-        Amount: amount,
-        PartyA: sanitizePhone(phone),
+        TransactionType: "CustomerPayBillOnline",
+        Amount: req.body.amount || 1,
+        PartyA: req.body.phone,
         PartyB: process.env.MPESA_SHORTCODE,
-        PhoneNumber: sanitizePhone(phone),
-        CallBackURL: `${process.env.BASE_URL}/api/mpesa/callback`,
+        PhoneNumber: req.body.phone,
+        CallBackURL: process.env.BASE_URL + "/api/stk/callback",
         AccountReference: "PesaGrow",
-        TransactionDesc: "Deposit"
+        TransactionDesc: "Payment"
       },
-      { headers: { Authorization: `Bearer ${token}` } }
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
     );
 
-    db.prepare(`
-      UPDATE deposits SET mpesaCheckoutId=? WHERE id=?
-    `).run(response.data.CheckoutRequestID, depositId);
+    res.json(response.data);
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ msg: "STK Push failed" });
+  }
+});
+
+// CALLBACK
+app.post("/api/stk/callback", (req, res) => {
+  console.log("MPESA CALLBACK:", JSON.stringify(req.body, null, 2));
+  res.json({ ResultCode: 0, ResultDesc: "Accepted" });
+});
+
+// ================= B2C =================
+app.post("/api/b2c/send", async (req, res) => {
+  try {
+    const token = await getMpesaToken();
+
+    const response = await axios.post(
+      "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest",
+      {
+        InitiatorName: "testapi",
+        SecurityCredential: "YOUR_ENCRYPTED_CREDENTIAL",
+        CommandID: "BusinessPayment",
+        Amount: req.body.amount,
+        PartyA: process.env.MPESA_SHORTCODE,
+        PartyB: req.body.phone,
+        Remarks: "Payment",
+        QueueTimeOutURL: process.env.BASE_URL + "/timeout",
+        ResultURL: process.env.BASE_URL + "/result",
+        Occasion: "Payout"
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
     res.json(response.data);
-
-  } catch (e) {
-    res.status(500).json({ error: e.message });
+  } catch (err) {
+    console.error(err.response?.data || err.message);
+    res.status(500).json({ msg: "B2C failed" });
   }
 });
 
-// ====================== CALLBACK ======================
-app.post("/api/mpesa/callback", (req, res) => {
-  res.json({ ResultCode: 0 });
+// ================= START SERVER =================
+const PORT = process.env.PORT || 5000;
 
-  const data = req.body?.Body?.stkCallback;
-  if (!data) return;
-
-  const checkoutId = data.CheckoutRequestID;
-
-  if (data.ResultCode === 0) {
-    const deposit = db.prepare(`
-      SELECT * FROM deposits WHERE mpesaCheckoutId=?
-    `).get(checkoutId);
-
-    if (!deposit) return;
-
-    db.prepare(`
-      UPDATE deposits SET status='completed' WHERE id=?
-    `).run(deposit.id);
-
-    db.prepare(`
-      UPDATE users SET balance=balance+? WHERE id=?
-    `).run(deposit.amount, deposit.userId);
-  }
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// ====================== WITHDRAW ======================
-app.post("/api/withdraw", auth, (req, res) => {
-  const { amount } = req.body;
-
-  const user = db.prepare("SELECT * FROM users WHERE id=?").get(req.user.id);
-
-  if (user.balance < amount)
-    return res.status(400).json({ error: "Insufficient balance" });
-
-  db.prepare(`
-    UPDATE users SET balance=balance-? WHERE id=?
-  `).run(amount, user.id);
-
-  db.prepare(`
-    INSERT INTO withdrawals (id,userId,amount,status,createdAt)
-    VALUES (?,?,?,?,?)
-  `).run(uuidv4(), user.id, amount, "pending", now());
-
-  res.json({ success: true });
-});
-
-// ====================== START ======================
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-
-module.exports = app;
