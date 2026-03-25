@@ -2,129 +2,45 @@ require("dotenv").config();
 
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
-
-// SAFE IMPORT (prevents crash if not installed)
-let rateLimit;
-try {
-  rateLimit = require("express-rate-limit");
-} catch (e) {
-  console.warn("express-rate-limit not installed, skipping...");
-}
+const path = require("path");
 
 const app = express();
 
 // ================= MIDDLEWARE =================
-app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-if (rateLimit) {
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
-    })
-  );
-}
-
-// ================= ENV VARIABLES =================
-const PORT = process.env.PORT || 8080;
-const MONGO_URI = process.env.MONGO_URI;
-
-// ================= DATABASE CONNECTION =================
-async function connectDB() {
-  if (!MONGO_URI) {
-    console.error("❌ MONGO_URI is missing in environment variables");
-    return;
-  }
-
-  try {
-    await mongoose.connect(MONGO_URI);
-    console.log("✅ MongoDB connected");
-  } catch (err) {
-    console.error("DB ERROR:", err.message);
-
-    // retry after delay instead of crashing
-    setTimeout(connectDB, 5000);
-  }
-}
-
-// call connection
-connectDB();
-
-// ================= MODELS =================
-const transactionSchema = new mongoose.Schema(
-  {
-    phone: String,
-    amount: Number,
-    status: { type: String, default: "pending" },
-    reference: String,
-  },
-  { timestamps: true }
-);
-
-const Transaction = mongoose.model("Transaction", transactionSchema);
+// ================= STATIC FILES =================
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
 
 // ================= ROUTES =================
 app.get("/", (req, res) => {
-  res.send("🚀 Server is running...");
+  res.sendFile(path.join(publicPath, "index.html"));
 });
 
-// STK PUSH SIMULATION / REAL HOOK
-app.post("/stk", async (req, res) => {
-  try {
-    const { phone, amount } = req.body;
-
-    if (!phone || !amount) {
-      return res.status(400).json({ error: "Missing phone or amount" });
-    }
-
-    const trx = await Transaction.create({
-      phone,
-      amount,
-      reference: "TX-" + Date.now(),
-    });
-
-    res.json({
-      message: "STK initiated",
-      transaction: trx,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "STK failed" });
-  }
-});
-
-// CALLBACK (Daraja will hit this)
-app.post("/callback", (req, res) => {
-  console.log("📩 CALLBACK RECEIVED:", JSON.stringify(req.body, null, 2));
-
-  // TODO: update transaction status here
-
-  res.json({ message: "Callback received" });
-});
-
-// ================= START SERVER =================
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
-const path = require("path");
-
-// Serve static files
-app.use(express.static(path.join(__dirname, "public")));
-
-// Explicit routes (important for Railway)
-// Home
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// Admin panel
 app.get("/admin", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "admin.html"));
+  res.sendFile(path.join(publicPath, "admin.html"));
 });
 
-// fallback (important for Railway)
+// fallback (critical for Railway)
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "index.html"));
+  res.sendFile(path.join(publicPath, "index.html"));
+});
+
+// ================= DATABASE =================
+if (process.env.MONGO_URI) {
+  mongoose
+    .connect(process.env.MONGO_URI)
+    .then(() => console.log("✅ MongoDB connected"))
+    .catch((err) => console.log("DB ERROR:", err.message));
+} else {
+  console.log("⚠️ No MONGO_URI set (running without DB)");
+}
+
+// ================= START =================
+const PORT = process.env.PORT || 8080;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 Server running on port ${PORT}`);
 });
