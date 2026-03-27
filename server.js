@@ -29,6 +29,9 @@ if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 const PORT        = process.env.PORT        || 3000;
 const JWT_SECRET  = process.env.JWT_SECRET  || 'pesagrow-secret-2024-change-me';
 const BASE_URL    = process.env.BASE_URL    || `http://localhost:${PORT}`;
+
+// ADMIN CREDENTIALS — set these as Railway env vars for production
+// Defaults here are used if env vars are not set
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@pesagrow.co.ke';
 const ADMIN_PASS  = process.env.ADMIN_PASS  || 'Admin@2024';
 
@@ -37,7 +40,7 @@ const MPESA = {
   env:             process.env.MPESA_ENV             || 'sandbox',
   consumerKey:     process.env.MPESA_CONSUMER_KEY    || '',
   consumerSecret:  process.env.MPESA_CONSUMER_SECRET || '',
-  shortcode:       process.env.MPESA_SHORTCODE        || '5321672',
+  shortcode:       '5321672',   // LOCKED — do not change
   passkey:         process.env.MPESA_PASSKEY          || 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919',
   transactionType: process.env.MPESA_TRANSACTION_TYPE || 'CustomerBuyGoodsOnline',
   get baseUrl() {
@@ -49,12 +52,11 @@ const MPESA = {
 
 // ══════════════════════════════════════════════════════
 //  sql.js WRAPPER  — mimics better-sqlite3 sync API
-//  sql.js is in-memory; we persist to a JSON file on disk
 // ══════════════════════════════════════════════════════
-const DB_FILE = process.env.DB_PATH || path.join(__dirname, 'pesagrow.db.json');
+const DB_FILE = process.env.DB_PATH || path.join(__dirname, 'pesagrow.db.bin');
 
-let SQL;   // sql.js module
-let db;    // sql.js Database instance
+let SQL;
+let db;
 let saveTimer = null;
 
 function scheduleSave() {
@@ -62,13 +64,12 @@ function scheduleSave() {
   saveTimer = setTimeout(() => {
     saveTimer = null;
     try {
-      const data = db.export();           // Uint8Array
-      fs.writeFileSync(DB_FILE + '.bin', Buffer.from(data));
+      const data = db.export();
+      fs.writeFileSync(DB_FILE, Buffer.from(data));
     } catch (e) { console.error('DB save error:', e.message); }
   }, 500);
 }
 
-// Thin helpers that look like better-sqlite3
 function run(sql, params = []) {
   db.run(sql, params);
   scheduleSave();
@@ -121,7 +122,6 @@ function makeToken(user) {
 function safeUser(u) {
   if (!u) return null;
   const { password, ...safe } = u;
-  // sql.js returns numbers as numbers — coerce balance fields
   ['balance','totalInvested','totalProfits','totalWithdrawn'].forEach(f => {
     if (safe[f] !== undefined) safe[f] = Number(safe[f]) || 0;
   });
@@ -152,24 +152,28 @@ function adminOnly(req, res, next) {
 }
 
 // ══════════════════════════════════════════════════════
-//  BOOT — init sql.js then start express
+//  BOOT
 // ══════════════════════════════════════════════════════
 async function boot() {
   SQL = await initSqlJs();
 
   // Load existing DB from disk if available
-  const binFile = DB_FILE + '.bin';
-  if (fs.existsSync(binFile)) {
-    const buf = fs.readFileSync(binFile);
-    db = new SQL.Database(buf);
-    console.log('✅ Loaded existing database from disk');
+  if (fs.existsSync(DB_FILE)) {
+    try {
+      const buf = fs.readFileSync(DB_FILE);
+      db = new SQL.Database(buf);
+      console.log('✅ Loaded existing database from disk');
+    } catch (e) {
+      console.warn('⚠️  Corrupt DB file, creating fresh:', e.message);
+      db = new SQL.Database();
+    }
   } else {
     db = new SQL.Database();
     console.log('✅ Created fresh database');
   }
 
   // ── Schema ──────────────────────────────────────────
-  exec(`
+  db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id            TEXT PRIMARY KEY,
       firstName     TEXT NOT NULL,
@@ -188,8 +192,10 @@ async function boot() {
       totalWithdrawn REAL NOT NULL DEFAULT 0,
       lastLogin     TEXT,
       createdAt     TEXT NOT NULL
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS plans (
       id            TEXT PRIMARY KEY,
       name          TEXT NOT NULL,
@@ -203,8 +209,10 @@ async function boot() {
       popular       INTEGER DEFAULT 0,
       active        INTEGER DEFAULT 1,
       createdAt     TEXT NOT NULL
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS investments (
       id            TEXT PRIMARY KEY,
       userId        TEXT NOT NULL,
@@ -219,8 +227,10 @@ async function boot() {
       endDate       TEXT NOT NULL,
       lastCredited  TEXT,
       createdAt     TEXT NOT NULL
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS deposits (
       id                TEXT PRIMARY KEY,
       userId            TEXT NOT NULL,
@@ -233,23 +243,27 @@ async function boot() {
       rejectionReason   TEXT,
       createdAt         TEXT NOT NULL,
       updatedAt         TEXT
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS withdrawals (
-      id              TEXT PRIMARY KEY,
-      userId          TEXT NOT NULL,
-      amount          REAL NOT NULL,
-      fee             REAL NOT NULL DEFAULT 0,
-      net             REAL NOT NULL,
-      method          TEXT NOT NULL DEFAULT 'M-Pesa',
-      address         TEXT NOT NULL,
-      status          TEXT NOT NULL DEFAULT 'pending',
-      rejectionReason TEXT,
+      id               TEXT PRIMARY KEY,
+      userId           TEXT NOT NULL,
+      amount           REAL NOT NULL,
+      fee              REAL NOT NULL DEFAULT 0,
+      net              REAL NOT NULL,
+      method           TEXT NOT NULL DEFAULT 'M-Pesa',
+      address          TEXT NOT NULL,
+      status           TEXT NOT NULL DEFAULT 'pending',
+      rejectionReason  TEXT,
       b2cTransactionId TEXT,
-      createdAt       TEXT NOT NULL,
-      updatedAt       TEXT
-    );
+      createdAt        TEXT NOT NULL,
+      updatedAt        TEXT
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS transactions (
       id          TEXT PRIMARY KEY,
       userId      TEXT NOT NULL,
@@ -258,8 +272,10 @@ async function boot() {
       description TEXT,
       status      TEXT NOT NULL DEFAULT 'completed',
       createdAt   TEXT NOT NULL
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS notifications (
       id        TEXT PRIMARY KEY,
       userId    TEXT NOT NULL,
@@ -267,8 +283,10 @@ async function boot() {
       type      TEXT DEFAULT 'info',
       read      INTEGER DEFAULT 0,
       createdAt TEXT NOT NULL
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS mpesa_logs (
       id          TEXT PRIMARY KEY,
       checkoutId  TEXT,
@@ -277,22 +295,26 @@ async function boot() {
       resultCode  TEXT,
       receiptNo   TEXT,
       processedAt TEXT
-    );
+    )
+  `);
 
+  db.run(`
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,
       value TEXT
-    );
+    )
   `);
+
+  scheduleSave();
 
   // ── Seed default plans ─────────────────────────────
   const planCount = get('SELECT COUNT(*) as c FROM plans');
   if (!planCount || Number(planCount.c) === 0) {
     const plans = [
-      [uid(),'Starter', 3,  7,  1000,   9999,   5,  '#00e5ff', 'Perfect entry plan',         0, 1],
-      [uid(),'Silver',  5,  14, 10000,  49999,  5,  '#b0b0b0', 'Balanced growth plan',       0, 1],
-      [uid(),'Gold',    7,  21, 50000,  199999, 7,  '#ffc107', 'High-performance plan',      1, 1],
-      [uid(),'Platinum',10, 30, 200000, 9999999,10, '#b388ff', 'Dedicated manager included', 0, 1],
+      [uid(),'Starter', 3,  7,  1000,   9999,   5, '#00e5ff', 'Perfect entry plan',         0, 1],
+      [uid(),'Silver',  5,  14, 10000,  49999,  5, '#b0b0b0', 'Balanced growth plan',       0, 1],
+      [uid(),'Gold',    7,  21, 50000,  199999, 7, '#ffc107', 'High-performance plan',      1, 1],
+      [uid(),'Platinum',10, 30, 200000, 9999999,10,'#b388ff', 'Dedicated manager included', 0, 1],
     ];
     for (const p of plans) {
       run(`INSERT OR IGNORE INTO plans
@@ -300,6 +322,7 @@ async function boot() {
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
         [...p, nowISO()]);
     }
+    console.log('✅ Seeded default investment plans');
   }
 
   // ── Seed settings ──────────────────────────────────
@@ -316,16 +339,10 @@ async function boot() {
     run('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)', [k, v]);
   }
 
-  // ── Seed admin ─────────────────────────────────────
-  const adminRow = get("SELECT id FROM users WHERE role='admin'");
-  if (!adminRow) {
-    const hash = bcrypt.hashSync(ADMIN_PASS, 10);
-    run(`INSERT OR IGNORE INTO users
-         (id,firstName,lastName,email,phone,password,role,refCode,balance,
-          totalInvested,totalProfits,totalWithdrawn,createdAt)
-         VALUES (?,?,?,?,?,?,?,?,0,0,0,0,?)`,
-      [uid(),'Admin','User',ADMIN_EMAIL,'0796820013',hash,'admin','ADMIN001',nowISO()]);
-  }
+  // ── Always ensure admin exists with correct password ─
+  // This fixes the "wrong email or password" admin panel issue.
+  // Every boot we upsert the admin with the current ADMIN_PASS.
+  await ensureAdmin();
 
   // ── Profit accrual every 60s ───────────────────────
   setInterval(accrueProfit, 60000);
@@ -334,15 +351,36 @@ async function boot() {
   startExpress();
 }
 
+// ── Ensure admin user always exists & password is correct ──
+async function ensureAdmin() {
+  const hash = await bcrypt.hash(ADMIN_PASS, 10);
+  const existing = get("SELECT id FROM users WHERE email=?", [ADMIN_EMAIL.toLowerCase()]);
+
+  if (!existing) {
+    // Create fresh admin
+    run(`INSERT OR IGNORE INTO users
+         (id,firstName,lastName,email,phone,password,role,status,kycStatus,
+          refCode,balance,totalInvested,totalProfits,totalWithdrawn,createdAt)
+         VALUES (?,?,?,?,?,?,?,?,?,?,0,0,0,0,?)`,
+      [uid(), 'Admin', 'User', ADMIN_EMAIL.toLowerCase(), '0796820013',
+       hash, 'admin', 'active', 'verified', 'ADMIN001', nowISO()]);
+    console.log(`✅ Admin created: ${ADMIN_EMAIL}`);
+  } else {
+    // Always update password to match current ADMIN_PASS env var
+    run(`UPDATE users SET password=?, role='admin', status='active' WHERE email=?`,
+      [hash, ADMIN_EMAIL.toLowerCase()]);
+    console.log(`✅ Admin password synced for: ${ADMIN_EMAIL}`);
+  }
+}
+
 // ── Profit accrual ────────────────────────────────────────
 function accrueProfit() {
   const active = all(`SELECT * FROM investments WHERE status='active'`);
   for (const inv of active) {
-    const now  = new Date();
-    const end  = new Date(inv.endDate);
+    const now = new Date();
+    const end = new Date(inv.endDate);
 
     if (now >= end) {
-      // Matured
       const totalProfit = Number(inv.amount) * Number(inv.roi) / 100 * Number(inv.period);
       const remaining   = totalProfit - Number(inv.earned);
       run(`UPDATE investments SET earned=?, lastCredited=?, status='completed' WHERE id=?`,
@@ -353,10 +391,11 @@ function accrueProfit() {
         run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
           [uid(), inv.userId, 'profit', totalProfit, `${inv.planName} plan completed`, 'completed', nowISO()]);
         run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-          [uid(), inv.userId, `🎉 Your ${inv.planName} investment matured! KES ${totalProfit.toFixed(2)} credited.`, 'success', nowISO()]);
+          [uid(), inv.userId,
+           `🎉 Your ${inv.planName} investment matured! KES ${totalProfit.toFixed(2)} credited.`,
+           'success', nowISO()]);
       }
     } else {
-      // Ongoing — credit hourly
       const lastCredit = inv.lastCredited ? new Date(inv.lastCredited) : new Date(inv.startDate);
       const hoursElapsed = (now - lastCredit) / 3600000;
       if (hoursElapsed < 1) continue;
@@ -384,7 +423,12 @@ function startExpress() {
   app.use(express.static(path.join(__dirname, 'public')));
 
   // ── Health ─────────────────────────────────────────
-  app.get('/api/health', (_, res) => res.json({ ok: true, ts: nowISO() }));
+  app.get('/api/health', (_, res) => res.json({
+    ok: true,
+    ts: nowISO(),
+    till: MPESA.shortcode,
+    admin: ADMIN_EMAIL
+  }));
 
   // ── Public plans ───────────────────────────────────
   app.get('/api/plans', (_, res) => {
@@ -396,7 +440,10 @@ function startExpress() {
     const rows = all('SELECT key,value FROM settings');
     const out  = {};
     rows.forEach(r => { out[r.key] = r.value; });
+    // Never expose secret keys
     delete out.mpesaB2cSecurityCredential;
+    // Always enforce correct till in public settings
+    out.mpesaTill = '5321672';
     res.json(out);
   });
 
@@ -459,7 +506,7 @@ function startExpress() {
     }
   });
 
-  // LOGIN
+  // LOGIN — works for both admin and regular users
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -510,7 +557,7 @@ function startExpress() {
     res.json({ user: safeUser(user), investments, deposits, withdrawals, transactions, referrals });
   });
 
-  // Balance (for poller)
+  // Balance
   app.get('/api/user/balance', authMiddleware, (req, res) => {
     const u  = get('SELECT balance,totalProfits,totalWithdrawn FROM users WHERE id=?', [req.user.id]);
     const pd = get(`SELECT COUNT(*) as c FROM deposits WHERE userId=? AND status='pending'`, [req.user.id]);
@@ -768,13 +815,13 @@ function startExpress() {
 
   app.post('/api/mpesa/callback', express.json({ type: '*/*' }), (req, res) => {
     try {
-      const body   = req.body?.Body?.stkCallback || req.body;
-      const code   = String(body?.ResultCode);
-      const checkId= body?.CheckoutRequestID;
-      const items  = body?.CallbackMetadata?.Item || [];
-      const receipt= items.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
-      const amount = items.find(i => i.Name === 'Amount')?.Value;
-      const phone  = String(items.find(i => i.Name === 'PhoneNumber')?.Value || '');
+      const body    = req.body?.Body?.stkCallback || req.body;
+      const code    = String(body?.ResultCode);
+      const checkId = body?.CheckoutRequestID;
+      const items   = body?.CallbackMetadata?.Item || [];
+      const receipt = items.find(i => i.Name === 'MpesaReceiptNumber')?.Value;
+      const amount  = items.find(i => i.Name === 'Amount')?.Value;
+      const phone   = String(items.find(i => i.Name === 'PhoneNumber')?.Value || '');
 
       run(`INSERT INTO mpesa_logs (id,checkoutId,phone,amount,resultCode,receiptNo,processedAt) VALUES (?,?,?,?,?,?,?)`,
         [uid(), checkId, phone, amount, code, receipt, nowISO()]);
@@ -786,7 +833,9 @@ function startExpress() {
             [receipt, nowISO(), dep.id]);
           run(`UPDATE users SET balance=balance+? WHERE id=?`, [Number(dep.amount), dep.userId]);
           run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-            [uid(), dep.userId, `✅ KES ${Number(dep.amount).toFixed(2)} deposit confirmed! Receipt: ${receipt}`, 'success', nowISO()]);
+            [uid(), dep.userId,
+             `✅ KES ${Number(dep.amount).toFixed(2)} deposit confirmed! Receipt: ${receipt}`,
+             'success', nowISO()]);
         }
       }
       res.json({ ResultCode: 0, ResultDesc: 'Accepted' });
@@ -852,7 +901,9 @@ function startExpress() {
     run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
       [uid(), userId, type === 'credit' ? 'deposit' : 'withdrawal', Math.abs(amount), reason, 'completed', nowISO()]);
     run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), userId, `${type === 'credit' ? '💰 KES ' + amount + ' credited' : '💸 KES ' + amount + ' debited'}: ${reason}`, 'info', nowISO()]);
+      [uid(), userId,
+       `${type === 'credit' ? '💰 KES ' + amount + ' credited' : '💸 KES ' + amount + ' debited'}: ${reason}`,
+       'info', nowISO()]);
     res.json({ success: true });
   });
 
@@ -910,7 +961,9 @@ function startExpress() {
     run('UPDATE users SET balance=balance+?, totalWithdrawn=totalWithdrawn-? WHERE id=?',
       [Number(wd.amount), Number(wd.net), wd.userId]);
     run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), wd.userId, `❌ Withdrawal rejected. KES ${Number(wd.amount).toFixed(2)} refunded. Reason: ${reason}`, 'error', nowISO()]);
+      [uid(), wd.userId,
+       `❌ Withdrawal rejected. KES ${Number(wd.amount).toFixed(2)} refunded. Reason: ${reason}`,
+       'error', nowISO()]);
     res.json({ success: true });
   });
 
@@ -936,7 +989,8 @@ function startExpress() {
     const id = uid();
     run(`INSERT INTO plans (id,name,roi,period,minAmount,maxAmount,referralBonus,color,description,popular,active,createdAt)
          VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-      [id, name, roi, period, minAmount, maxAmount, referralBonus||5, color||'#00e676', description||'', popular||0, active??1, nowISO()]);
+      [id, name, roi, period, minAmount, maxAmount, referralBonus||5, color||'#00e676',
+       description||'', popular||0, active??1, nowISO()]);
     res.json({ id, success: true });
   });
 
@@ -963,14 +1017,20 @@ function startExpress() {
     const rows = all('SELECT key,value FROM settings');
     const out  = {};
     rows.forEach(r => { out[r.key] = r.value; });
+    // Always enforce correct till
+    out.mpesaTill = '5321672';
     res.json(out);
   });
 
   app.put('/api/admin/settings', authMiddleware, adminOnly, (req, res) => {
     for (const [k,v] of Object.entries(req.body)) {
+      // Prevent overriding the till number via settings
+      if (k === 'mpesaTill') continue;
       if (v !== undefined && v !== null)
         run('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)', [k, String(v)]);
     }
+    // Always keep till correct
+    run('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)', ['mpesaTill', '5321672']);
     res.json({ success: true });
   });
 
@@ -996,20 +1056,35 @@ function startExpress() {
     res.json(all('SELECT * FROM mpesa_logs ORDER BY processedAt DESC LIMIT 100'));
   });
 
-  // B2C logs stub
   app.get('/api/admin/b2c-logs', authMiddleware, adminOnly, (req, res) => res.json([]));
 
-  // ── SPA fallbacks ─────────────────────────────────
-  app.get('/admin*',     (_, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-  app.get('/dashboard*', (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
-  app.get('*', (req, res) => {
-    if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  // ── Admin panel — only accessible when logged in as admin ──
+  // The HTML file handles auth via JWT check; server just serves it
+  app.get('/admin*', (_, res) => {
+    const adminFile = path.join(__dirname, 'public', 'admin.html');
+    if (fs.existsSync(adminFile)) return res.sendFile(adminFile);
+    res.status(403).send('Admin panel not found');
   });
 
-  app.listen(PORT, () => {
+  // ── SPA fallbacks ─────────────────────────────────
+  app.get('/dashboard*', (_, res) => {
+    const f = path.join(__dirname, 'public', 'dashboard.html');
+    if (fs.existsSync(f)) return res.sendFile(f);
+    res.status(404).send('Dashboard not found');
+  });
+
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
+    const f = path.join(__dirname, 'public', 'index.html');
+    if (fs.existsSync(f)) return res.sendFile(f);
+    res.status(404).send('Not found');
+  });
+
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Pesa Grow running on port ${PORT}`);
-    console.log(`   Till: ${MPESA.shortcode} | URL: ${BASE_URL}`);
+    console.log(`   Till: ${MPESA.shortcode}`);
+    console.log(`   Admin: ${ADMIN_EMAIL}`);
+    console.log(`   URL: ${BASE_URL}`);
   });
 }
 
