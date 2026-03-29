@@ -271,7 +271,7 @@ function startExpress() {
 
 Here's the full flow after the change:
 ```
-User registers
+/*User registers
       │
       ▼
 welcomeBonus > 0?
@@ -287,7 +287,7 @@ welcomeBonus > 0?
                    User notified: "earning NOW at X% daily"
               │
         Not found? ── Keep as liquid balance
-                      Notify user to invest manually
+                      Notify user to invest manually*/
     } catch (e) {
       if (e.message?.includes('UNIQUE')) return res.status(409).json({ error: 'Email already registered' });
       res.status(500).json({ error: 'Registration failed. Please try again.' });
