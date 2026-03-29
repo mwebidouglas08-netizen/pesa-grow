@@ -24,7 +24,7 @@ const PORT         = process.env.PORT         || 3000;
 const JWT_SECRET   = process.env.JWT_SECRET   || 'pesagrow-secret-2024-change-me';
 const BASE_URL     = process.env.BASE_URL     || `http://localhost:${PORT}`;
 const ADMIN_EMAIL  = (process.env.ADMIN_EMAIL || 'admin@pesagrow.co.ke').toLowerCase().trim();
-const ADMIN_PASS   = process.env.ADMIN_PASS   || 'Admin@2024';
+const ADMIN_PASS   = process.env.ADMIN_PASS   || '@Daggy7267';;
 const RESET_SECRET = process.env.RESET_SECRET || 'pesagrow-reset-2024';
 
 const MPESA = {
