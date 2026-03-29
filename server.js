@@ -238,11 +238,56 @@ function startExpress() {
         [id, firstName.trim(), lastName.trim(), emailNorm, phone.trim(), hash, 'user', 'active', 'none', genRefCode(), referredBy, welcomeBonus, nowISO()]);
       if (welcomeBonus > 0) {
         run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`, [uid(), id, 'bonus', welcomeBonus, 'Welcome bonus', 'completed', nowISO()]);
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`, [uid(), id, `🎉 Welcome! KES ${welcomeBonus} bonus credited.`, 'success', nowISO()]);
+        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`, [uid(), id, `🎉 Welcome! KES ${welcomeBonus} bonus credited and earning interest immediately!`, 'success', nowISO()]);
+
+        // Auto-invest the welcome bonus into the lowest active plan immediately
+        const starterPlan = get(`SELECT * FROM plans WHERE active=1 AND minAmount <= ? ORDER BY minAmount ASC LIMIT 1`, [welcomeBonus]);
+        if (starterPlan) {
+          const invId  = uid();
+          const start  = nowISO();
+          const end    = new Date(Date.now() + Number(starterPlan.period) * 86400000).toISOString();
+          // Deduct bonus from balance and place into investment
+          run(`UPDATE users SET balance=balance-?, totalInvested=totalInvested+? WHERE id=?`, [welcomeBonus, welcomeBonus, id]);
+          run(`INSERT INTO investments (id,userId,planId,planName,amount,roi,period,status,startDate,endDate,lastCredited,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+            [invId, id, starterPlan.id, starterPlan.name, welcomeBonus, starterPlan.roi, starterPlan.period, 'active', start, end, start, nowISO()]);
+          run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+            [uid(), id, 'investment', welcomeBonus, `Auto-invested welcome bonus in ${starterPlan.name} plan (${starterPlan.roi}% daily)`, 'completed', nowISO()]);
+          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+            [uid(), id, `📈 Your KES ${welcomeBonus} welcome bonus has been auto-invested in the ${starterPlan.name} plan at ${starterPlan.roi}% daily ROI. Profits start accruing now!`, 'success', nowISO()]);
+        } else {
+          // No eligible plan found — keep bonus as liquid balance, still accrues via a manual fallback
+          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+            [uid(), id, `💰 Your KES ${welcomeBonus} welcome bonus is ready. Go to Invest to start earning!`, 'info', nowISO()]);
+        }
       }
       if (referredBy) run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`, [uid(), referredBy, '👥 Someone joined using your referral code!', 'info', nowISO()]);
       const user = get('SELECT * FROM users WHERE id=?', [id]);
       res.json({ token: makeToken(user), user: safeUser(user) });
+```
+
+---
+
+### What this does
+
+Here's the full flow after the change:
+```
+User registers
+      │
+      ▼
+welcomeBonus > 0?
+      │
+      Yes ──► Credit bonus to balance
+              │
+              ▼
+        Find lowest plan where minAmount ≤ bonus
+              │
+        Found? ──► Deduct from balance
+                   Create active investment (startDate = NOW)
+                   accrueProfit() picks it up within 60s
+                   User notified: "earning NOW at X% daily"
+              │
+        Not found? ── Keep as liquid balance
+                      Notify user to invest manually
     } catch (e) {
       if (e.message?.includes('UNIQUE')) return res.status(409).json({ error: 'Email already registered' });
       res.status(500).json({ error: 'Registration failed. Please try again.' });
