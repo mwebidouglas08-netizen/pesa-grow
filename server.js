@@ -225,72 +225,112 @@ function startExpress() {
   app.post('/api/auth/register', async (req, res) => {
     try {
       const { firstName, lastName, email, phone, password, refCode } = req.body;
-      if (!firstName || !lastName || !email || !phone || !password) return res.status(400).json({ error: 'All fields are required' });
-      if (password.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
-      const emailNorm = email.toLowerCase().trim();
-      if (get('SELECT id FROM users WHERE email=?', [emailNorm])) return res.status(409).json({ error: 'Email already registered' });
-      const hash = await bcrypt.hash(password, 10);
-      const id   = uid();
-      const welcomeBonus = parseFloat(getSetting('welcomeBonus') || '0');
-      let referredBy = null;
-      if (refCode) { const ref = get('SELECT id FROM users WHERE refCode=?', [refCode.toUpperCase()]); if (ref) referredBy = ref.id; }
-      run(`INSERT INTO users (id,firstName,lastName,email,phone,password,role,status,kycStatus,refCode,referredBy,balance,totalInvested,totalProfits,totalWithdrawn,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0,0,0,?)`,
-        [id, firstName.trim(), lastName.trim(), emailNorm, phone.trim(), hash, 'user', 'active', 'none', genRefCode(), referredBy, welcomeBonus, nowISO()]);
-      if (welcomeBonus > 0) {
-        run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`, [uid(), id, 'bonus', welcomeBonus, 'Welcome bonus', 'completed', nowISO()]);
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`, [uid(), id, `🎉 Welcome! KES ${welcomeBonus} bonus credited and earning interest immediately!`, 'success', nowISO()]);
+      if (!firstName || !lastName || !email || !phone || !password)
+        return res.status(400).json({ error: 'All fields are required' });
+      if (password.length < 8)
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
 
-        // Auto-invest the welcome bonus into the lowest active plan immediately
-        const starterPlan = get(`SELECT * FROM plans WHERE active=1 AND minAmount <= ? ORDER BY minAmount ASC LIMIT 1`, [welcomeBonus]);
-        if (starterPlan) {
-          const invId  = uid();
-          const start  = nowISO();
-          const end    = new Date(Date.now() + Number(starterPlan.period) * 86400000).toISOString();
-          // Deduct bonus from balance and place into investment
-          run(`UPDATE users SET balance=balance-?, totalInvested=totalInvested+? WHERE id=?`, [welcomeBonus, welcomeBonus, id]);
-          run(`INSERT INTO investments (id,userId,planId,planName,amount,roi,period,status,startDate,endDate,lastCredited,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-            [invId, id, starterPlan.id, starterPlan.name, welcomeBonus, starterPlan.roi, starterPlan.period, 'active', start, end, start, nowISO()]);
-          run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-            [uid(), id, 'investment', welcomeBonus, `Auto-invested welcome bonus in ${starterPlan.name} plan (${starterPlan.roi}% daily)`, 'completed', nowISO()]);
-          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-            [uid(), id, `📈 Your KES ${welcomeBonus} welcome bonus has been auto-invested in the ${starterPlan.name} plan at ${starterPlan.roi}% daily ROI. Profits start accruing now!`, 'success', nowISO()]);
-        } else {
-          // No eligible plan found — keep bonus as liquid balance, still accrues via a manual fallback
-          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-            [uid(), id, `💰 Your KES ${welcomeBonus} welcome bonus is ready. Go to Invest to start earning!`, 'info', nowISO()]);
+      const emailNorm = email.toLowerCase().trim();
+      if (get('SELECT id FROM users WHERE email=?', [emailNorm]))
+        return res.status(409).json({ error: 'Email already registered' });
+
+      const hash         = await bcrypt.hash(password, 10);
+      const newId        = uid();
+      const welcomeBonus = parseFloat(getSetting('welcomeBonus') || '0');
+
+      let referredBy = null;
+      if (refCode) {
+        const ref = get('SELECT id FROM users WHERE refCode=?', [refCode.toUpperCase()]);
+        if (ref) referredBy = ref.id;
+      }
+
+      // Insert user — balance starts at welcomeBonus (liquid)
+      run(
+        `INSERT INTO users (id,firstName,lastName,email,phone,password,role,status,kycStatus,refCode,referredBy,balance,totalInvested,totalProfits,totalWithdrawn,createdAt)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0,0,0,?)`,
+        [newId, firstName.trim(), lastName.trim(), emailNorm, phone.trim(), hash,
+         'user', 'active', 'none', genRefCode(), referredBy, welcomeBonus, nowISO()]
+      );
+
+      // Welcome bonus handling
+      if (welcomeBonus > 0) {
+        // Record the bonus credit transaction
+        run(
+          `INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+          [uid(), newId, 'bonus', welcomeBonus, 'Welcome bonus credited', 'completed', nowISO()]
+        );
+
+        // Try to auto-invest into the cheapest eligible plan
+        let autoInvested = false;
+        try {
+          const plan = get(
+            `SELECT * FROM plans WHERE active=1 AND minAmount <= ? ORDER BY minAmount ASC LIMIT 1`,
+            [welcomeBonus]
+          );
+          if (plan) {
+            const invId = uid();
+            const start = nowISO();
+            const end   = new Date(Date.now() + Number(plan.period) * 86400000).toISOString();
+
+            run(`UPDATE users SET balance=balance-?, totalInvested=totalInvested+? WHERE id=?`,
+                [welcomeBonus, welcomeBonus, newId]);
+
+            run(
+              `INSERT INTO investments (id,userId,planId,planName,amount,roi,period,status,startDate,endDate,lastCredited,createdAt)
+               VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+              [invId, newId, plan.id, plan.name, welcomeBonus,
+               plan.roi, plan.period, 'active', start, end, start, nowISO()]
+            );
+
+            run(
+              `INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+              [uid(), newId, 'investment', welcomeBonus,
+               `Auto-invested welcome bonus — ${plan.name} plan @ ${plan.roi}% daily`, 'completed', nowISO()]
+            );
+
+            run(
+              `INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+              [uid(), newId,
+               `📈 Your KES ${welcomeBonus} welcome bonus is now earning ${plan.roi}% daily in the ${plan.name} plan!`,
+               'success', nowISO()]
+            );
+
+            autoInvested = true;
+          }
+        } catch (invErr) {
+          console.error('Auto-invest error (non-fatal):', invErr.message);
+        }
+
+        if (!autoInvested) {
+          // Bonus stays as liquid balance
+          run(
+            `INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+            [uid(), newId,
+             `🎉 Welcome! KES ${welcomeBonus} bonus is in your balance. Head to Invest to start earning!`,
+             'success', nowISO()]
+          );
         }
       }
-      if (referredBy) run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`, [uid(), referredBy, '👥 Someone joined using your referral code!', 'info', nowISO()]);
-      const user = get('SELECT * FROM users WHERE id=?', [id]);
-      res.json({ token: makeToken(user), user: safeUser(user) });
-```
 
----
+      // Notify referrer
+      if (referredBy) {
+        run(
+          `INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+          [uid(), referredBy, '👥 Someone joined using your referral code!', 'info', nowISO()]
+        );
+      }
 
-### What this does
+      // Always fetch fresh user record before responding
+      const user = get('SELECT * FROM users WHERE id=?', [newId]);
+      if (!user) return res.status(500).json({ error: 'Registration failed. Please try again.' });
 
-Here's the full flow after the change:
-```
-/*User registers
-      │
-      ▼
-welcomeBonus > 0?
-      │
-      Yes ──► Credit bonus to balance
-              │
-              ▼
-        Find lowest plan where minAmount ≤ bonus
-              │
-        Found? ──► Deduct from balance
-                   Create active investment (startDate = NOW)
-                   accrueProfit() picks it up within 60s
-                   User notified: "earning NOW at X% daily"
-              │
-        Not found? ── Keep as liquid balance
-                      Notify user to invest manually*/
+      return res.json({ token: makeToken(user), user: safeUser(user) });
+
     } catch (e) {
-      if (e.message?.includes('UNIQUE')) return res.status(409).json({ error: 'Email already registered' });
-      res.status(500).json({ error: 'Registration failed. Please try again.' });
+      console.error('Register error:', e.message);
+      if (e.message?.includes('UNIQUE'))
+        return res.status(409).json({ error: 'Email already registered' });
+      return res.status(500).json({ error: 'Registration failed. Please try again.' });
     }
   });
 
