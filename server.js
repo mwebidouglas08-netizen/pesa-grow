@@ -2,10 +2,7 @@
  * ============================================================
  *  PESA GROW — server.js  (Railway-ready, zero native deps)
  *  Till Number: 5321672
- * ============================================================
- *  Dependencies: express, cors, dotenv, bcryptjs, jsonwebtoken,
- *                sql.js (pure-JS SQLite), axios, multer
- *  NO native addons — builds on Railway Node 22 without Python
+ *  M-Pesa: Lipana (lipana.dev) via direct HTTP — no SDK needed
  * ============================================================
  */
 
@@ -15,13 +12,12 @@ const express   = require('express');
 const cors      = require('cors');
 const path      = require('path');
 const fs        = require('fs');
+const https     = require('https');
+const http      = require('http');
 const jwt       = require('jsonwebtoken');
 const bcrypt    = require('bcryptjs');
-const axios     = require('axios');
 const multer    = require('multer');
 const initSqlJs = require('sql.js');
-// ── Lipana SDK (npm install @lipana/sdk) ───────────────────
-const { Lipana } = require('@lipana/sdk');
 
 // ── Uploads dir ────────────────────────────────────────────
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -35,19 +31,60 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@pesagrow.co.ke';
 const ADMIN_PASS  = process.env.ADMIN_PASS  || 'Admin@2024';
 
 // ── Lipana M-Pesa config ───────────────────────────────────
-// Get your secret key from: https://lipana.dev/dashboard → API Keys
+// Sign up at https://lipana.dev → Dashboard → API Keys → copy Secret Key
 const LIPANA_SECRET_KEY = process.env.LIPANA_SECRET_KEY || '';
-const LIPANA_ENV        = process.env.LIPANA_ENV        || 'sandbox'; // 'sandbox' or 'production'
-const MPESA_TILL        = process.env.MPESA_SHORTCODE   || '5321672';
+const LIPANA_BASE_URL   = 'https://api.lipana.dev'; // Lipana REST API base
+const MPESA_TILL        = process.env.MPESA_SHORTCODE || '5321672';
+
+// ── Lipana HTTP helper (no axios — uses built-in https) ───
+function lipanaRequest(method, endpoint, body) {
+  return new Promise((resolve, reject) => {
+    const payload = body ? JSON.stringify(body) : null;
+    const url     = new URL(LIPANA_BASE_URL + endpoint);
+    const options = {
+      hostname: url.hostname,
+      port:     443,
+      path:     url.pathname + url.search,
+      method:   method.toUpperCase(),
+      headers: {
+        'Authorization': `Bearer ${LIPANA_SECRET_KEY}`,
+        'Content-Type':  'application/json',
+        'Accept':        'application/json',
+      }
+    };
+    if (payload) options.headers['Content-Length'] = Buffer.byteLength(payload);
+
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => { data += chunk; });
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(parsed);
+          } else {
+            const msg = parsed.message || parsed.error || `HTTP ${res.statusCode}`;
+            reject(new Error(msg));
+          }
+        } catch {
+          reject(new Error(`Invalid JSON response from Lipana: ${data.slice(0, 200)}`));
+        }
+      });
+    });
+
+    req.on('error', (e) => reject(new Error(`Network error: ${e.message}`)));
+    if (payload) req.write(payload);
+    req.end();
+  });
+}
 
 // ══════════════════════════════════════════════════════
-//  sql.js WRAPPER  — mimics better-sqlite3 sync API
-//  sql.js is in-memory; we persist to a JSON file on disk
+//  sql.js WRAPPER
 // ══════════════════════════════════════════════════════
-const DB_FILE = process.env.DB_PATH || path.join(__dirname, 'pesagrow.db.json');
+const DB_FILE = process.env.DB_PATH || path.join(__dirname, 'pesagrow.db.bin');
 
-let SQL;   // sql.js module
-let db;    // sql.js Database instance
+let SQL;
+let db;
 let saveTimer = null;
 
 function scheduleSave() {
@@ -55,13 +92,12 @@ function scheduleSave() {
   saveTimer = setTimeout(() => {
     saveTimer = null;
     try {
-      const data = db.export();           // Uint8Array
-      fs.writeFileSync(DB_FILE + '.bin', Buffer.from(data));
+      const data = db.export();
+      fs.writeFileSync(DB_FILE, Buffer.from(data));
     } catch (e) { console.error('DB save error:', e.message); }
   }, 500);
 }
 
-// Thin helpers that look like better-sqlite3
 function run(sql, params = []) {
   db.run(sql, params);
   scheduleSave();
@@ -114,7 +150,6 @@ function makeToken(user) {
 function safeUser(u) {
   if (!u) return null;
   const { password, ...safe } = u;
-  // sql.js returns numbers as numbers — coerce balance fields
   ['balance','totalInvested','totalProfits','totalWithdrawn'].forEach(f => {
     if (safe[f] !== undefined) safe[f] = Number(safe[f]) || 0;
   });
@@ -123,6 +158,13 @@ function safeUser(u) {
 
 function genRefCode() {
   return 'PG' + Math.random().toString(36).slice(2, 8).toUpperCase();
+}
+
+function formatPhone(phone) {
+  let p = String(phone).trim().replace(/\s+/g, '');
+  if (p.startsWith('0'))  p = '254' + p.slice(1);
+  if (p.startsWith('+'))  p = p.slice(1);
+  return p;
 }
 
 // ── Auth middleware ────────────────────────────────────────
@@ -145,23 +187,20 @@ function adminOnly(req, res, next) {
 }
 
 // ══════════════════════════════════════════════════════
-//  BOOT — init sql.js then start express
+//  BOOT
 // ══════════════════════════════════════════════════════
 async function boot() {
   SQL = await initSqlJs();
 
-  // Load existing DB from disk if available
-  const binFile = DB_FILE + '.bin';
-  if (fs.existsSync(binFile)) {
-    const buf = fs.readFileSync(binFile);
+  if (fs.existsSync(DB_FILE)) {
+    const buf = fs.readFileSync(DB_FILE);
     db = new SQL.Database(buf);
-    console.log('✅ Loaded existing database from disk');
+    console.log('✅ Loaded existing database');
   } else {
     db = new SQL.Database();
     console.log('✅ Created fresh database');
   }
 
-  // ── Schema ──────────────────────────────────────────
   exec(`
     CREATE TABLE IF NOT EXISTS users (
       id            TEXT PRIMARY KEY,
@@ -182,7 +221,6 @@ async function boot() {
       lastLogin     TEXT,
       createdAt     TEXT NOT NULL
     );
-
     CREATE TABLE IF NOT EXISTS plans (
       id            TEXT PRIMARY KEY,
       name          TEXT NOT NULL,
@@ -197,7 +235,6 @@ async function boot() {
       active        INTEGER DEFAULT 1,
       createdAt     TEXT NOT NULL
     );
-
     CREATE TABLE IF NOT EXISTS investments (
       id            TEXT PRIMARY KEY,
       userId        TEXT NOT NULL,
@@ -213,7 +250,6 @@ async function boot() {
       lastCredited  TEXT,
       createdAt     TEXT NOT NULL
     );
-
     CREATE TABLE IF NOT EXISTS deposits (
       id                TEXT PRIMARY KEY,
       userId            TEXT NOT NULL,
@@ -227,22 +263,20 @@ async function boot() {
       createdAt         TEXT NOT NULL,
       updatedAt         TEXT
     );
-
     CREATE TABLE IF NOT EXISTS withdrawals (
-      id              TEXT PRIMARY KEY,
-      userId          TEXT NOT NULL,
-      amount          REAL NOT NULL,
-      fee             REAL NOT NULL DEFAULT 0,
-      net             REAL NOT NULL,
-      method          TEXT NOT NULL DEFAULT 'M-Pesa',
-      address         TEXT NOT NULL,
-      status          TEXT NOT NULL DEFAULT 'pending',
-      rejectionReason TEXT,
+      id               TEXT PRIMARY KEY,
+      userId           TEXT NOT NULL,
+      amount           REAL NOT NULL,
+      fee              REAL NOT NULL DEFAULT 0,
+      net              REAL NOT NULL,
+      method           TEXT NOT NULL DEFAULT 'M-Pesa',
+      address          TEXT NOT NULL,
+      status           TEXT NOT NULL DEFAULT 'pending',
+      rejectionReason  TEXT,
       b2cTransactionId TEXT,
-      createdAt       TEXT NOT NULL,
-      updatedAt       TEXT
+      createdAt        TEXT NOT NULL,
+      updatedAt        TEXT
     );
-
     CREATE TABLE IF NOT EXISTS transactions (
       id          TEXT PRIMARY KEY,
       userId      TEXT NOT NULL,
@@ -252,7 +286,6 @@ async function boot() {
       status      TEXT NOT NULL DEFAULT 'completed',
       createdAt   TEXT NOT NULL
     );
-
     CREATE TABLE IF NOT EXISTS notifications (
       id        TEXT PRIMARY KEY,
       userId    TEXT NOT NULL,
@@ -261,7 +294,6 @@ async function boot() {
       read      INTEGER DEFAULT 0,
       createdAt TEXT NOT NULL
     );
-
     CREATE TABLE IF NOT EXISTS mpesa_logs (
       id          TEXT PRIMARY KEY,
       checkoutId  TEXT,
@@ -271,14 +303,13 @@ async function boot() {
       receiptNo   TEXT,
       processedAt TEXT
     );
-
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,
       value TEXT
     );
   `);
 
-  // ── Seed default plans ─────────────────────────────
+  // Seed plans
   const planCount = get('SELECT COUNT(*) as c FROM plans');
   if (!planCount || Number(planCount.c) === 0) {
     const plans = [
@@ -290,16 +321,15 @@ async function boot() {
     for (const p of plans) {
       run(`INSERT OR IGNORE INTO plans
            (id,name,roi,period,minAmount,maxAmount,referralBonus,color,description,popular,active,createdAt)
-           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
-        [...p, nowISO()]);
+           VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`, [...p, nowISO()]);
     }
   }
 
-  // ── Seed settings ──────────────────────────────────
+  // Seed settings
   const defaults = {
     siteName:'Pesa Grow', sitePhone:'0796820013',
     siteEmail:'support@pesagrow.co.ke',
-    mpesaTill:'5321672', mpesaName:'PESA GROW LTD',
+    mpesaTill: MPESA_TILL, mpesaName:'PESA GROW LTD',
     minDeposit:'1000', minWithdraw:'500',
     withdrawFee:'2', referralRate:'5',
     welcomeBonus:'0', minHoldingDays:'3',
@@ -309,7 +339,7 @@ async function boot() {
     run('INSERT OR IGNORE INTO settings (key,value) VALUES (?,?)', [k, v]);
   }
 
-  // ── Seed admin ─────────────────────────────────────
+  // Seed admin
   const adminRow = get("SELECT id FROM users WHERE role='admin'");
   if (!adminRow) {
     const hash = bcrypt.hashSync(ADMIN_PASS, 10);
@@ -320,51 +350,43 @@ async function boot() {
       [uid(),'Admin','User',ADMIN_EMAIL,'0796820013',hash,'admin','ADMIN001',nowISO()]);
   }
 
-  // ── Profit accrual every 60s ───────────────────────
   setInterval(accrueProfit, 60000);
-
-  // ── Start Express ──────────────────────────────────
   startExpress();
 }
 
-// ── Profit accrual ────────────────────────────────────────
+// ── Profit accrual ─────────────────────────────────────────
 function accrueProfit() {
-  const active = all(`SELECT * FROM investments WHERE status='active'`);
+  const active = all("SELECT * FROM investments WHERE status='active'");
   for (const inv of active) {
-    const now  = new Date();
-    const end  = new Date(inv.endDate);
-
+    const now = new Date();
+    const end = new Date(inv.endDate);
     if (now >= end) {
-      // Matured
       const totalProfit = Number(inv.amount) * Number(inv.roi) / 100 * Number(inv.period);
       const remaining   = totalProfit - Number(inv.earned);
-      run(`UPDATE investments SET earned=?, lastCredited=?, status='completed' WHERE id=?`,
+      run("UPDATE investments SET earned=?, lastCredited=?, status='completed' WHERE id=?",
         [totalProfit, nowISO(), inv.id]);
       if (remaining > 0) {
-        run(`UPDATE users SET balance=balance+?, totalProfits=totalProfits+? WHERE id=?`,
+        run('UPDATE users SET balance=balance+?, totalProfits=totalProfits+? WHERE id=?',
           [remaining, remaining, inv.userId]);
-        run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+        run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
           [uid(), inv.userId, 'profit', totalProfit, `${inv.planName} plan completed`, 'completed', nowISO()]);
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-          [uid(), inv.userId, `🎉 Your ${inv.planName} investment matured! KES ${totalProfit.toFixed(2)} credited.`, 'success', nowISO()]);
+        run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+          [uid(), inv.userId, `Your ${inv.planName} investment matured! KES ${totalProfit.toFixed(2)} credited.`, 'success', nowISO()]);
       }
     } else {
-      // Ongoing — credit hourly
-      const lastCredit = inv.lastCredited ? new Date(inv.lastCredited) : new Date(inv.startDate);
+      const lastCredit   = inv.lastCredited ? new Date(inv.lastCredited) : new Date(inv.startDate);
       const hoursElapsed = (now - lastCredit) / 3600000;
       if (hoursElapsed < 1) continue;
-      const dailyRoi    = Number(inv.amount) * Number(inv.roi) / 100;
-      const hoursProfit = dailyRoi / 24 * hoursElapsed;
-      run(`UPDATE investments SET earned=earned+?, lastCredited=? WHERE id=?`,
-        [hoursProfit, nowISO(), inv.id]);
-      run(`UPDATE users SET balance=balance+?, totalProfits=totalProfits+? WHERE id=?`,
+      const hoursProfit = (Number(inv.amount) * Number(inv.roi) / 100) / 24 * hoursElapsed;
+      run('UPDATE investments SET earned=earned+?, lastCredited=? WHERE id=?', [hoursProfit, nowISO(), inv.id]);
+      run('UPDATE users SET balance=balance+?, totalProfits=totalProfits+? WHERE id=?',
         [hoursProfit, hoursProfit, inv.userId]);
     }
   }
 }
 
 // ══════════════════════════════════════════════════════
-//  EXPRESS APP
+//  EXPRESS
 // ══════════════════════════════════════════════════════
 function startExpress() {
   const app    = express();
@@ -389,7 +411,6 @@ function startExpress() {
     const rows = all('SELECT key,value FROM settings');
     const out  = {};
     rows.forEach(r => { out[r.key] = r.value; });
-    delete out.mpesaB2cSecurityCredential;
     res.json(out);
   });
 
@@ -397,7 +418,6 @@ function startExpress() {
   //  AUTH
   // ════════════════════════════════════════════════════
 
-  // REGISTER
   app.post('/api/auth/register', async (req, res) => {
     try {
       const { firstName, lastName, email, phone, password, refCode } = req.body;
@@ -425,19 +445,15 @@ function startExpress() {
             refCode,referredBy,balance,totalInvested,totalProfits,totalWithdrawn,createdAt)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,0,0,0,?)`,
         [id, firstName.trim(), lastName.trim(), email.toLowerCase().trim(),
-         phone.trim(), hash, 'user', 'active', 'none',
-         newCode, referredBy, welcomeBonus, nowISO()]);
+         phone.trim(), hash, 'user', 'active', 'none', newCode, referredBy, welcomeBonus, nowISO()]);
 
       if (welcomeBonus > 0) {
-        run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+        run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
           [uid(), id, 'bonus', welcomeBonus, 'Welcome bonus', 'completed', nowISO()]);
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-          [uid(), id, `🎉 Welcome! KES ${welcomeBonus} bonus credited.`, 'success', nowISO()]);
       }
-
       if (referredBy) {
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-          [uid(), referredBy, '👥 Someone joined using your referral code!', 'info', nowISO()]);
+        run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+          [uid(), referredBy, 'Someone joined using your referral code!', 'info', nowISO()]);
       }
 
       const user  = get('SELECT * FROM users WHERE id=?', [id]);
@@ -452,7 +468,6 @@ function startExpress() {
     }
   });
 
-  // LOGIN
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -468,8 +483,7 @@ function startExpress() {
       if (!match) return res.status(401).json({ error: 'Invalid email or password' });
 
       run('UPDATE users SET lastLogin=? WHERE id=?', [nowISO(), user.id]);
-      const token = makeToken(user);
-      res.json({ token, user: safeUser(user) });
+      res.json({ token: makeToken(user), user: safeUser(user) });
 
     } catch (e) {
       console.error('Login error:', e.message);
@@ -477,7 +491,6 @@ function startExpress() {
     }
   });
 
-  // ME
   app.get('/api/auth/me', authMiddleware, (req, res) => {
     const user = get('SELECT * FROM users WHERE id=?', [req.user.id]);
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -488,25 +501,23 @@ function startExpress() {
   //  USER
   // ════════════════════════════════════════════════════
 
-  // Dashboard
   app.get('/api/user/dashboard', authMiddleware, (req, res) => {
     const uid2 = req.user.id;
     const user = get('SELECT * FROM users WHERE id=?', [uid2]);
     if (!user) return res.status(404).json({ error: 'User not found' });
-
-    const investments  = all('SELECT * FROM investments WHERE userId=? ORDER BY createdAt DESC', [uid2]);
-    const deposits     = all('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20', [uid2]);
-    const withdrawals  = all('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20', [uid2]);
-    const transactions = all('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50', [uid2]);
-    const referrals    = all(`SELECT firstName,lastName,createdAt FROM users WHERE referredBy=? ORDER BY createdAt DESC`, [uid2]);
-
-    res.json({ user: safeUser(user), investments, deposits, withdrawals, transactions, referrals });
+    res.json({
+      user:         safeUser(user),
+      investments:  all('SELECT * FROM investments WHERE userId=? ORDER BY createdAt DESC', [uid2]),
+      deposits:     all('SELECT * FROM deposits WHERE userId=? ORDER BY createdAt DESC LIMIT 20', [uid2]),
+      withdrawals:  all('SELECT * FROM withdrawals WHERE userId=? ORDER BY createdAt DESC LIMIT 20', [uid2]),
+      transactions: all('SELECT * FROM transactions WHERE userId=? ORDER BY createdAt DESC LIMIT 50', [uid2]),
+      referrals:    all('SELECT firstName,lastName,createdAt FROM users WHERE referredBy=? ORDER BY createdAt DESC', [uid2]),
+    });
   });
 
-  // Balance (for poller)
   app.get('/api/user/balance', authMiddleware, (req, res) => {
     const u  = get('SELECT balance,totalProfits,totalWithdrawn FROM users WHERE id=?', [req.user.id]);
-    const pd = get(`SELECT COUNT(*) as c FROM deposits WHERE userId=? AND status='pending'`, [req.user.id]);
+    const pd = get("SELECT COUNT(*) as c FROM deposits WHERE userId=? AND status='pending'", [req.user.id]);
     res.json({
       balance:        Number(u.balance),
       totalProfits:   Number(u.totalProfits),
@@ -515,21 +526,20 @@ function startExpress() {
     });
   });
 
-  // Withdraw info
   app.get('/api/user/withdraw-info', authMiddleware, (req, res) => {
-    const user      = get('SELECT * FROM users WHERE id=?', [req.user.id]);
-    const lockDays  = parseInt(getSetting('principalLockDays') || '90');
-    const feeRate   = parseFloat(getSetting('withdrawFee') || '2');
-    const minWd     = parseFloat(getSetting('minWithdraw') || '500');
-    const maxDaily  = parseInt(getSetting('maxDailyWithdrawals') || '3');
+    const user     = get('SELECT * FROM users WHERE id=?', [req.user.id]);
+    const lockDays = parseInt(getSetting('principalLockDays') || '90');
+    const feeRate  = parseFloat(getSetting('withdrawFee') || '2');
+    const minWd    = parseFloat(getSetting('minWithdraw') || '500');
+    const maxDaily = parseInt(getSetting('maxDailyWithdrawals') || '3');
 
     const todayStart = new Date(); todayStart.setHours(0,0,0,0);
     const todayWds   = get(
-      `SELECT COUNT(*) as c FROM withdrawals WHERE userId=? AND status NOT IN ('rejected') AND createdAt>=?`,
+      "SELECT COUNT(*) as c FROM withdrawals WHERE userId=? AND status NOT IN ('rejected') AND createdAt>=?",
       [req.user.id, todayStart.toISOString()]
     );
 
-    const active = all(`SELECT * FROM investments WHERE userId=? AND status='active'`, [req.user.id]);
+    const active = all("SELECT * FROM investments WHERE userId=? AND status='active'", [req.user.id]);
     let totalLocked = 0, earliestUnlock = 999;
     for (const inv of active) {
       const unlockAt = new Date(new Date(inv.startDate).getTime() + lockDays * 86400000);
@@ -543,18 +553,17 @@ function startExpress() {
     const withdrawable = Math.max(0, Number(user.balance) - totalLocked);
     const todayCount   = Number(todayWds.c);
     res.json({
-      withdrawableBalance:   withdrawable,
+      withdrawableBalance:  withdrawable,
       totalLocked,
-      principalLocked:       totalLocked > 0,
-      todayWithdrawals:      todayCount,
-      maxDailyWithdrawals:   maxDaily,
-      withdrawalsRemaining:  Math.max(0, maxDaily - todayCount),
+      principalLocked:      totalLocked > 0,
+      todayWithdrawals:     todayCount,
+      maxDailyWithdrawals:  maxDaily,
+      withdrawalsRemaining: Math.max(0, maxDaily - todayCount),
       feeRate, minWithdraw: minWd, lockDays,
-      earliestUnlockDays: earliestUnlock === 999 ? 0 : earliestUnlock
+      earliestUnlockDays:   earliestUnlock === 999 ? 0 : earliestUnlock
     });
   });
 
-  // Invest
   app.post('/api/user/invest', authMiddleware, (req, res) => {
     try {
       const { planId, amount } = req.body;
@@ -562,58 +571,54 @@ function startExpress() {
       const plan = get('SELECT * FROM plans WHERE id=? AND active=1', [planId]);
 
       if (!plan) return res.status(404).json({ error: 'Plan not found' });
-      if (amount < Number(plan.minAmount))
+      if (Number(amount) < Number(plan.minAmount))
         return res.status(400).json({ error: `Minimum is KES ${Number(plan.minAmount).toLocaleString()}` });
-      if (amount > Number(plan.maxAmount))
+      if (Number(amount) > Number(plan.maxAmount))
         return res.status(400).json({ error: `Maximum is KES ${Number(plan.maxAmount).toLocaleString()}` });
-      if (Number(user.balance) < amount)
+      if (Number(user.balance) < Number(amount))
         return res.status(400).json({ error: 'Insufficient balance. Please deposit first.' });
 
       const start = nowISO();
       const end   = new Date(Date.now() + Number(plan.period) * 86400000).toISOString();
-      const invId = uid();
 
-      run(`UPDATE users SET balance=balance-?, totalInvested=totalInvested+? WHERE id=?`,
-        [amount, amount, user.id]);
+      run('UPDATE users SET balance=balance-?, totalInvested=totalInvested+? WHERE id=?',
+        [Number(amount), Number(amount), user.id]);
       run(`INSERT INTO investments (id,userId,planId,planName,amount,roi,period,status,startDate,endDate,createdAt)
            VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-        [invId, user.id, plan.id, plan.name, amount, plan.roi, plan.period, 'active', start, end, nowISO()]);
-      run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-        [uid(), user.id, 'investment', amount, `${plan.name} plan investment`, 'completed', nowISO()]);
+        [uid(), user.id, plan.id, plan.name, Number(amount), plan.roi, plan.period, 'active', start, end, nowISO()]);
+      run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
+        [uid(), user.id, 'investment', Number(amount), `${plan.name} plan investment`, 'completed', nowISO()]);
 
-      // Referral commission
       if (user.referredBy) {
         const rate       = Number(plan.referralBonus || getSetting('referralRate') || 5) / 100;
-        const commission = amount * rate;
+        const commission = Number(amount) * rate;
         run('UPDATE users SET balance=balance+? WHERE id=?', [commission, user.referredBy]);
-        run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+        run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
           [uid(), user.referredBy, 'referral', commission, `Commission from ${user.firstName}`, 'completed', nowISO()]);
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-          [uid(), user.referredBy, `💰 You earned KES ${commission.toFixed(2)} referral commission!`, 'success', nowISO()]);
+        run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+          [uid(), user.referredBy, `You earned KES ${commission.toFixed(2)} referral commission!`, 'success', nowISO()]);
       }
 
-      const updated = get('SELECT * FROM users WHERE id=?', [user.id]);
-      res.json({ success: true, user: safeUser(updated) });
+      res.json({ success: true, user: safeUser(get('SELECT * FROM users WHERE id=?', [user.id])) });
     } catch (e) {
       console.error('Invest error:', e.message);
       res.status(500).json({ error: 'Investment failed. Please try again.' });
     }
   });
 
-  // Manual deposit
   app.post('/api/user/deposit/manual', authMiddleware, (req, res) => {
     try {
       const { amount, method, proofNote } = req.body;
       const minDep = parseFloat(getSetting('minDeposit') || '1000');
-      if (!amount || amount < minDep)
+      if (!amount || Number(amount) < minDep)
         return res.status(400).json({ error: `Minimum deposit is KES ${minDep}` });
       if (!proofNote)
         return res.status(400).json({ error: 'M-Pesa transaction code required' });
 
-      run(`INSERT INTO deposits (id,userId,amount,method,proofNote,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-        [uid(), req.user.id, amount, method || 'M-Pesa', proofNote, 'pending', nowISO()]);
-      run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-        [uid(), req.user.id, 'deposit', amount, `${method || 'M-Pesa'} deposit - pending`, 'pending', nowISO()]);
+      run('INSERT INTO deposits (id,userId,amount,method,proofNote,status,createdAt) VALUES (?,?,?,?,?,?,?)',
+        [uid(), req.user.id, Number(amount), method || 'M-Pesa', proofNote, 'pending', nowISO()]);
+      run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
+        [uid(), req.user.id, 'deposit', Number(amount), `${method || 'M-Pesa'} deposit - pending`, 'pending', nowISO()]);
 
       res.json({ success: true, message: 'Deposit submitted. Admin confirms within 30 minutes.' });
     } catch (e) {
@@ -621,7 +626,6 @@ function startExpress() {
     }
   });
 
-  // Withdraw
   app.post('/api/user/withdraw', authMiddleware, (req, res) => {
     try {
       const { amount, method, address } = req.body;
@@ -630,53 +634,45 @@ function startExpress() {
       const maxD   = parseInt(getSetting('maxDailyWithdrawals') || '3');
       const feeR   = parseFloat(getSetting('withdrawFee') || '2');
 
-      if (!amount || amount < minWd)
+      if (!amount || Number(amount) < minWd)
         return res.status(400).json({ error: `Minimum withdrawal is KES ${minWd}` });
       if (!address)
         return res.status(400).json({ error: 'Withdrawal address required' });
+      if (Number(amount) > Number(user.balance))
+        return res.status(400).json({ error: 'Insufficient balance' });
 
       const todayStart = new Date(); todayStart.setHours(0,0,0,0);
       const todayWds   = get(
-        `SELECT COUNT(*) as c FROM withdrawals WHERE userId=? AND status NOT IN ('rejected') AND createdAt>=?`,
+        "SELECT COUNT(*) as c FROM withdrawals WHERE userId=? AND status NOT IN ('rejected') AND createdAt>=?",
         [user.id, todayStart.toISOString()]
       );
       if (Number(todayWds.c) >= maxD)
         return res.status(400).json({ error: `Daily limit (${maxD}) reached. Resets at midnight.` });
 
-      if (amount > Number(user.balance))
-        return res.status(400).json({ error: 'Insufficient balance' });
-
-      const fee = amount * (feeR / 100);
-      const net = amount - fee;
+      const fee = Number(amount) * (feeR / 100);
+      const net = Number(amount) - fee;
 
       run('UPDATE users SET balance=balance-?, totalWithdrawn=totalWithdrawn+? WHERE id=?',
-        [amount, net, user.id]);
-      run(`INSERT INTO withdrawals (id,userId,amount,fee,net,method,address,status,createdAt) VALUES (?,?,?,?,?,?,?,?,?)`,
-        [uid(), user.id, amount, fee, net, method || 'M-Pesa', address, 'pending', nowISO()]);
-      run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-        [uid(), user.id, 'withdrawal', amount, `${method} withdrawal to ${address}`, 'pending', nowISO()]);
+        [Number(amount), net, user.id]);
+      run('INSERT INTO withdrawals (id,userId,amount,fee,net,method,address,status,createdAt) VALUES (?,?,?,?,?,?,?,?,?)',
+        [uid(), user.id, Number(amount), fee, net, method || 'M-Pesa', address, 'pending', nowISO()]);
+      run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
+        [uid(), user.id, 'withdrawal', Number(amount), `${method} withdrawal to ${address}`, 'pending', nowISO()]);
 
-      const remaining = Math.max(0, maxD - Number(todayWds.c) - 1);
-      res.json({ success: true, withdrawalsRemainingToday: remaining });
+      res.json({ success: true, withdrawalsRemainingToday: Math.max(0, maxD - Number(todayWds.c) - 1) });
     } catch (e) {
       console.error('Withdraw error:', e.message);
       res.status(500).json({ error: 'Withdrawal failed. Please try again.' });
     }
   });
 
-  // Profile update
   app.put('/api/user/profile', authMiddleware, (req, res) => {
     const { firstName, lastName, phone } = req.body;
-    run(`UPDATE users SET
-         firstName=COALESCE(?,firstName),
-         lastName=COALESCE(?,lastName),
-         phone=COALESCE(?,phone)
-         WHERE id=?`,
+    run('UPDATE users SET firstName=COALESCE(?,firstName), lastName=COALESCE(?,lastName), phone=COALESCE(?,phone) WHERE id=?',
       [firstName || null, lastName || null, phone || null, req.user.id]);
     res.json(safeUser(get('SELECT * FROM users WHERE id=?', [req.user.id])));
   });
 
-  // Password change
   app.put('/api/user/password', authMiddleware, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const user = get('SELECT * FROM users WHERE id=?', [req.user.id]);
@@ -688,7 +684,6 @@ function startExpress() {
     res.json({ success: true });
   });
 
-  // Notifications
   app.get('/api/user/notifications', authMiddleware, (req, res) => {
     res.json(all('SELECT * FROM notifications WHERE userId=? ORDER BY createdAt DESC LIMIT 30', [req.user.id]));
   });
@@ -699,25 +694,16 @@ function startExpress() {
   });
 
   // ════════════════════════════════════════════════════
-  //  M-PESA STK PUSH — powered by Lipana (lipana.dev)
-  //  SDK docs: https://lipana.dev/docs
-  //  Install:  npm install @lipana/sdk
+  //  M-PESA STK PUSH — Lipana (lipana.dev)
+  //
+  //  Setup steps:
+  //  1. Sign up at https://lipana.dev
+  //  2. Add your till number (5321672) in Lipana dashboard
+  //  3. Copy your Secret Key
+  //  4. Add to Railway: LIPANA_SECRET_KEY=lip_sk_live_xxxxx
+  //  5. Set webhook in Lipana dashboard:
+  //     https://your-app.up.railway.app/api/lipana/webhook
   // ════════════════════════════════════════════════════
-
-  function getLipanaClient() {
-    if (!LIPANA_SECRET_KEY) return null;
-    return new Lipana({
-      apiKey:      LIPANA_SECRET_KEY,
-      environment: LIPANA_ENV
-    });
-  }
-
-  function formatPhone(phone) {
-    let p = String(phone).trim().replace(/\s+/g, '');
-    if (p.startsWith('0'))  p = '254' + p.slice(1);
-    if (p.startsWith('+'))  p = p.slice(1);
-    return p;
-  }
 
   app.post('/api/mpesa/stk-push', authMiddleware, async (req, res) => {
     try {
@@ -731,100 +717,118 @@ function startExpress() {
 
       const formattedPhone = formatPhone(phone);
 
+      // ── Demo mode when no Lipana key set ─────────
       if (!LIPANA_SECRET_KEY) {
         const demoId = 'DEMO_' + Date.now();
-        run(`INSERT INTO deposits (id,userId,amount,method,proofNote,checkoutRequestId,status,createdAt) VALUES (?,?,?,?,?,?,?,?)`,
-          [uid(), req.user.id, Number(amount), 'M-Pesa STK', 'Demo mode - add LIPANA_SECRET_KEY', demoId, 'pending', nowISO()]);
-        console.log(`[Lipana] Demo STK: phone=${formattedPhone} amount=${amount}`);
-        return res.json({ checkoutRequestId: demoId, demo: true, message: 'Demo mode: set LIPANA_SECRET_KEY in Railway variables' });
+        run('INSERT INTO deposits (id,userId,amount,method,proofNote,checkoutRequestId,status,createdAt) VALUES (?,?,?,?,?,?,?,?)',
+          [uid(), req.user.id, Number(amount), 'M-Pesa STK',
+           'Demo mode — set LIPANA_SECRET_KEY in Railway vars', demoId, 'pending', nowISO()]);
+        console.log(`[Lipana] DEMO mode — would have sent KES ${amount} prompt to +${formattedPhone}`);
+        return res.json({
+          checkoutRequestId: demoId,
+          demo: true,
+          message: 'Demo mode: add LIPANA_SECRET_KEY in Railway → Variables to enable live STK Push'
+        });
       }
 
-      const lipana = getLipanaClient();
-      console.log(`[Lipana] Initiating STK: phone=+${formattedPhone} amount=${amount}`);
+      // ── Live STK Push via Lipana REST API ─────────
+      console.log(`[Lipana] Sending STK to +${formattedPhone} amount=KES ${amount}`);
 
-      const stkResponse = await lipana.transactions.initiateStkPush({
+      const stkResponse = await lipanaRequest('POST', '/v1/transactions/stk-push', {
         phone:  `+${formattedPhone}`,
-        amount: Math.round(Number(amount))
+        amount: Math.round(Number(amount)),
+        till:   MPESA_TILL
       });
 
-      // transactionId is at root level - NOT inside .data
-      const transactionId = stkResponse.transactionId || stkResponse.id;
+      // Lipana returns transactionId at the top level
+      const transactionId = stkResponse.transactionId
+                         || stkResponse.transaction_id
+                         || stkResponse.id;
 
       if (!transactionId) {
-        console.error('[Lipana] No transactionId in response:', stkResponse);
-        return res.status(500).json({ error: 'STK Push initiated but no transaction ID returned' });
+        console.error('[Lipana] Unexpected response (no transactionId):', JSON.stringify(stkResponse));
+        return res.status(502).json({ error: 'STK sent but no transaction ID returned. Contact support.' });
       }
 
-      run(`INSERT INTO deposits (id,userId,amount,method,checkoutRequestId,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+      run('INSERT INTO deposits (id,userId,amount,method,checkoutRequestId,status,createdAt) VALUES (?,?,?,?,?,?,?)',
         [uid(), req.user.id, Number(amount), 'M-Pesa STK', transactionId, 'pending', nowISO()]);
 
-      console.log(`[Lipana] STK sent - transactionId: ${transactionId}`);
+      console.log(`[Lipana] STK sent OK — transactionId: ${transactionId}`);
       res.json({ checkoutRequestId: transactionId });
 
     } catch (e) {
-      const errMsg = e?.response?.data?.message || e?.message || 'STK Push failed';
+      const errMsg = e.message || 'STK Push failed';
       console.error('[Lipana] STK error:', errMsg);
       res.status(500).json({ error: errMsg });
     }
   });
 
-  // Lipana Webhook - set URL in Lipana dashboard:
-  // https://your-railway-app.up.railway.app/api/lipana/webhook
+  // ── Lipana Webhook ─────────────────────────────────
+  // Set this in Lipana dashboard → Webhooks:
+  //   https://your-app.up.railway.app/api/lipana/webhook
   app.post('/api/lipana/webhook', express.json({ type: '*/*' }), (req, res) => {
     try {
-      const body    = req.body;
-      const event   = body.event;
+      const body  = req.body;
+      const event = body.event || '';
 
-      // Lipana sends transactionId in both camelCase and snake_case - handle both
+      // Lipana wraps payload under body.data in some versions
       const payload       = body.data || body;
-      const transactionId = payload.transactionId || payload.transaction_id || payload.id;
+      const transactionId = payload.transactionId || payload.transaction_id || payload.id || '';
       const receiptNo     = payload.mpesaReceiptNumber || payload.receipt_number || payload.mpesaCode || null;
       const amount        = payload.amount || null;
       const phone         = payload.phone  || null;
 
       console.log(`[Lipana Webhook] event=${event} txnId=${transactionId}`);
 
-      run(`INSERT INTO mpesa_logs (id,checkoutId,phone,amount,resultCode,receiptNo,processedAt) VALUES (?,?,?,?,?,?,?)`,
+      // Log raw entry
+      run('INSERT INTO mpesa_logs (id,checkoutId,phone,amount,resultCode,receiptNo,processedAt) VALUES (?,?,?,?,?,?,?)',
         [uid(), transactionId, String(phone || ''), Number(amount || 0),
          event === 'transaction.success' ? '0' : '1', receiptNo, nowISO()]);
 
       if (event === 'transaction.success' && transactionId) {
-        const dep = get(`SELECT * FROM deposits WHERE checkoutRequestId=? AND status='pending'`, [transactionId]);
+        const dep = get(
+          "SELECT * FROM deposits WHERE checkoutRequestId=? AND status='pending'",
+          [transactionId]
+        );
         if (dep) {
-          run(`UPDATE deposits SET status='approved', mpesaReceiptNo=?, updatedAt=? WHERE id=?`,
+          run("UPDATE deposits SET status='approved', mpesaReceiptNo=?, updatedAt=? WHERE id=?",
             [receiptNo || transactionId, nowISO(), dep.id]);
-          run(`UPDATE users SET balance=balance+? WHERE id=?`, [Number(dep.amount), dep.userId]);
-          run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+          run('UPDATE users SET balance=balance+? WHERE id=?', [Number(dep.amount), dep.userId]);
+          run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
             [uid(), dep.userId, 'deposit', Number(dep.amount),
              `M-Pesa STK confirmed${receiptNo ? ' - ' + receiptNo : ''}`, 'completed', nowISO()]);
-          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+          run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
             [uid(), dep.userId,
-             `\u2705 KES ${Number(dep.amount).toFixed(2)} deposit confirmed!${receiptNo ? ' Receipt: ' + receiptNo : ''}`,
+             `KES ${Number(dep.amount).toFixed(2)} deposit confirmed!${receiptNo ? ' Receipt: ' + receiptNo : ''}`,
              'success', nowISO()]);
           console.log(`[Lipana Webhook] Credited KES ${dep.amount} to user ${dep.userId}`);
         } else {
           console.warn(`[Lipana Webhook] No pending deposit for txnId=${transactionId}`);
         }
+
       } else if (event === 'transaction.failed' && transactionId) {
-        run(`UPDATE deposits SET status='rejected', updatedAt=? WHERE checkoutRequestId=? AND status='pending'`,
+        run("UPDATE deposits SET status='rejected', updatedAt=? WHERE checkoutRequestId=? AND status='pending'",
           [nowISO(), transactionId]);
-        const dep = get(`SELECT userId FROM deposits WHERE checkoutRequestId=?`, [transactionId]);
+        const dep = get('SELECT userId FROM deposits WHERE checkoutRequestId=?', [transactionId]);
         if (dep) {
-          run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-            [uid(), dep.userId, '\u274c Payment failed. Please try again.', 'error', nowISO()]);
+          run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+            [uid(), dep.userId, 'Payment failed. Please try again.', 'error', nowISO()]);
         }
         console.log(`[Lipana Webhook] Transaction failed: ${transactionId}`);
       }
 
+      // Always return 200 — Lipana retries on any other status
       res.status(200).json({ received: true });
+
     } catch (e) {
       console.error('[Lipana Webhook] Error:', e.message);
       res.status(200).json({ received: true });
     }
   });
 
+  // ── STK status polling ────────────────────────────
   app.get('/api/mpesa/status/:checkoutId', authMiddleware, (req, res) => {
-    const dep = get(`SELECT status FROM deposits WHERE checkoutRequestId=? AND userId=?`,
+    const dep = get('SELECT status FROM deposits WHERE checkoutRequestId=? AND userId=?',
       [req.params.checkoutId, req.user.id]);
     if (!dep) return res.status(404).json({ status: 'not_found' });
     const mapped = dep.status === 'approved' ? 'approved'
@@ -836,69 +840,61 @@ function startExpress() {
   //  ADMIN
   // ════════════════════════════════════════════════════
 
-  // Stats
   app.get('/api/admin/stats', authMiddleware, adminOnly, (req, res) => {
     res.json({
-      totalMembers:    Number(get(`SELECT COUNT(*) as c FROM users WHERE role='user'`).c),
-      activeInvestors: Number(get(`SELECT COUNT(DISTINCT userId) as c FROM investments WHERE status='active'`).c),
-      pendingDeps:     Number(get(`SELECT COUNT(*) as c FROM deposits WHERE status='pending'`).c),
-      pendingWds:      Number(get(`SELECT COUNT(*) as c FROM withdrawals WHERE status='pending'`).c),
-      totalDeposited:  Number(get(`SELECT COALESCE(SUM(amount),0) as s FROM deposits WHERE status='approved'`).s),
-      totalWithdrawn:  Number(get(`SELECT COALESCE(SUM(net),0) as s FROM withdrawals WHERE status='approved'`).s),
-      totalInvested:   Number(get(`SELECT COALESCE(SUM(amount),0) as s FROM investments`).s),
-      totalProfitPaid: Number(get(`SELECT COALESCE(SUM(amount),0) as s FROM transactions WHERE type='profit'`).s),
-      recentUsers: all(`SELECT * FROM users WHERE role='user' ORDER BY createdAt DESC LIMIT 5`).map(safeUser),
-      recentTx:    all(`SELECT * FROM transactions ORDER BY createdAt DESC LIMIT 10`)
+      totalMembers:    Number(get("SELECT COUNT(*) as c FROM users WHERE role='user'").c),
+      activeInvestors: Number(get("SELECT COUNT(DISTINCT userId) as c FROM investments WHERE status='active'").c),
+      pendingDeps:     Number(get("SELECT COUNT(*) as c FROM deposits WHERE status='pending'").c),
+      pendingWds:      Number(get("SELECT COUNT(*) as c FROM withdrawals WHERE status='pending'").c),
+      totalDeposited:  Number(get("SELECT COALESCE(SUM(amount),0) as s FROM deposits WHERE status='approved'").s),
+      totalWithdrawn:  Number(get("SELECT COALESCE(SUM(net),0) as s FROM withdrawals WHERE status='approved'").s),
+      totalInvested:   Number(get('SELECT COALESCE(SUM(amount),0) as s FROM investments').s),
+      totalProfitPaid: Number(get("SELECT COALESCE(SUM(amount),0) as s FROM transactions WHERE type='profit'").s),
+      recentUsers: all("SELECT * FROM users WHERE role='user' ORDER BY createdAt DESC LIMIT 5").map(safeUser),
+      recentTx:    all('SELECT * FROM transactions ORDER BY createdAt DESC LIMIT 10')
     });
   });
 
-  // Members
   app.get('/api/admin/members', authMiddleware, adminOnly, (req, res) => {
-    res.json(all(`SELECT * FROM users WHERE role='user' ORDER BY createdAt DESC`).map(safeUser));
+    res.json(all("SELECT * FROM users WHERE role='user' ORDER BY createdAt DESC").map(safeUser));
   });
 
   app.put('/api/admin/members/:id', authMiddleware, adminOnly, (req, res) => {
     const { firstName, lastName, email, phone, balance, status } = req.body;
     run(`UPDATE users SET
          firstName=COALESCE(?,firstName), lastName=COALESCE(?,lastName),
-         email=COALESCE(?,email),         phone=COALESCE(?,phone),
-         balance=COALESCE(?,balance),     status=COALESCE(?,status)
-         WHERE id=?`,
-      [firstName||null, lastName||null, email||null, phone||null,
-       balance??null, status||null, req.params.id]);
+         email=COALESCE(?,email), phone=COALESCE(?,phone),
+         balance=COALESCE(?,balance), status=COALESCE(?,status) WHERE id=?`,
+      [firstName||null, lastName||null, email||null, phone||null, balance??null, status||null, req.params.id]);
     res.json({ success: true });
   });
 
-  // Adjust balance
   app.post('/api/admin/adjust-balance', authMiddleware, adminOnly, (req, res) => {
     const { userId, amount, type, reason } = req.body;
     if (!userId || !amount || !type || !reason)
       return res.status(400).json({ error: 'All fields required' });
-    const delta = type === 'credit' ? amount : -amount;
-    run('UPDATE users SET balance=balance+? WHERE id=?', [delta, userId]);
-    run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
-      [uid(), userId, type === 'credit' ? 'deposit' : 'withdrawal', Math.abs(amount), reason, 'completed', nowISO()]);
-    run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), userId, `${type === 'credit' ? '💰 KES ' + amount + ' credited' : '💸 KES ' + amount + ' debited'}: ${reason}`, 'info', nowISO()]);
+    run('UPDATE users SET balance=balance+? WHERE id=?', [type === 'credit' ? Number(amount) : -Number(amount), userId]);
+    run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
+      [uid(), userId, type === 'credit' ? 'deposit' : 'withdrawal', Math.abs(Number(amount)), reason, 'completed', nowISO()]);
+    run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+      [uid(), userId, `${type === 'credit' ? 'KES ' + amount + ' credited' : 'KES ' + amount + ' debited'}: ${reason}`, 'info', nowISO()]);
     res.json({ success: true });
   });
 
-  // Deposits
   app.get('/api/admin/deposits', authMiddleware, adminOnly, (req, res) => {
-    res.json(all(`SELECT d.*, u.firstName||' '||u.lastName as userName, u.phone as userPhone
-                  FROM deposits d JOIN users u ON d.userId=u.id ORDER BY d.createdAt DESC`));
+    res.json(all("SELECT d.*, u.firstName||' '||u.lastName as userName, u.phone as userPhone FROM deposits d JOIN users u ON d.userId=u.id ORDER BY d.createdAt DESC"));
   });
 
   app.put('/api/admin/deposits/:id/approve', authMiddleware, adminOnly, (req, res) => {
     const dep = get('SELECT * FROM deposits WHERE id=?', [req.params.id]);
     if (!dep) return res.status(404).json({ error: 'Not found' });
     if (dep.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
-    run(`UPDATE deposits SET status='approved', updatedAt=? WHERE id=?`, [nowISO(), dep.id]);
+    run("UPDATE deposits SET status='approved', updatedAt=? WHERE id=?", [nowISO(), dep.id]);
     run('UPDATE users SET balance=balance+? WHERE id=?', [Number(dep.amount), dep.userId]);
-    run(`INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)`,
+    run('INSERT INTO transactions (id,userId,type,amount,description,status,createdAt) VALUES (?,?,?,?,?,?,?)',
       [uid(), dep.userId, 'deposit', Number(dep.amount), `${dep.method} deposit approved`, 'completed', nowISO()]);
-    run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), dep.userId, `✅ Your deposit of KES ${Number(dep.amount).toFixed(2)} has been approved!`, 'success', nowISO()]);
+    run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+      [uid(), dep.userId, `Your deposit of KES ${Number(dep.amount).toFixed(2)} has been approved!`, 'success', nowISO()]);
     res.json({ success: true });
   });
 
@@ -906,25 +902,23 @@ function startExpress() {
     const { reason } = req.body;
     const dep = get('SELECT * FROM deposits WHERE id=?', [req.params.id]);
     if (!dep) return res.status(404).json({ error: 'Not found' });
-    run(`UPDATE deposits SET status='rejected', rejectionReason=?, updatedAt=? WHERE id=?`,
+    run("UPDATE deposits SET status='rejected', rejectionReason=?, updatedAt=? WHERE id=?",
       [reason || 'Rejected by admin', nowISO(), dep.id]);
-    run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), dep.userId, `❌ Deposit rejected. Reason: ${reason || 'Contact support'}`, 'error', nowISO()]);
+    run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+      [uid(), dep.userId, `Deposit rejected. Reason: ${reason || 'Contact support'}`, 'error', nowISO()]);
     res.json({ success: true });
   });
 
-  // Withdrawals
   app.get('/api/admin/withdrawals', authMiddleware, adminOnly, (req, res) => {
-    res.json(all(`SELECT w.*, u.firstName||' '||u.lastName as userName, u.phone as userPhone
-                  FROM withdrawals w JOIN users u ON w.userId=u.id ORDER BY w.createdAt DESC`));
+    res.json(all("SELECT w.*, u.firstName||' '||u.lastName as userName, u.phone as userPhone FROM withdrawals w JOIN users u ON w.userId=u.id ORDER BY w.createdAt DESC"));
   });
 
   app.put('/api/admin/withdrawals/:id/approve', authMiddleware, adminOnly, (req, res) => {
     const wd = get('SELECT * FROM withdrawals WHERE id=?', [req.params.id]);
     if (!wd || wd.status !== 'pending') return res.status(400).json({ error: 'Cannot approve' });
-    run(`UPDATE withdrawals SET status='approved', updatedAt=? WHERE id=?`, [nowISO(), wd.id]);
-    run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), wd.userId, `✅ Withdrawal of KES ${Number(wd.amount).toFixed(2)} approved and sent!`, 'success', nowISO()]);
+    run("UPDATE withdrawals SET status='approved', updatedAt=? WHERE id=?", [nowISO(), wd.id]);
+    run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+      [uid(), wd.userId, `Withdrawal of KES ${Number(wd.amount).toFixed(2)} approved and sent!`, 'success', nowISO()]);
     res.json({ success: true, warning: `Send KES ${wd.net} to ${wd.address} manually via M-Pesa.` });
   });
 
@@ -932,28 +926,22 @@ function startExpress() {
     const { reason } = req.body;
     const wd = get('SELECT * FROM withdrawals WHERE id=?', [req.params.id]);
     if (!wd || wd.status !== 'pending') return res.status(400).json({ error: 'Cannot reject' });
-    run(`UPDATE withdrawals SET status='rejected', rejectionReason=?, updatedAt=? WHERE id=?`,
-      [reason, nowISO(), wd.id]);
+    run("UPDATE withdrawals SET status='rejected', rejectionReason=?, updatedAt=? WHERE id=?", [reason, nowISO(), wd.id]);
     run('UPDATE users SET balance=balance+?, totalWithdrawn=totalWithdrawn-? WHERE id=?',
       [Number(wd.amount), Number(wd.net), wd.userId]);
-    run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
-      [uid(), wd.userId, `❌ Withdrawal rejected. KES ${Number(wd.amount).toFixed(2)} refunded. Reason: ${reason}`, 'error', nowISO()]);
+    run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
+      [uid(), wd.userId, `Withdrawal rejected. KES ${Number(wd.amount).toFixed(2)} refunded. Reason: ${reason}`, 'error', nowISO()]);
     res.json({ success: true });
   });
 
-  // Investments
   app.get('/api/admin/investments', authMiddleware, adminOnly, (req, res) => {
-    res.json(all(`SELECT i.*, u.firstName||' '||u.lastName as userName
-                  FROM investments i JOIN users u ON i.userId=u.id ORDER BY i.createdAt DESC`));
+    res.json(all("SELECT i.*, u.firstName||' '||u.lastName as userName FROM investments i JOIN users u ON i.userId=u.id ORDER BY i.createdAt DESC"));
   });
 
-  // Transactions
   app.get('/api/admin/transactions', authMiddleware, adminOnly, (req, res) => {
-    res.json(all(`SELECT t.*, u.firstName||' '||u.lastName as userName
-                  FROM transactions t JOIN users u ON t.userId=u.id ORDER BY t.createdAt DESC LIMIT 200`));
+    res.json(all("SELECT t.*, u.firstName||' '||u.lastName as userName FROM transactions t JOIN users u ON t.userId=u.id ORDER BY t.createdAt DESC LIMIT 200"));
   });
 
-  // Plans CRUD
   app.get('/api/admin/plans', authMiddleware, adminOnly, (req, res) => {
     res.json(all('SELECT * FROM plans ORDER BY minAmount ASC'));
   });
@@ -961,20 +949,17 @@ function startExpress() {
   app.post('/api/admin/plans', authMiddleware, adminOnly, (req, res) => {
     const { name, roi, period, minAmount, maxAmount, referralBonus, color, description, popular, active } = req.body;
     const id = uid();
-    run(`INSERT INTO plans (id,name,roi,period,minAmount,maxAmount,referralBonus,color,description,popular,active,createdAt)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+    run('INSERT INTO plans (id,name,roi,period,minAmount,maxAmount,referralBonus,color,description,popular,active,createdAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
       [id, name, roi, period, minAmount, maxAmount, referralBonus||5, color||'#00e676', description||'', popular||0, active??1, nowISO()]);
     res.json({ id, success: true });
   });
 
   app.put('/api/admin/plans/:id', authMiddleware, adminOnly, (req, res) => {
     const { name, roi, period, minAmount, maxAmount, referralBonus, color, description, popular, active } = req.body;
-    run(`UPDATE plans SET
-         name=COALESCE(?,name), roi=COALESCE(?,roi), period=COALESCE(?,period),
+    run(`UPDATE plans SET name=COALESCE(?,name), roi=COALESCE(?,roi), period=COALESCE(?,period),
          minAmount=COALESCE(?,minAmount), maxAmount=COALESCE(?,maxAmount),
          referralBonus=COALESCE(?,referralBonus), color=COALESCE(?,color),
-         description=COALESCE(?,description), popular=COALESCE(?,popular), active=COALESCE(?,active)
-         WHERE id=?`,
+         description=COALESCE(?,description), popular=COALESCE(?,popular), active=COALESCE(?,active) WHERE id=?`,
       [name||null, roi??null, period??null, minAmount??null, maxAmount??null,
        referralBonus??null, color||null, description||null, popular??null, active??null, req.params.id]);
     res.json({ success: true });
@@ -985,7 +970,6 @@ function startExpress() {
     res.json({ success: true });
   });
 
-  // Settings
   app.get('/api/admin/settings', authMiddleware, adminOnly, (req, res) => {
     const rows = all('SELECT key,value FROM settings');
     const out  = {};
@@ -1001,65 +985,56 @@ function startExpress() {
     res.json({ success: true });
   });
 
-  // Broadcast
   app.post('/api/admin/broadcast', authMiddleware, adminOnly, (req, res) => {
     const { userId, message, type } = req.body;
     if (!message) return res.status(400).json({ error: 'Message required' });
     if (userId) {
-      run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+      run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
         [uid(), userId, message, type||'info', nowISO()]);
     } else {
-      const members = all(`SELECT id FROM users WHERE role='user' AND status='active'`);
+      const members = all("SELECT id FROM users WHERE role='user' AND status='active'");
       for (const u of members) {
-        run(`INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)`,
+        run('INSERT INTO notifications (id,userId,message,type,createdAt) VALUES (?,?,?,?,?)',
           [uid(), u.id, message, type||'info', nowISO()]);
       }
     }
     res.json({ success: true });
   });
 
-  // M-Pesa logs
   app.get('/api/admin/mpesa-logs', authMiddleware, adminOnly, (req, res) => {
     res.json(all('SELECT * FROM mpesa_logs ORDER BY processedAt DESC LIMIT 100'));
   });
 
-  // B2C logs stub
   app.get('/api/admin/b2c-logs', authMiddleware, adminOnly, (req, res) => res.json([]));
 
-  // ── TWA Digital Asset Links (Play Store verification) ──
-  // IMPORTANT: Update SHA256 fingerprint after generating keystore
+  // ── TWA / Play Store verification ─────────────────
   app.get('/.well-known/assetlinks.json', (req, res) => {
     const fingerprint = process.env.TWA_SHA256_FINGERPRINT || 'REPLACE_WITH_YOUR_SHA256_FINGERPRINT';
     res.json([{
       relation: ['delegate_permission/common.handle_all_urls'],
       target: {
-        namespace: 'android_app',
-        package_name: process.env.TWA_PACKAGE_NAME || 'ke.co.pesagrow.app',
+        namespace:               'android_app',
+        package_name:            process.env.TWA_PACKAGE_NAME || 'ke.co.pesagrow.app',
         sha256_cert_fingerprints: [fingerprint]
       }
     }]);
   });
 
-  // ── Push Notification Subscription ────────────────
+  // ── Push subscription ─────────────────────────────
   app.post('/api/user/push-subscribe', authMiddleware, (req, res) => {
     const { subscription } = req.body;
     if (!subscription) return res.status(400).json({ error: 'Subscription required' });
-    // Store subscription — in production use a push service like web-push
     try {
-      run(`INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)`,
+      run('INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)',
         [`push_${req.user.id}`, JSON.stringify(subscription)]);
     } catch {}
     res.json({ success: true });
   });
 
-  // ── Offline page ───────────────────────────────────
-  app.get('/offline.html', (_, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'offline.html'));
-  });
-
   // ── SPA fallbacks ─────────────────────────────────
-  app.get('/admin*',     (_, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
-  app.get('/dashboard*', (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
+  app.get('/offline.html', (_, res) => res.sendFile(path.join(__dirname, 'public', 'offline.html')));
+  app.get('/admin*',       (_, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+  app.get('/dashboard*',   (_, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard.html')));
   app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not found' });
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -1067,7 +1042,9 @@ function startExpress() {
 
   app.listen(PORT, () => {
     console.log(`✅ Pesa Grow running on port ${PORT}`);
-    console.log(`   Till: ${MPESA.shortcode} | URL: ${BASE_URL}`);
+    console.log(`   Till: ${MPESA_TILL}`);
+    console.log(`   Lipana: ${LIPANA_SECRET_KEY ? 'CONFIGURED' : 'demo mode — add LIPANA_SECRET_KEY'}`);
+    console.log(`   URL: ${BASE_URL}`);
   });
 }
 
