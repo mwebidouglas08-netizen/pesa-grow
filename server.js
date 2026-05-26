@@ -33,10 +33,17 @@ const ADMIN_PASS  = process.env.ADMIN_PASS  || 'Admin@2024';
 // ── Lipana M-Pesa config ───────────────────────────────────
 // Sign up at https://lipana.dev → Dashboard → API Keys → copy Secret Key
 const LIPANA_SECRET_KEY = process.env.LIPANA_SECRET_KEY || '';
-const LIPANA_BASE_URL   = 'https://api.lipana.dev'; // Lipana REST API base
-const MPESA_TILL        = process.env.MPESA_SHORTCODE || '5321672';
+const LIPANA_ENV        = process.env.LIPANA_ENV        || 'production'; // 'sandbox' or 'production'
+const MPESA_TILL        = process.env.MPESA_SHORTCODE   || '5321672';
 
-// ── Lipana HTTP helper (no axios — uses built-in https) ───
+// ── Lipana HTTP helper ─────────────────────────────────────
+// Uses Node built-in https — no axios needed
+// Endpoint:  POST https://api.lipana.dev/v1/transactions/push-stk
+// Auth header: x-api-key (confirmed from SDK source)
+const LIPANA_BASE_URL = LIPANA_ENV === 'sandbox'
+  ? 'https://api-sandbox.lipana.dev/v1'
+  : 'https://api.lipana.dev/v1';
+
 function lipanaRequest(method, endpoint, body) {
   return new Promise((resolve, reject) => {
     const payload = body ? JSON.stringify(body) : null;
@@ -47,7 +54,7 @@ function lipanaRequest(method, endpoint, body) {
       path:     url.pathname + url.search,
       method:   method.toUpperCase(),
       headers: {
-        'Authorization': `Bearer ${LIPANA_SECRET_KEY}`,
+        'x-api-key':     LIPANA_SECRET_KEY,
         'Content-Type':  'application/json',
         'Accept':        'application/json',
       }
@@ -60,19 +67,21 @@ function lipanaRequest(method, endpoint, body) {
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
+          // SDK unwraps response.data.data || response.data
+          const unwrapped = parsed.data || parsed;
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(parsed);
+            resolve(unwrapped);
           } else {
-            const msg = parsed.message || parsed.error || `HTTP ${res.statusCode}`;
+            const msg = unwrapped.message || unwrapped.error || `HTTP ${res.statusCode}`;
             reject(new Error(msg));
           }
         } catch {
-          reject(new Error(`Invalid JSON response from Lipana: ${data.slice(0, 200)}`));
+          reject(new Error(`Lipana returned non-JSON (status ${res.statusCode}): ${data.slice(0, 300)}`));
         }
       });
     });
 
-    req.on('error', (e) => reject(new Error(`Network error: ${e.message}`)));
+    req.on('error', (e) => reject(new Error(`Network error calling Lipana: ${e.message}`)));
     if (payload) req.write(payload);
     req.end();
   });
@@ -734,10 +743,9 @@ function startExpress() {
       // ── Live STK Push via Lipana REST API ─────────
       console.log(`[Lipana] Sending STK to +${formattedPhone} amount=KES ${amount}`);
 
-      const stkResponse = await lipanaRequest('POST', '/v1/transactions/stk-push', {
+      const stkResponse = await lipanaRequest('POST', '/transactions/push-stk', {
         phone:  `+${formattedPhone}`,
-        amount: Math.round(Number(amount)),
-        till:   MPESA_TILL
+        amount: Math.round(Number(amount))
       });
 
       // Lipana returns transactionId at the top level
