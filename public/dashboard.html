@@ -20,8 +20,6 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;min-height:100vh}
 h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:2px}
-
-/* TOP NAV */
 .top-nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:50}
 .tn-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
 .tn-logo{width:32px;height:32px;background:linear-gradient(135deg,var(--green),#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:14px;color:#000}
@@ -32,8 +30,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .user-pill{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:100px;padding:5px 14px 5px 5px;cursor:pointer}
 .up-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:11px;color:#000}
 .up-name{font-size:14px;font-weight:600}
-
-/* LAYOUT */
 .layout{display:flex;flex:1;overflow:hidden;height:calc(100vh - 57px)}
 .sidebar{width:236px;background:var(--bg2);border-right:1px solid var(--border);padding:16px 0;flex-shrink:0;overflow-y:auto;display:flex;flex-direction:column}
 .sb-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;padding:10px 20px 4px}
@@ -42,20 +38,15 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .sb-item.active{background:rgba(0,230,118,.06);color:var(--green);font-weight:600;border-right-color:var(--green)}
 .sb-item .ic{font-size:17px;width:22px;text-align:center;flex-shrink:0}
 .sb-bottom{margin-top:auto;padding:16px 12px}
-
 .main{flex:1;overflow-y:auto;padding:28px 32px}
 .page{display:none}.page.active{display:block}
 .page-title{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;margin-bottom:20px;letter-spacing:-.5px}
-
-/* STAT CARDS */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:18px;position:relative;overflow:hidden}
 .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--sc,var(--green))}
 .sc-lbl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
 .sc-val{font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;line-height:1}
 .sc-sub{font-size:12px;color:var(--text2);margin-top:4px}
-
-/* PROFIT TICKER */
 .profit-ticker{background:linear-gradient(135deg,rgba(0,230,118,.07),rgba(0,230,118,.02));border:1px solid rgba(0,230,118,.25);border-radius:16px;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;position:relative;overflow:hidden}
 .profit-ticker::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--green),transparent);animation:scan 3s linear infinite}
 @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
@@ -63,14 +54,10 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .pt-lbl{font-size:13px;color:var(--text2)}
 .pt-sub{font-size:11px;color:var(--green);opacity:.7}
 .pt-val{font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:800;color:var(--green)}
-
-/* CARDS */
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px}
 .card-title{font-family:'Bricolage Grotesque',sans-serif;font-size:17px;font-weight:700;margin-bottom:16px}
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-
-/* BUTTONS */
 .btn{padding:10px 18px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px}
 .btn-green{background:linear-gradient(135deg,var(--green),#00b341);color:#000}.btn-green:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,230,118,.3)}
 .btn-gold{background:linear-gradient(135deg,var(--gold),#e6a800);color:#000}.btn-gold:hover{transform:translateY(-1px)}
@@ -78,35 +65,25 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .btn-red{background:rgba(255,77,106,.1);color:var(--red);border:1px solid rgba(255,77,106,.25)}
 .btn-full{width:100%;padding:14px;font-size:15px;justify-content:center;border-radius:11px;margin-top:8px}
 .btn-sm{padding:7px 12px;font-size:12px;border-radius:8px}
-
-/* FORM */
 .fg{margin-bottom:16px}
 .fg label{display:block;font-size:13px;font-weight:600;color:var(--text2);margin-bottom:6px}
 .fc{width:100%;padding:12px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;font-family:'DM Sans',sans-serif;transition:.2s}
 .fc:focus{outline:none;border-color:var(--green)}
 select.fc option{background:var(--bg3)}
 .fc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-
-/* TABLE */
 .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border)}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:11px 15px;text-align:left;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;background:var(--bg2);border-bottom:1px solid var(--border)}
 .tbl td{padding:12px 15px;border-bottom:1px solid var(--border);font-size:13px}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(255,255,255,.015)}
-
-/* BADGES */
 .badge{padding:3px 9px;border-radius:100px;font-size:11px;font-weight:700;text-transform:uppercase}
 .b-ok{background:rgba(0,230,118,.1);color:var(--green)}
 .b-pend{background:rgba(255,193,7,.1);color:var(--gold)}
 .b-fail{background:rgba(255,77,106,.1);color:var(--red)}
 .b-blue{background:rgba(79,195,247,.1);color:var(--blue)}
-
-/* PROGRESS */
 .prog-wrap{background:var(--bg3);border-radius:100px;height:7px;overflow:hidden;margin-top:6px}
 .prog-bar{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--green),var(--gold));transition:width 1s ease}
-
-/* MODAL */
 .modal-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
 .modal{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:32px;width:100%;max-width:460px;position:relative;max-height:92vh;overflow-y:auto}
@@ -116,13 +93,9 @@ select.fc option{background:var(--bg3)}
 .modal-sub{font-size:14px;color:var(--text2);margin-bottom:22px}
 .m-err{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
 .m-ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
-
-/* STK */
 .stk-spinner{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
-
-/* NOTIF PANEL */
 .notif-panel{position:fixed;top:58px;right:20px;width:320px;background:var(--card);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow);z-index:300;display:none;max-height:400px;overflow-y:auto}
 .notif-panel.open{display:block}
 .np-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:15px}
@@ -130,17 +103,12 @@ select.fc option{background:var(--bg3)}
 .np-item:last-child{border-bottom:none}
 .np-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;margin-top:4px}
 .np-dot.read{background:var(--text3)}
-
-/* REFERRAL */
 .ref-box{background:var(--bg3);border:1.5px dashed rgba(0,230,118,.4);border-radius:12px;padding:18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .ref-code{font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;letter-spacing:4px;color:var(--green)}
-
-/* TOAST */
 .toast{position:fixed;bottom:20px;right:20px;z-index:600;padding:13px 20px;border-radius:12px;font-size:14px;font-weight:600;transform:translateY(60px);opacity:0;transition:.3s;max-width:300px;box-shadow:var(--shadow)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green)}
 .toast.err{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:var(--red)}
-
 @media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}.grid-2{grid-template-columns:1fr}}
 @media(max-width:640px){.sidebar{display:none}.main{padding:16px}.stats-row{grid-template-columns:1fr 1fr}}
 </style>
@@ -178,18 +146,11 @@ select.fc option{background:var(--bg3)}
   <div class="sb-lbl">Account</div>
   <div class="sb-item" data-page="referral" onclick="showPage('referral')"><span class="ic">🤝</span> Referrals</div>
   <div class="sb-item" data-page="profile" onclick="showPage('profile')"><span class="ic">👤</span> Profile</div>
-  <div class="sb-bottom">
-    <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.12);border-radius:12px;padding:14px;text-align:center">
-      <div style="font-size:20px;margin-bottom:6px">📞</div>
-      <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Need help?</div>
-      <a href="tel:0796820013" style="font-size:14px;font-weight:700;color:var(--green);text-decoration:none">0796820013</a>
-    </div>
-  </div>
 </aside>
 
 <main class="main">
 
-  <!-- ── OVERVIEW ─────────────────────────── -->
+  <!-- OVERVIEW -->
   <div class="page active" id="page-overview">
     <div class="page-title">Portfolio Overview</div>
     <div class="profit-ticker">
@@ -212,18 +173,29 @@ select.fc option{background:var(--bg3)}
       <div class="stat-card" style="--sc:var(--blue)"><div class="sc-lbl">Total Withdrawn</div><div class="sc-val" id="ovWithdrawn">KES 0</div><div class="sc-sub">Paid out</div></div>
     </div>
     <div class="grid-2">
-      <div>
-        <div class="card-title">Active Investments</div>
-        <div id="activeInvList"></div>
-      </div>
-      <div>
-        <div class="card-title">Recent Transactions</div>
-        <div id="recentTxList"></div>
+      <div><div class="card-title">Active Investments</div><div id="activeInvList"></div></div>
+      <div><div class="card-title">Recent Transactions</div><div id="recentTxList"></div></div>
+    </div>
+
+    <!-- Investment image banner -->
+    <div style="margin-top:24px;position:relative;border-radius:16px;overflow:hidden;height:200px;border:1px solid rgba(0,230,118,0.2)">
+      <img
+        src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1200&q=80&auto=format&fit=crop"
+        alt="Investment growth"
+        style="width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block;"
+        loading="lazy"
+      />
+      <div style="position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,5,8,0.88) 0%,rgba(3,5,8,0.55) 60%,rgba(3,5,8,0.2) 100%);display:flex;align-items:center;padding:28px 32px">
+        <div>
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;color:#eef2ff;margin-bottom:8px">Grow Your Wealth Daily 📈</div>
+          <div style="font-size:14px;color:rgba(238,242,255,0.7);margin-bottom:16px;max-width:340px">Invest more and earn higher daily returns. Your money works 24/7.</div>
+          <button onclick="showPage('invest')" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:9px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer">View Investment Plans →</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- ── INVEST ───────────────────────────── -->
+  <!-- INVEST -->
   <div class="page" id="page-invest">
     <div class="page-title">Investment Plans</div>
     <div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.2);border-radius:12px;padding:13px 18px;margin-bottom:22px;font-size:14px;color:var(--text2);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
@@ -233,13 +205,12 @@ select.fc option{background:var(--bg3)}
     <div class="grid-3" id="investPlansGrid"></div>
   </div>
 
-  <!-- ── DEPOSIT ──────────────────────────── -->
+  <!-- DEPOSIT — STK Push only -->
   <div class="page" id="page-deposit">
     <div class="page-title">Deposit Funds</div>
     <div class="grid-2">
       <div>
-        <!-- STK PUSH -->
-        <div class="card" style="margin-bottom:16px">
+        <div class="card">
           <div class="card-title">📲 M-Pesa STK Push <span style="background:rgba(0,230,118,.1);color:var(--green);font-size:11px;padding:3px 8px;border-radius:100px;font-weight:700;margin-left:6px">INSTANT</span></div>
           <p style="font-size:14px;color:var(--text2);margin-bottom:16px">We send a prompt directly to your phone. Just enter your PIN.</p>
           <div class="m-err" id="stkErr"></div>
@@ -249,33 +220,13 @@ select.fc option{background:var(--bg3)}
           <div class="fg"><label>Amount (KES)</label><input class="fc" id="stkAmt" type="number" min="1000" placeholder="Minimum KES 1,000"></div>
           <button class="btn btn-green btn-full" id="stkBtn" onclick="doSTKPush()">📲 Send M-Pesa Prompt</button>
         </div>
-        <!-- MANUAL -->
-        <div class="card">
-          <div class="card-title">📝 Manual Deposit</div>
-          <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:11px;padding:16px;text-align:center;margin-bottom:16px">
-            <div style="font-size:13px;color:var(--text2);margin-bottom:4px">Send M-Pesa to</div>
-            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:32px;font-weight:800;color:var(--green)">0796820013</div>
-            <div style="font-size:13px;color:var(--text2)">PESA GROW LTD</div>
-          </div>
-          <div class="fg"><label>Method</label>
-            <select class="fc" id="manMethod">
-              <option value="M-Pesa">M-Pesa</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-            </select>
-          </div>
-          <div class="fg"><label>Amount (KES)</label><input class="fc" id="manAmt" type="number" min="1000" placeholder="Min KES 1,000"></div>
-          <div class="fg"><label>M-Pesa Transaction Code</label><input class="fc" id="manRef" placeholder="e.g. QJK8XYZABC"></div>
-          <button class="btn btn-ghost btn-full" onclick="doManualDeposit()">Submit for Approval</button>
-        </div>
       </div>
       <div>
         <div class="card" style="margin-bottom:16px">
           <div class="card-title">📋 Deposit Info</div>
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
-            <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">M-Pesa Till</span><strong>0796820013</strong></div>
-            <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Account Name</span><strong>PESA GROW LTD</strong></div>
             <div style="display:flex;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--border)"><span style="color:var(--text2)">Min Deposit</span><strong>KES 1,000</strong></div>
-            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Confirmation</span><strong style="color:var(--green)">Instant (STK) / 30 min (Manual)</strong></div>
+            <div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Confirmation</span><strong style="color:var(--green)">Instant via STK Push</strong></div>
           </div>
         </div>
         <div class="card">
@@ -289,18 +240,13 @@ select.fc option{background:var(--bg3)}
     </div>
   </div>
 
-  <!-- ── WITHDRAW ─────────────────────────── -->
+  <!-- WITHDRAW -->
   <div class="page" id="page-withdraw">
     <div class="page-title">Withdraw Funds</div>
-
-    <!-- Rules banner -->
     <div id="wdRulesBanner" style="margin-bottom:20px"></div>
-
     <div class="grid-2">
       <div class="card">
         <div class="card-title">💸 Request Withdrawal</div>
-
-        <!-- Balance boxes -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
           <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.2);border-radius:11px;padding:14px;text-align:center">
             <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px">Withdrawable</div>
@@ -313,25 +259,13 @@ select.fc option{background:var(--bg3)}
             <div style="font-size:11px;color:var(--text2);margin-top:3px" id="wdLockInfo">Principal</div>
           </div>
         </div>
-
-        <!-- Daily limit tracker -->
         <div id="wdDailyTracker" style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-size:13px;font-weight:600">Daily Withdrawals</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:2px">Resets at midnight</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800" id="wdCountDisplay">0 / 3</div>
-            <div style="font-size:11px;color:var(--text2)" id="wdCountSub">withdrawals today</div>
-          </div>
+          <div><div style="font-size:13px;font-weight:600">Daily Withdrawals</div><div style="font-size:12px;color:var(--text2);margin-top:2px">Resets at midnight</div></div>
+          <div style="text-align:right"><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800" id="wdCountDisplay">0 / 3</div><div style="font-size:11px;color:var(--text2)" id="wdCountSub">withdrawals today</div></div>
         </div>
-
         <div class="m-err" id="wdErr"></div>
         <div class="fg"><label>Withdrawal Method</label>
-          <select class="fc" id="wdMethod">
-            <option value="M-Pesa">M-Pesa</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-          </select>
+          <select class="fc" id="wdMethod"><option value="M-Pesa">M-Pesa</option><option value="Bank Transfer">Bank Transfer</option></select>
         </div>
         <div class="fg"><label>M-Pesa Number / Account</label><input class="fc" id="wdAddr" placeholder="e.g. 0712345678"></div>
         <div class="fg"><label>Amount (KES)</label><input class="fc" id="wdAmt" type="number" min="500" placeholder="Min KES 500" oninput="calcWd()"></div>
@@ -344,28 +278,15 @@ select.fc option{background:var(--bg3)}
         </div>
         <button class="btn btn-green btn-full" id="wdSubmitBtn" onclick="doWithdraw()">Request Withdrawal</button>
       </div>
-
       <div>
-        <!-- Rules card -->
         <div class="card" style="margin-bottom:16px;border-color:rgba(0,230,118,.2)">
           <div class="card-title">📋 Withdrawal Rules</div>
           <div style="display:flex;flex-direction:column;gap:12px;font-size:14px">
-            <div style="display:flex;gap:10px;align-items:flex-start">
-              <span style="color:var(--green);font-size:18px;flex-shrink:0">💰</span>
-              <div><strong>Profits Only</strong><br><span style="color:var(--text2);font-size:13px">Only profits can be withdrawn. Your initial investment is locked for 90 days.</span></div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:flex-start">
-              <span style="color:var(--gold);font-size:18px;flex-shrink:0">🔒</span>
-              <div><strong>90-Day Lock</strong><br><span style="color:var(--text2);font-size:13px">Your invested principal is locked for 90 days from investment date. It returns to your balance after 90 days.</span></div>
-            </div>
-            <div style="display:flex;gap:10px;align-items:flex-start">
-              <span style="color:var(--blue);font-size:18px;flex-shrink:0">📅</span>
-              <div><strong>3 Times Per Day</strong><br><span style="color:var(--text2);font-size:13px">Maximum 3 profit withdrawals per day. Limit resets at midnight every day.</span></div>
-            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:18px;flex-shrink:0">💰</span><div><strong>Profits Only</strong><br><span style="color:var(--text2);font-size:13px">Only profits can be withdrawn. Your initial investment is locked for 90 days.</span></div></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--gold);font-size:18px;flex-shrink:0">🔒</span><div><strong>90-Day Lock</strong><br><span style="color:var(--text2);font-size:13px">Your invested principal is locked for 90 days from investment date.</span></div></div>
+            <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--blue);font-size:18px;flex-shrink:0">📅</span><div><strong>3 Times Per Day</strong><br><span style="color:var(--text2);font-size:13px">Maximum 3 profit withdrawals per day. Limit resets at midnight.</span></div></div>
           </div>
         </div>
-
-        <!-- Summary card -->
         <div class="card" style="margin-bottom:16px">
           <div class="card-title">📊 Summary</div>
           <div style="display:flex;flex-direction:column;gap:10px;font-size:14px">
@@ -375,8 +296,6 @@ select.fc option{background:var(--bg3)}
             <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--border)"><span style="color:var(--text2)">Balance</span><span id="wdBalance" style="color:var(--green);font-weight:700">KES 0</span></div>
           </div>
         </div>
-
-        <!-- History -->
         <div class="card">
           <div class="card-title">📂 Withdrawal History</div>
           <div class="tbl-wrap"><table class="tbl">
@@ -388,7 +307,7 @@ select.fc option{background:var(--bg3)}
     </div>
   </div>
 
-  <!-- ── HISTORY ──────────────────────────── -->
+  <!-- HISTORY -->
   <div class="page" id="page-history">
     <div class="page-title">Transaction History</div>
     <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
@@ -405,7 +324,7 @@ select.fc option{background:var(--bg3)}
     </table></div>
   </div>
 
-  <!-- ── REFERRAL ─────────────────────────── -->
+  <!-- REFERRAL -->
   <div class="page" id="page-referral">
     <div class="page-title">Referral Program</div>
     <div style="background:linear-gradient(135deg,rgba(0,230,118,.06),var(--card));border:1px solid rgba(0,230,118,.2);border-radius:16px;padding:28px;text-align:center;margin-bottom:22px">
@@ -416,10 +335,7 @@ select.fc option{background:var(--bg3)}
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Your Referral Code</div>
-        <div class="ref-box">
-          <span class="ref-code" id="myRefCode">———</span>
-          <button class="btn btn-green btn-sm" onclick="copyCode()">Copy</button>
-        </div>
+        <div class="ref-box"><span class="ref-code" id="myRefCode">———</span><button class="btn btn-green btn-sm" onclick="copyCode()">Copy</button></div>
         <div class="fg"><label>Your Referral Link</label>
           <div style="display:flex;gap:8px"><input class="fc" id="refLink" readonly style="font-size:12px"><button class="btn btn-green btn-sm" onclick="copyLink()">Copy</button></div>
         </div>
@@ -447,7 +363,7 @@ select.fc option{background:var(--bg3)}
     </div>
   </div>
 
-  <!-- ── PROFILE ──────────────────────────── -->
+  <!-- PROFILE -->
   <div class="page" id="page-profile">
     <div class="page-title">My Profile</div>
     <div class="grid-2">
@@ -501,9 +417,6 @@ select.fc option{background:var(--bg3)}
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════════════
-//  API CLIENT
-// ══════════════════════════════════════════════════
 const API = window.location.origin;
 let currentUser = null;
 let allTx = [];
@@ -512,44 +425,20 @@ function token() { return localStorage.getItem('pg_token'); }
 
 async function apiFetch(url, opts={}) {
   try {
-    const r = await fetch(API + url, {
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token() },
-      ...opts
-    });
-
-    // Parse response safely
+    const r = await fetch(API + url, { headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token() }, ...opts });
     let d;
-    try { d = await r.json(); }
-    catch { throw new Error('Server returned invalid response — please refresh'); }
-
-    // Auth failed — token expired or invalid
-    if (r.status === 401 || r.status === 403) {
-      clearAuthAndRedirect();
-      return;
-    }
-
-    // User record missing from DB (happens when Railway resets DB)
-    if (r.status === 404) {
-      clearAuthAndRedirect();
-      return;
-    }
-
+    try { d = await r.json(); } catch { throw new Error('Server returned invalid response — please refresh'); }
+    if (r.status === 401 || r.status === 403 || r.status === 404) { clearAuthAndRedirect(); return; }
     if (!r.ok) throw new Error(d.error || 'Request failed');
     return d;
   } catch(e) {
-    // Network errors — don't clear auth, just throw
-    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) {
-      throw new Error('No internet connection. Please check your network.');
-    }
+    if (e.message.includes('Failed to fetch') || e.message.includes('NetworkError')) throw new Error('No internet connection. Please check your network.');
     throw e;
   }
 }
 
 function clearAuthAndRedirect() {
-  localStorage.removeItem('pg_token');
-  localStorage.removeItem('pg_user');
-  sessionStorage.clear();
-  // Use replace so back button doesn't return to broken dashboard
+  localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user'); sessionStorage.clear();
   window.location.replace('index.html');
 }
 
@@ -564,18 +453,14 @@ function toast(msg, type='ok') {
 }
 
 function showErr(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
+  const el = document.getElementById(id); if (!el) return;
   el.textContent = msg; el.style.display = 'block';
-  const ok = document.getElementById(id.replace('Err','Ok'));
-  if (ok) ok.style.display = 'none';
+  const ok = document.getElementById(id.replace('Err','Ok')); if (ok) ok.style.display = 'none';
 }
 function showOk(id, msg) {
-  const el = document.getElementById(id);
-  if (!el) return;
+  const el = document.getElementById(id); if (!el) return;
   el.textContent = msg; el.style.display = 'block';
-  const err = document.getElementById(id.replace('Ok','Err'));
-  if (err) err.style.display = 'none';
+  const err = document.getElementById(id.replace('Ok','Err')); if (err) err.style.display = 'none';
 }
 function clearMsg(errId) {
   const e = document.getElementById(errId); if(e) e.style.display='none';
@@ -583,369 +468,182 @@ function clearMsg(errId) {
 }
 
 function doLogout() {
-  localStorage.removeItem('pg_token');
-  localStorage.removeItem('pg_user');
-  sessionStorage.clear();
-  // replace() prevents user going back to dashboard with back button
+  localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user'); sessionStorage.clear();
   window.location.replace('index.html');
 }
 
-// ══════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════
 let platformSettings = { minDeposit:1000, minWithdraw:500, withdrawFee:2 };
 
 async function init() {
   try {
     const tok = token();
     if (!tok) { window.location.replace('index.html'); return; }
-
-    // Use stored user for instant display
     const stored = localStorage.getItem('pg_user');
-    if (stored) {
-      try { currentUser = JSON.parse(stored); } catch {}
-    }
-
-    // Always verify with server — this is the source of truth
-    const me = await fetch(API + '/api/auth/me', {
-      headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok }
-    });
-
-    if (me.status === 401 || me.status === 403 || me.status === 404) {
-      // Token invalid, expired, or user deleted — clear and go to login
-      clearAuthAndRedirect(); return;
-    }
-
+    if (stored) { try { currentUser = JSON.parse(stored); } catch {} }
+    const me = await fetch(API + '/api/auth/me', { headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+tok } });
+    if (me.status === 401 || me.status === 403 || me.status === 404) { clearAuthAndRedirect(); return; }
     let meData;
     try { meData = await me.json(); } catch { clearAuthAndRedirect(); return; }
-
     if (!meData || !meData.id) { clearAuthAndRedirect(); return; }
-
     currentUser = meData;
     localStorage.setItem('pg_user', JSON.stringify(currentUser));
-
-    // Load platform settings
     try {
       platformSettings = await apiFetch('/api/settings/public');
       const minDep = parseFloat(platformSettings.minDeposit)||1000;
-      const stkEl  = document.getElementById('stkAmt');
-      const manEl  = document.getElementById('manAmt');
+      const stkEl = document.getElementById('stkAmt');
       if (stkEl) { stkEl.min = minDep; stkEl.placeholder = `Minimum KES ${minDep.toLocaleString()}`; }
-      if (manEl) { manEl.min = minDep; manEl.placeholder = `Min KES ${minDep.toLocaleString()}`; }
     } catch {}
-
-    // Set nav
     const av = ((currentUser.firstName||'P')[0]+(currentUser.lastName||'G')[0]).toUpperCase();
-    document.getElementById('userAv').textContent   = av;
+    document.getElementById('userAv').textContent = av;
     document.getElementById('userName').textContent = currentUser.firstName;
-
     await loadOverview();
     loadNotifications();
     startLiveTicker();
     startDepositPoller();
-
   } catch(e) {
     console.error('Init error:', e.message);
-    // Only redirect if it's an auth error, not a network blip
-    if (!e.message.includes('internet') && !e.message.includes('network')) {
-      clearAuthAndRedirect();
-    }
+    if (!e.message.includes('internet') && !e.message.includes('network')) clearAuthAndRedirect();
   }
 }
 
-// ══════════════════════════════════════════════════
-//  NAVIGATION
-// ══════════════════════════════════════════════════
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(s=>s.classList.toggle('active',s.dataset.page===name));
   document.getElementById('notifPanel').classList.remove('open');
-  const map = {
-    overview: loadOverview, invest: loadInvest, deposit: loadDeposit,
-    withdraw: loadWithdraw, history: ()=>loadHistory('all'),
-    referral: loadReferral, profile: loadProfile
-  };
+  const map = { overview:loadOverview, invest:loadInvest, deposit:loadDeposit, withdraw:loadWithdraw, history:()=>loadHistory('all'), referral:loadReferral, profile:loadProfile };
   if (map[name]) map[name]();
 }
 
-// ══════════════════════════════════════════════════
-//  OVERVIEW
-// ══════════════════════════════════════════════════
 async function loadOverview() {
   try {
     const data = await apiFetch('/api/user/dashboard');
     currentUser = data.user;
     localStorage.setItem('pg_user', JSON.stringify(currentUser));
-
     const active = (data.investments||[]).filter(i=>i.status==='active');
-    document.getElementById('ovBalance').textContent   = k(currentUser.balance);
-    document.getElementById('ovInvested').textContent  = k(currentUser.totalInvested);
+    document.getElementById('ovBalance').textContent  = k(currentUser.balance);
+    document.getElementById('ovInvested').textContent = k(currentUser.totalInvested);
     document.getElementById('ovActivePlans').textContent = active.length + ' active plan(s)';
-    document.getElementById('ovProfits').textContent   = k(currentUser.totalProfits);
-    document.getElementById('ovWithdrawn').textContent = k(currentUser.totalWithdrawn);
-
-    // Active investments
+    document.getElementById('ovProfits').textContent  = k(currentUser.totalProfits);
+    document.getElementById('ovWithdrawn').textContent= k(currentUser.totalWithdrawn);
     const invCont = document.getElementById('activeInvList');
     if (!active.length) {
-      invCont.innerHTML = `<div class="card" style="text-align:center;padding:32px">
-        <div style="font-size:40px;margin-bottom:10px">📈</div>
-        <p style="color:var(--text2);margin-bottom:14px">No active investments yet.</p>
-        <button class="btn btn-green" onclick="showPage('invest')">Start Investing</button>
-      </div>`;
+      invCont.innerHTML = `<div class="card" style="text-align:center;padding:32px"><div style="font-size:40px;margin-bottom:10px">📈</div><p style="color:var(--text2);margin-bottom:14px">No active investments yet.</p><button class="btn btn-green" onclick="showPage('invest')">Start Investing</button></div>`;
     } else {
       invCont.innerHTML = active.map(inv => {
         const pct = Math.min(Math.round((Date.now()-new Date(inv.startDate).getTime())/(inv.period*86400000)*100),100);
         const daysLeft = Math.max(0, Math.ceil((new Date(inv.endDate)-Date.now())/86400000));
-        return `<div class="card" style="margin-bottom:12px">
-          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
-            <span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700">${inv.planName} Plan</span>
-            <span style="font-size:13px;color:var(--text2)">${daysLeft} days left</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px">
-            <span>${k(inv.amount)} invested</span>
-            <span style="color:var(--green)">+${k(inv.earned)} earned</span>
-          </div>
-          <div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div>
-          <div style="font-size:11px;color:var(--text2);margin-top:4px">${pct}% complete • ${inv.roi}% daily ROI</div>
-        </div>`;
+        return `<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700">${inv.planName} Plan</span><span style="font-size:13px;color:var(--text2)">${daysLeft} days left</span></div><div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text2);margin-bottom:8px"><span>${k(inv.amount)} invested</span><span style="color:var(--green)">+${k(inv.earned)} earned</span></div><div class="prog-wrap"><div class="prog-bar" style="width:${pct}%"></div></div><div style="font-size:11px;color:var(--text2);margin-top:4px">${pct}% complete • ${inv.roi}% daily ROI</div></div>`;
       }).join('');
     }
-
-    // Recent transactions
     const recent = (data.transactions||[]).slice(0,5);
     document.getElementById('recentTxList').innerHTML = recent.length ? recent.map(tx=>`
-      <div class="card" style="margin-bottom:10px;padding:14px">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-weight:600;font-size:14px;text-transform:capitalize">${tx.type}</div>
-            <div style="font-size:12px;color:var(--text2)">${ds(tx.createdAt)}</div>
-          </div>
-          <div style="text-align:right">
-            <div style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}${k(tx.amount)}</div>
-            <span class="badge ${tx.status==='completed'?'b-ok':tx.status==='pending'?'b-pend':'b-fail'}">${tx.status}</span>
-          </div>
-        </div>
-      </div>`).join('') : '<div class="card" style="text-align:center;padding:24px;color:var(--text2)">No transactions yet</div>';
-
+      <div class="card" style="margin-bottom:10px;padding:14px"><div style="display:flex;justify-content:space-between;align-items:center"><div><div style="font-weight:600;font-size:14px;text-transform:capitalize">${tx.type}</div><div style="font-size:12px;color:var(--text2)">${ds(tx.createdAt)}</div></div><div style="text-align:right"><div style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}${k(tx.amount)}</div><span class="badge ${tx.status==='completed'?'b-ok':tx.status==='pending'?'b-pend':'b-fail'}">${tx.status}</span></div></div></div>`).join('') : '<div class="card" style="text-align:center;padding:24px;color:var(--text2)">No transactions yet</div>';
   } catch(e) { toast('Overview error: '+e.message,'err'); }
 }
 
-// ══════════════════════════════════════════════════
-//  LIVE PROFIT TICKER — True real-time per-second
-// ══════════════════════════════════════════════════
-let activeInvestments = [];   // cached active investments
-let liveBaseEarned    = 0;    // earned at last server sync
-let liveBaseTime      = 0;    // timestamp of last server sync
-let livePerSecond     = 0;    // total KES earned per second across all investments
-let liveTickInterval  = null; // the per-second UI updater
-let liveSyncInterval  = null; // the server re-sync (every 30s)
+let activeInvestments=[],liveBaseEarned=0,liveBaseTime=0,livePerSecond=0,liveTickInterval=null,liveSyncInterval=null;
 
 function startLiveTicker() {
-  // Clear any existing intervals
   if (liveTickInterval) clearInterval(liveTickInterval);
   if (liveSyncInterval) clearInterval(liveSyncInterval);
-
-  // Sync investment data from server immediately, then every 30s
   syncLiveData();
   liveSyncInterval = setInterval(syncLiveData, 30000);
-
-  // Update the UI display every second
   liveTickInterval = setInterval(updateLiveDisplay, 1000);
 }
 
 async function syncLiveData() {
   try {
     const data = await apiFetch('/api/user/dashboard');
-    activeInvestments = (data.investments||[]).filter(i => i.status === 'active');
-
-    // Calculate total earned so far and per-second rate
-    liveBaseEarned = activeInvestments.reduce((s,i) => s + (+i.earned||0), 0);
+    activeInvestments = (data.investments||[]).filter(i=>i.status==='active');
+    liveBaseEarned = activeInvestments.reduce((s,i)=>s+(+i.earned||0),0);
     liveBaseTime   = Date.now();
-
-    // Per second = sum of (amount * roi/100 / 86400) for each active investment
-    livePerSecond  = activeInvestments.reduce((s, i) => {
-      return s + ((+i.amount||0) * (+i.roi||0) / 100 / 86400);
-    }, 0);
-
-    // Also refresh the overview stats while we have fresh data
+    livePerSecond  = activeInvestments.reduce((s,i)=>s+((+i.amount||0)*(+i.roi||0)/100/86400),0);
     if (data.user) {
-      const el = document.getElementById('ovBalance');
-      if (el) el.textContent = k(data.user.balance);
-      const profEl = document.getElementById('ovProfits');
-      if (profEl) profEl.textContent = k(data.user.totalProfits);
+      const el = document.getElementById('ovBalance'); if (el) el.textContent = k(data.user.balance);
+      const profEl = document.getElementById('ovProfits'); if (profEl) profEl.textContent = k(data.user.totalProfits);
     }
-
-    // Update active investments progress bars
     updateInvestmentProgress();
-
   } catch {}
 }
 
 function updateLiveDisplay() {
-  const el = document.getElementById('liveProfit');
-  if (!el) return;
-
-  if (livePerSecond <= 0) {
-    el.textContent = 'KES 0.0000';
-    return;
-  }
-
-  // Calculate elapsed seconds since last server sync
+  const el = document.getElementById('liveProfit'); if (!el) return;
+  if (livePerSecond <= 0) { el.textContent = 'KES 0.0000'; return; }
   const elapsed = (Date.now() - liveBaseTime) / 1000;
-
-  // Current earned = base + (rate per second × elapsed seconds)
   const current = liveBaseEarned + (livePerSecond * elapsed);
-
-  // Show 4 decimal places so user can literally see it ticking up
   el.textContent = 'KES ' + current.toFixed(4);
-
-  // Subtle green flash every 5 seconds to show it's live
-  if (Math.floor(elapsed) % 5 === 0 && elapsed > 0) {
-    el.style.textShadow = '0 0 20px rgba(0,230,118,0.8)';
-    setTimeout(() => { if(el) el.style.textShadow = ''; }, 500);
-  }
+  if (Math.floor(elapsed) % 5 === 0 && elapsed > 0) { el.style.textShadow='0 0 20px rgba(0,230,118,0.8)'; setTimeout(()=>{if(el)el.style.textShadow='';},500); }
 }
 
 function updateInvestmentProgress() {
   const subEl = document.getElementById('liveSubText');
-  if (subEl && livePerSecond > 0) {
-    subEl.textContent = `+KES ${livePerSecond.toFixed(6)}/sec · ${activeInvestments.length} active plan(s)`;
-  } else if (subEl) {
-    subEl.textContent = 'No active investments — deposit and invest to start earning';
-  }
+  if (subEl && livePerSecond > 0) subEl.textContent = `+KES ${livePerSecond.toFixed(6)}/sec · ${activeInvestments.length} active plan(s)`;
+  else if (subEl) subEl.textContent = 'No active investments — deposit and invest to start earning';
 }
 
-// ══════════════════════════════════════════════════
-//  AUTO DEPOSIT POLLER
-//  Polls every 10s for pending deposits — instantly
-//  updates balance when a payment confirms
-// ══════════════════════════════════════════════════
-let depositPollInterval = null;
-let lastKnownBalance    = 0;
-let pendingDepositCount = 0;
+let depositPollInterval=null,lastKnownBalance=0,pendingDepositCount=0;
 
 function startDepositPoller() {
   if (depositPollInterval) clearInterval(depositPollInterval);
-  lastKnownBalance    = currentUser.balance || 0;
+  lastKnownBalance = currentUser.balance || 0;
   pendingDepositCount = 0;
-
-  depositPollInterval = setInterval(async () => {
+  depositPollInterval = setInterval(async()=>{
     try {
       const data = await apiFetch('/api/user/balance');
-
-      // Detect balance increase — means a deposit was confirmed!
       if (data.balance > lastKnownBalance) {
         const increase = data.balance - lastKnownBalance;
         lastKnownBalance = data.balance;
-
-        // Update all balance displays instantly
         currentUser.balance = data.balance;
         localStorage.setItem('pg_user', JSON.stringify(currentUser));
         updateAllBalanceDisplays(data);
-
-        // Show a prominent success toast
         showDepositConfirmedBanner(increase);
-
-        // Reload overview if user is on it
         const overviewActive = document.getElementById('page-overview')?.classList.contains('active');
         if (overviewActive) await loadOverview();
-
-        // Reload deposit page if user is on it
         const depositActive = document.getElementById('page-deposit')?.classList.contains('active');
         if (depositActive) loadDeposit();
-
-        // Refresh notifications
         loadNotifications();
-      } else {
-        lastKnownBalance = data.balance;
-      }
-
-      // Track pending deposits — if reduced, something was processed
-      if (data.pendingDeps !== undefined) {
-        pendingDepositCount = data.pendingDeps;
-      }
-
+      } else { lastKnownBalance = data.balance; }
+      if (data.pendingDeps !== undefined) pendingDepositCount = data.pendingDeps;
     } catch {}
-  }, 10000); // check every 10 seconds
+  }, 10000);
 }
 
 function updateAllBalanceDisplays(data) {
-  // Update every balance element on the page
   const bal = k(data.balance);
-  ['ovBalance','wdBalance','investBal'].forEach(id => {
+  ['ovBalance','wdBalance','investBal'].forEach(id=>{
     const el = document.getElementById(id);
-    if (el) {
-      el.textContent = bal;
-      el.style.color = 'var(--green)';
-      el.style.transition = 'color 0.5s';
-      setTimeout(() => { if(el) el.style.color = ''; }, 2000);
-    }
+    if (el) { el.textContent=bal; el.style.color='var(--green)'; el.style.transition='color 0.5s'; setTimeout(()=>{if(el)el.style.color='';},2000); }
   });
-  if (data.totalProfits !== undefined) {
-    const profEl = document.getElementById('ovProfits');
-    if (profEl) profEl.textContent = k(data.totalProfits);
-  }
-  if (data.totalWithdrawn !== undefined) {
-    const wdEl = document.getElementById('ovWithdrawn');
-    if (wdEl) wdEl.textContent = k(data.totalWithdrawn);
-    const wdSumEl = document.getElementById('wdSumWd');
-    if (wdSumEl) wdSumEl.textContent = k(data.totalWithdrawn);
-  }
+  if (data.totalProfits !== undefined) { const e=document.getElementById('ovProfits'); if(e) e.textContent=k(data.totalProfits); }
+  if (data.totalWithdrawn !== undefined) { const e=document.getElementById('ovWithdrawn'); if(e) e.textContent=k(data.totalWithdrawn); const e2=document.getElementById('wdSumWd'); if(e2) e2.textContent=k(data.totalWithdrawn); }
 }
 
 function showDepositConfirmedBanner(amount) {
-  // Remove any existing banner
-  const old = document.getElementById('depositBanner');
-  if (old) old.remove();
-
+  const old = document.getElementById('depositBanner'); if (old) old.remove();
   const banner = document.createElement('div');
   banner.id = 'depositBanner';
-  banner.style.cssText = `
-    position:fixed;top:70px;left:50%;transform:translateX(-50%);
-    background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(0,180,100,.08));
-    border:1.5px solid rgba(0,230,118,.5);border-radius:14px;
-    padding:16px 28px;z-index:999;text-align:center;
-    box-shadow:0 8px 40px rgba(0,230,118,.25);
-    animation:slideDown .4s ease;max-width:380px;width:90%
-  `;
-  banner.innerHTML = `
-    <div style="font-size:28px;margin-bottom:6px">💰</div>
-    <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;color:#00e676">
-      Deposit Confirmed!
-    </div>
-    <div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:4px">
-      KES ${(+amount).toLocaleString('en-KE',{minimumFractionDigits:2})} has been credited to your balance
-    </div>
-  `;
+  banner.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,rgba(0,230,118,.15),rgba(0,180,100,.08));border:1.5px solid rgba(0,230,118,.5);border-radius:14px;padding:16px 28px;z-index:999;text-align:center;box-shadow:0 8px 40px rgba(0,230,118,.25);animation:slideDown .4s ease;max-width:380px;width:90%';
+  banner.innerHTML = `<div style="font-size:28px;margin-bottom:6px">💰</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;color:#00e676">Deposit Confirmed!</div><div style="font-size:14px;color:rgba(255,255,255,.8);margin-top:4px">KES ${(+amount).toLocaleString('en-KE',{minimumFractionDigits:2})} has been credited to your balance</div>`;
   document.body.appendChild(banner);
-
-  // Also show toast
-  showToast(`💰 KES ${(+amount).toFixed(2)} deposit confirmed! Balance updated.`, 'ok');
-
-  // Auto remove after 5 seconds
-  setTimeout(() => { banner.style.opacity='0'; banner.style.transition='.5s'; setTimeout(()=>banner.remove(),500); }, 5000);
+  toast(`💰 KES ${(+amount).toFixed(2)} deposit confirmed! Balance updated.`, 'ok');
+  setTimeout(()=>{ banner.style.opacity='0'; banner.style.transition='.5s'; setTimeout(()=>banner.remove(),500); },5000);
 }
 
-// Add slide down animation
 const style = document.createElement('style');
 style.textContent = `@keyframes slideDown{from{opacity:0;transform:translateX(-50%) translateY(-20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}`;
 document.head.appendChild(style);
+
 async function loadInvest() {
   try {
     const plans = await apiFetch('/api/plans');
     document.getElementById('investBal').textContent = k(currentUser.balance);
     document.getElementById('investPlansGrid').innerHTML = plans.map(p=>`
-      <div class="card" style="border-top:3px solid ${p.color||'var(--green)'};cursor:pointer;transition:.3s"
-           onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''"
-           onclick="openInvestModal('${p.id}')">
+      <div class="card" style="border-top:3px solid ${p.color||'var(--green)'};cursor:pointer;transition:.3s" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform=''" onclick="openInvestModal('${p.id}')">
         <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px">${p.name}</div>
         <div style="font-size:48px;font-weight:800;color:${p.color||'var(--green)'};font-family:'Bricolage Grotesque',sans-serif;line-height:1">${p.roi}%</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Daily ROI • ${p.period} days</div>
-        <div style="background:var(--bg3);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text2);margin-bottom:16px">
-          Min: <strong style="color:var(--text)">KES ${(+p.minAmount).toLocaleString()}</strong><br>
-          Max: <strong style="color:var(--text)">KES ${(+p.maxAmount).toLocaleString()}</strong>
-        </div>
+        <div style="background:var(--bg3);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text2);margin-bottom:16px">Min: <strong style="color:var(--text)">KES ${(+p.minAmount).toLocaleString()}</strong><br>Max: <strong style="color:var(--text)">KES ${(+p.maxAmount).toLocaleString()}</strong></div>
         <button class="btn btn-green btn-full">Invest Now</button>
       </div>`).join('') || '<div style="color:var(--text2)">No plans available.</div>';
   } catch(e) { toast(e.message,'err'); }
@@ -959,14 +657,8 @@ async function openInvestModal(planId) {
       <div class="modal-title">Invest in ${plan.name}</div>
       <div class="modal-sub">${plan.roi}% daily ROI for ${plan.period} days</div>
       <div class="m-err" id="invErr"></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:16px;display:flex;justify-content:space-between">
-        <span style="color:var(--text2)">Your Balance</span>
-        <span style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--green)">${k(currentUser.balance)}</span>
-      </div>
-      <div class="fg"><label>Investment Amount (KES)</label>
-        <input class="fc" id="invAmt" type="number" min="${plan.minAmount}" max="${plan.maxAmount}"
-               placeholder="Min KES ${(+plan.minAmount).toLocaleString()}" oninput="calcInvest(${plan.roi},${plan.period})">
-      </div>
+      <div style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:16px;display:flex;justify-content:space-between"><span style="color:var(--text2)">Your Balance</span><span style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--green)">${k(currentUser.balance)}</span></div>
+      <div class="fg"><label>Investment Amount (KES)</label><input class="fc" id="invAmt" type="number" min="${plan.minAmount}" max="${plan.maxAmount}" placeholder="Min KES ${(+plan.minAmount).toLocaleString()}" oninput="calcInvest(${plan.roi},${plan.period})"></div>
       <div id="invCalc" style="background:var(--bg3);border-radius:10px;padding:13px;margin-bottom:14px;display:none">
         <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Daily Profit</span><span id="ic-daily" style="color:var(--green);font-weight:700"></span></div>
         <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:var(--text2)">Total Return</span><span id="ic-total" style="color:var(--gold);font-weight:700"></span></div>
@@ -982,9 +674,9 @@ function calcInvest(roi, period) {
   const c = document.getElementById('invCalc');
   if (amt > 0) {
     c.style.display = 'block';
-    document.getElementById('ic-daily').textContent  = k(amt * roi / 100);
-    document.getElementById('ic-total').textContent  = k(amt + amt * roi / 100 * period);
-    document.getElementById('ic-profit').textContent = k(amt * roi / 100 * period);
+    document.getElementById('ic-daily').textContent  = k(amt*roi/100);
+    document.getElementById('ic-total').textContent  = k(amt+amt*roi/100*period);
+    document.getElementById('ic-profit').textContent = k(amt*roi/100*period);
   } else { c.style.display = 'none'; }
 }
 
@@ -996,19 +688,13 @@ async function confirmInvest(planId) {
   try {
     await apiFetch('/api/user/invest', { method:'POST', body:JSON.stringify({planId, amount:amt}) });
     document.getElementById('investModal').classList.remove('open');
-    toast('Investment activated! Earning '+' daily. 🚀','ok');
+    toast('Investment activated! Earning daily. 🚀','ok');
     currentUser = await apiFetch('/api/auth/me');
     localStorage.setItem('pg_user', JSON.stringify(currentUser));
     showPage('overview');
-  } catch(e) {
-    showErr('invErr', e.message);
-    btn.textContent = '✅ Confirm Investment'; btn.disabled = false;
-  }
+  } catch(e) { showErr('invErr', e.message); btn.textContent = '✅ Confirm Investment'; btn.disabled = false; }
 }
 
-// ══════════════════════════════════════════════════
-//  DEPOSIT
-// ══════════════════════════════════════════════════
 async function loadDeposit() {
   document.getElementById('stkPhone').value = currentUser.phone || '';
   clearMsg('stkErr');
@@ -1016,119 +702,54 @@ async function loadDeposit() {
     const data = await apiFetch('/api/user/dashboard');
     const deps = (data.deposits||[]).slice(0,8);
     document.getElementById('depHistory').innerHTML = deps.length ? deps.map(d=>`
-      <tr>
-        <td style="color:var(--green);font-weight:700">${k(d.amount)}</td>
-        <td style="color:var(--text2)">${d.method||'M-Pesa'}</td>
-        <td><span class="badge ${d.status==='approved'?'b-ok':d.status==='pending'?'b-pend':'b-fail'}">${d.status}</span></td>
-        <td style="color:var(--text2)">${ds(d.createdAt)}</td>
-      </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">No deposits yet</td></tr>';
+      <tr><td style="color:var(--green);font-weight:700">${k(d.amount)}</td><td style="color:var(--text2)">${d.method||'M-Pesa'}</td><td><span class="badge ${d.status==='approved'?'b-ok':d.status==='pending'?'b-pend':'b-fail'}">${d.status}</span></td><td style="color:var(--text2)">${ds(d.createdAt)}</td></tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:20px;color:var(--text2)">No deposits yet</td></tr>';
   } catch {}
 }
 
-// STK PUSH
 async function doSTKPush() {
   const phone  = document.getElementById('stkPhone').value.trim();
   const amount = parseFloat(document.getElementById('stkAmt').value);
   clearMsg('stkErr');
-
   if (!phone) { showErr('stkErr','Enter your M-Pesa phone number'); return; }
   const minDep = parseFloat(platformSettings.minDeposit)||1000;
   if (!amount || amount < minDep) { showErr('stkErr',`Minimum deposit is KES ${minDep.toLocaleString()}`); return; }
-
   const btn = document.getElementById('stkBtn');
   btn.textContent = 'Sending prompt...'; btn.disabled = true;
   document.getElementById('stkStatusArea').innerHTML = '';
-
   try {
-    const res = await apiFetch('/api/mpesa/stk-push', {
-      method: 'POST',
-      body: JSON.stringify({ phone, amount })
-    });
-
-    document.getElementById('stkStatusArea').innerHTML = `
-      <div style="text-align:center;padding:20px 0;border:1px solid var(--border);border-radius:12px;margin-bottom:14px">
-        <div class="stk-spinner"></div>
-        <div style="font-size:32px;margin-bottom:8px">📱</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div>
-        <div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div>
-      </div>`;
+    const res = await apiFetch('/api/mpesa/stk-push', { method:'POST', body:JSON.stringify({phone,amount}) });
+    document.getElementById('stkStatusArea').innerHTML = `<div style="text-align:center;padding:20px 0;border:1px solid var(--border);border-radius:12px;margin-bottom:14px"><div class="stk-spinner"></div><div style="font-size:32px;margin-bottom:8px">📱</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div><div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div></div>`;
     btn.textContent = 'Waiting for payment...';
-
-    // Poll every 5 seconds, max 24 times (2 min)
     let tries = 0;
-    const poll = setInterval(async () => {
+    const poll = setInterval(async()=>{
       tries++;
-      if (tries > 24) {
-        clearInterval(poll);
-        showErr('stkErr','Payment timed out. Try again or use manual deposit.');
-        btn.textContent = '📲 Send M-Pesa Prompt'; btn.disabled = false;
-        document.getElementById('stkStatusArea').innerHTML = '';
-        return;
-      }
+      if (tries > 24) { clearInterval(poll); showErr('stkErr','Payment timed out. Please try again.'); btn.textContent='📲 Send M-Pesa Prompt'; btn.disabled=false; document.getElementById('stkStatusArea').innerHTML=''; return; }
       try {
         const status = await apiFetch(`/api/mpesa/status/${res.checkoutRequestId}`);
         if (status.status === 'approved') {
           clearInterval(poll);
-          document.getElementById('stkStatusArea').innerHTML = `
-            <div style="text-align:center;padding:20px 0">
-              <div style="font-size:52px;margin-bottom:8px">✅</div>
-              <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--green)">Payment Confirmed!</div>
-              <div style="font-size:14px;color:var(--text2);margin-top:6px">KES ${amount.toLocaleString()} credited to your account.</div>
-            </div>`;
-          toast('KES ' + amount.toLocaleString() + ' deposited! 💰', 'ok');
+          document.getElementById('stkStatusArea').innerHTML = `<div style="text-align:center;padding:20px 0"><div style="font-size:52px;margin-bottom:8px">✅</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:var(--green)">Payment Confirmed!</div><div style="font-size:14px;color:var(--text2);margin-top:6px">KES ${amount.toLocaleString()} credited to your account.</div></div>`;
+          toast('KES '+amount.toLocaleString()+' deposited! 💰','ok');
           btn.textContent = '✅ Payment Complete!';
-          // Refresh user balance
           currentUser = await apiFetch('/api/auth/me');
           localStorage.setItem('pg_user', JSON.stringify(currentUser));
           document.getElementById('ovBalance').textContent = k(currentUser.balance);
           document.getElementById('wdBalance').textContent = k(currentUser.balance);
-          setTimeout(() => { btn.textContent = '📲 Send M-Pesa Prompt'; btn.disabled = false; loadDeposit(); }, 3000);
+          setTimeout(()=>{ btn.textContent='📲 Send M-Pesa Prompt'; btn.disabled=false; loadDeposit(); },3000);
         } else if (status.status === 'failed' || status.status === 'cancelled') {
-          clearInterval(poll);
-          showErr('stkErr', 'Payment ' + status.status + '. Please try again.');
-          btn.textContent = '📲 Send M-Pesa Prompt'; btn.disabled = false;
-          document.getElementById('stkStatusArea').innerHTML = '';
+          clearInterval(poll); showErr('stkErr','Payment '+status.status+'. Please try again.'); btn.textContent='📲 Send M-Pesa Prompt'; btn.disabled=false; document.getElementById('stkStatusArea').innerHTML='';
         }
       } catch {}
     }, 5000);
-
-  } catch(e) {
-    showErr('stkErr', e.message);
-    btn.textContent = '📲 Send M-Pesa Prompt'; btn.disabled = false;
-  }
+  } catch(e) { showErr('stkErr', e.message); btn.textContent='📲 Send M-Pesa Prompt'; btn.disabled=false; }
 }
 
-// MANUAL DEPOSIT
-async function doManualDeposit() {
-  const amount   = parseFloat(document.getElementById('manAmt').value);
-  const method   = document.getElementById('manMethod').value;
-  const proofNote = document.getElementById('manRef').value.trim();
-  const minDep = parseFloat(platformSettings.minDeposit)||1000;
-  if (!amount || amount < minDep) { toast(`Minimum deposit is KES ${minDep.toLocaleString()}`,'err'); return; }
-  if (!proofNote) { toast('Enter your M-Pesa transaction code','err'); return; }
-  try {
-    await apiFetch('/api/user/deposit/manual', { method:'POST', body:JSON.stringify({amount, method, proofNote}) });
-    document.getElementById('manAmt').value = '';
-    document.getElementById('manRef').value = '';
-    toast('Deposit submitted! Admin confirms within 30 minutes.','ok');
-    loadDeposit();
-  } catch(e) { toast(e.message,'err'); }
-}
-
-// ══════════════════════════════════════════════════
-//  WITHDRAW
-// ══════════════════════════════════════════════════
 let wdInfo = null;
 
 async function loadWithdraw() {
   clearMsg('wdErr');
-  try {
-    wdInfo = await apiFetch('/api/user/withdraw-info');
-    renderWithdrawRules(wdInfo);
-  } catch(e) {
-    wdInfo = { withdrawableBalance: currentUser.balance, totalLocked:0, principalLocked:false, todayWithdrawals:0, maxDailyWithdrawals:3, withdrawalsRemaining:3, feeRate:2, minWithdraw:500, lockDays:90, earliestUnlockDays:0 };
-    renderWithdrawRules(wdInfo);
-  }
+  try { wdInfo = await apiFetch('/api/user/withdraw-info'); renderWithdrawRules(wdInfo); }
+  catch(e) { wdInfo={withdrawableBalance:currentUser.balance,totalLocked:0,principalLocked:false,todayWithdrawals:0,maxDailyWithdrawals:3,withdrawalsRemaining:3,feeRate:2,minWithdraw:500,lockDays:90,earliestUnlockDays:0}; renderWithdrawRules(wdInfo); }
   document.getElementById('wdBalance').textContent   = k(currentUser.balance);
   document.getElementById('wdSumInv').textContent    = k(currentUser.totalInvested);
   document.getElementById('wdSumProfit').textContent = k(currentUser.totalProfits);
@@ -1136,280 +757,173 @@ async function loadWithdraw() {
   try {
     const data = await apiFetch('/api/user/dashboard');
     const wds = (data.withdrawals||[]).slice(0,10);
-    document.getElementById('wdHistory').innerHTML = wds.length ? wds.map(w=>`
-      <tr>
-        <td style="font-weight:700">${k(w.amount)}</td>
-        <td style="color:var(--green)">${k(w.net)}</td>
-        <td style="color:var(--text2)">${w.method}</td>
-        <td><span class="badge ${w.status==='approved'?'b-ok':w.status==='pending'?'b-pend':'b-fail'}">${w.status}</span></td>
-        <td style="color:var(--text2)">${ds(w.createdAt)}</td>
-      </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">No withdrawals yet</td></tr>';
+    document.getElementById('wdHistory').innerHTML = wds.length ? wds.map(w=>`<tr><td style="font-weight:700">${k(w.amount)}</td><td style="color:var(--green)">${k(w.net)}</td><td style="color:var(--text2)">${w.method}</td><td><span class="badge ${w.status==='approved'?'b-ok':w.status==='pending'?'b-pend':'b-fail'}">${w.status}</span></td><td style="color:var(--text2)">${ds(w.createdAt)}</td></tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text2)">No withdrawals yet</td></tr>';
   } catch {}
 }
 
 function renderWithdrawRules(info) {
-  const avail = document.getElementById('wdAvailable');
-  if (avail) avail.textContent = k(info.withdrawableBalance);
-  const locked = document.getElementById('wdLocked');
-  if (locked) locked.textContent = k(info.totalLocked);
-  const lockInfo = document.getElementById('wdLockInfo');
-  if (lockInfo) {
-    if (info.principalLocked && info.earliestUnlockDays > 0)
-      lockInfo.innerHTML = `<span style="color:var(--gold)">Unlocks in ${info.earliestUnlockDays} days</span>`;
-    else if (!info.totalLocked)
-      lockInfo.innerHTML = `<span style="color:var(--green)">Nothing locked</span>`;
-    else lockInfo.textContent = `${info.lockDays}-day lock`;
-  }
-  const max = info.maxDailyWithdrawals||3;
-  const used = info.todayWithdrawals||0;
-  const rem = Math.max(0, max - used);
-  const cntEl = document.getElementById('wdCountDisplay');
-  const subEl = document.getElementById('wdCountSub');
-  if (cntEl) { cntEl.textContent = `${used} / ${max}`; cntEl.style.color = rem===0?'var(--red)':rem===1?'var(--gold)':'var(--green)'; }
-  if (subEl) subEl.textContent = rem > 0 ? `${rem} remaining today` : '0 remaining — resets at midnight';
-  const minEl=document.getElementById('wdInfoMin'), feeEl=document.getElementById('wdInfoFee'), feeEl2=document.getElementById('wdFeeRate');
-  if (minEl) minEl.textContent = `KES ${(+info.minWithdraw||500).toLocaleString()}`;
-  if (feeEl) feeEl.textContent = info.feeRate||2;
-  if (feeEl2) feeEl2.textContent = info.feeRate||2;
-  const wdEl = document.getElementById('wdAmt');
-  if (wdEl) { wdEl.min = info.minWithdraw||500; wdEl.max = info.withdrawableBalance; wdEl.placeholder = `Max KES ${(+info.withdrawableBalance||0).toLocaleString()} (profits only)`; }
-  const btn = document.getElementById('wdSubmitBtn');
-  if (btn) {
-    if (rem === 0) { btn.disabled=true; btn.textContent='🚫 Daily Limit Reached — Resets at Midnight'; btn.style.opacity='.5'; }
-    else { btn.disabled=false; btn.textContent=`Request Withdrawal (${rem} left today)`; btn.style.opacity='1'; }
-  }
-  const banner = document.getElementById('wdRulesBanner');
-  if (banner) {
-    if (info.principalLocked) {
-      banner.innerHTML = `<div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.25);border-radius:13px;padding:16px 20px;display:flex;align-items:flex-start;gap:12px"><span style="font-size:24px;flex-shrink:0">🔒</span><div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin-bottom:4px">Investment Locked for ${info.lockDays} Days</div><div style="font-size:13px;color:var(--text2)">Your invested principal of <strong style="color:var(--text)">${k(info.totalLocked)}</strong> is locked. Only profits (<strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong>) can be withdrawn. Principal unlocks in <strong style="color:var(--gold)">${info.earliestUnlockDays} day(s)</strong>.</div></div></div>`;
-    } else if (info.withdrawableBalance <= 0) {
-      banner.innerHTML = `<div style="background:rgba(79,195,247,.05);border:1px solid rgba(79,195,247,.2);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">ℹ️ No profits available to withdraw yet. Keep investing and earning!</div>`;
-    } else {
-      banner.innerHTML = `<div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">✅ <strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong> available to withdraw. ${rem} withdrawal(s) remaining today.</div>`;
-    }
+  const avail=document.getElementById('wdAvailable'); if(avail)avail.textContent=k(info.withdrawableBalance);
+  const locked=document.getElementById('wdLocked'); if(locked)locked.textContent=k(info.totalLocked);
+  const lockInfo=document.getElementById('wdLockInfo');
+  if(lockInfo){if(info.principalLocked&&info.earliestUnlockDays>0)lockInfo.innerHTML=`<span style="color:var(--gold)">Unlocks in ${info.earliestUnlockDays} days</span>`;else if(!info.totalLocked)lockInfo.innerHTML=`<span style="color:var(--green)">Nothing locked</span>`;else lockInfo.textContent=`${info.lockDays}-day lock`;}
+  const max=info.maxDailyWithdrawals||3,used=info.todayWithdrawals||0,rem=Math.max(0,max-used);
+  const cntEl=document.getElementById('wdCountDisplay'),subEl=document.getElementById('wdCountSub');
+  if(cntEl){cntEl.textContent=`${used} / ${max}`;cntEl.style.color=rem===0?'var(--red)':rem===1?'var(--gold)':'var(--green)';}
+  if(subEl)subEl.textContent=rem>0?`${rem} remaining today`:'0 remaining — resets at midnight';
+  const minEl=document.getElementById('wdInfoMin'),feeEl=document.getElementById('wdInfoFee'),feeEl2=document.getElementById('wdFeeRate');
+  if(minEl)minEl.textContent=`KES ${(+info.minWithdraw||500).toLocaleString()}`;
+  if(feeEl)feeEl.textContent=info.feeRate||2; if(feeEl2)feeEl2.textContent=info.feeRate||2;
+  const wdEl=document.getElementById('wdAmt');
+  if(wdEl){wdEl.min=info.minWithdraw||500;wdEl.max=info.withdrawableBalance;wdEl.placeholder=`Max KES ${(+info.withdrawableBalance||0).toLocaleString()} (profits only)`;}
+  const btn=document.getElementById('wdSubmitBtn');
+  if(btn){if(rem===0){btn.disabled=true;btn.textContent='🚫 Daily Limit Reached — Resets at Midnight';btn.style.opacity='.5';}else{btn.disabled=false;btn.textContent=`Request Withdrawal (${rem} left today)`;btn.style.opacity='1';}}
+  const banner=document.getElementById('wdRulesBanner');
+  if(banner){
+    if(info.principalLocked)banner.innerHTML=`<div style="background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.25);border-radius:13px;padding:16px 20px;display:flex;align-items:flex-start;gap:12px"><span style="font-size:24px;flex-shrink:0">🔒</span><div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;margin-bottom:4px">Investment Locked for ${info.lockDays} Days</div><div style="font-size:13px;color:var(--text2)">Your invested principal of <strong style="color:var(--text)">${k(info.totalLocked)}</strong> is locked. Only profits (<strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong>) can be withdrawn. Principal unlocks in <strong style="color:var(--gold)">${info.earliestUnlockDays} day(s)</strong>.</div></div></div>`;
+    else if(info.withdrawableBalance<=0)banner.innerHTML=`<div style="background:rgba(79,195,247,.05);border:1px solid rgba(79,195,247,.2);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">ℹ️ No profits available to withdraw yet. Keep investing and earning!</div>`;
+    else banner.innerHTML=`<div style="background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:13px;padding:14px 18px;font-size:14px;color:var(--text2)">✅ <strong style="color:var(--green)">${k(info.withdrawableBalance)}</strong> available to withdraw. ${rem} withdrawal(s) remaining today.</div>`;
   }
 }
 
 function calcWd() {
-  const amt = parseFloat(document.getElementById('wdAmt').value);
-  const c = document.getElementById('wdCalc');
-  if (amt > 0) {
-    const feeRate = parseFloat((wdInfo&&wdInfo.feeRate)||platformSettings.withdrawFee||2) / 100;
-    const fee = amt * feeRate;
-    c.style.display = 'block';
-    document.getElementById('wdFeeAmt').textContent = k(fee);
-    document.getElementById('wdNetAmt').textContent = k(amt - fee);
-  } else { c.style.display = 'none'; }
+  const amt=parseFloat(document.getElementById('wdAmt').value);
+  const c=document.getElementById('wdCalc');
+  if(amt>0){const feeRate=parseFloat((wdInfo&&wdInfo.feeRate)||platformSettings.withdrawFee||2)/100;const fee=amt*feeRate;c.style.display='block';document.getElementById('wdFeeAmt').textContent=k(fee);document.getElementById('wdNetAmt').textContent=k(amt-fee);}
+  else{c.style.display='none';}
 }
 
 async function doWithdraw() {
-  const amount  = parseFloat(document.getElementById('wdAmt').value);
-  const method  = document.getElementById('wdMethod').value;
-  const address = document.getElementById('wdAddr').value.trim();
-  const minWd   = wdInfo ? (+wdInfo.minWithdraw||500) : 500;
+  const amount=parseFloat(document.getElementById('wdAmt').value);
+  const method=document.getElementById('wdMethod').value;
+  const address=document.getElementById('wdAddr').value.trim();
+  const minWd=wdInfo?(+wdInfo.minWithdraw||500):500;
   clearMsg('wdErr');
-  if (!amount || amount < minWd) { showErr('wdErr',`Minimum withdrawal is KES ${minWd.toLocaleString()}`); return; }
-  if (!address) { showErr('wdErr','Enter your M-Pesa number or account details'); return; }
-  if (wdInfo && wdInfo.principalLocked && amount > wdInfo.withdrawableBalance) { showErr('wdErr',`Only profits can be withdrawn. Available: ${k(wdInfo.withdrawableBalance)}`); return; }
-  if (wdInfo && wdInfo.withdrawalsRemaining <= 0) { showErr('wdErr','Daily withdrawal limit reached. Resets at midnight.'); return; }
-  const btn = document.getElementById('wdSubmitBtn');
-  btn.textContent = 'Submitting...'; btn.disabled = true;
+  if(!amount||amount<minWd){showErr('wdErr',`Minimum withdrawal is KES ${minWd.toLocaleString()}`);return;}
+  if(!address){showErr('wdErr','Enter your M-Pesa number or account details');return;}
+  if(wdInfo&&wdInfo.principalLocked&&amount>wdInfo.withdrawableBalance){showErr('wdErr',`Only profits can be withdrawn. Available: ${k(wdInfo.withdrawableBalance)}`);return;}
+  if(wdInfo&&wdInfo.withdrawalsRemaining<=0){showErr('wdErr','Daily withdrawal limit reached. Resets at midnight.');return;}
+  const btn=document.getElementById('wdSubmitBtn');
+  btn.textContent='Submitting...';btn.disabled=true;
   try {
-    const res = await apiFetch('/api/user/withdraw', { method:'POST', body:JSON.stringify({amount, method, address}) });
-    document.getElementById('wdAmt').value = '';
-    document.getElementById('wdAddr').value = '';
-    document.getElementById('wdCalc').style.display = 'none';
-    const rem = res.withdrawalsRemainingToday !== undefined ? res.withdrawalsRemainingToday : '';
-    toast(`Withdrawal of ${k(amount)} submitted! ${rem !== '' ? rem+' withdrawal(s) left today.' : ''}`, 'ok');
-    currentUser = await apiFetch('/api/auth/me');
-    localStorage.setItem('pg_user', JSON.stringify(currentUser));
-    loadWithdraw();
-  } catch(e) {
-    showErr('wdErr', e.message);
-    btn.textContent = 'Request Withdrawal'; btn.disabled = false;
-  }
+    const res=await apiFetch('/api/user/withdraw',{method:'POST',body:JSON.stringify({amount,method,address})});
+    document.getElementById('wdAmt').value='';document.getElementById('wdAddr').value='';document.getElementById('wdCalc').style.display='none';
+    const rem=res.withdrawalsRemainingToday!==undefined?res.withdrawalsRemainingToday:'';
+    toast(`Withdrawal of ${k(amount)} submitted! ${rem!==''?rem+' withdrawal(s) left today.':`}`,'ok');
+    currentUser=await apiFetch('/api/auth/me');localStorage.setItem('pg_user',JSON.stringify(currentUser));loadWithdraw();
+  } catch(e){showErr('wdErr',e.message);btn.textContent='Request Withdrawal';btn.disabled=false;}
 }
 
-
-// ══════════════════════════════════════════════════
-//  HISTORY
-// ══════════════════════════════════════════════════
 async function loadHistory(filter) {
-  try {
-    const data = await apiFetch('/api/user/dashboard');
-    allTx = data.transactions || [];
-    renderTx(filter);
-  } catch(e) { toast(e.message,'err'); }
+  try { const data=await apiFetch('/api/user/dashboard'); allTx=data.transactions||[]; renderTx(filter); }
+  catch(e){toast(e.message,'err');}
 }
 
 function renderTx(filter) {
-  const list = filter === 'all' ? allTx : allTx.filter(t=>t.type===filter);
-  document.getElementById('txBody').innerHTML = list.length ? list.map(tx=>`
-    <tr>
-      <td style="color:var(--text2)">${dt(tx.createdAt)}</td>
-      <td><span class="badge ${tx.type==='deposit'?'b-ok':tx.type==='withdrawal'?'b-fail':tx.type==='profit'?'b-blue':'b-pend'}" style="text-transform:capitalize">${tx.type}</span></td>
-      <td style="color:var(--text2);font-size:12px">${tx.description||'—'}</td>
-      <td style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}${k(tx.amount)}</td>
-      <td><span class="badge ${tx.status==='completed'?'b-ok':tx.status==='pending'?'b-pend':'b-fail'}">${tx.status}</span></td>
-    </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">No transactions</td></tr>';
+  const list=filter==='all'?allTx:allTx.filter(t=>t.type===filter);
+  document.getElementById('txBody').innerHTML=list.length?list.map(tx=>`
+    <tr><td style="color:var(--text2)">${dt(tx.createdAt)}</td><td><span class="badge ${tx.type==='deposit'?'b-ok':tx.type==='withdrawal'?'b-fail':tx.type==='profit'?'b-blue':'b-pend'}" style="text-transform:capitalize">${tx.type}</span></td><td style="color:var(--text2);font-size:12px">${tx.description||'—'}</td><td style="font-weight:700;color:${tx.type==='withdrawal'?'var(--red)':'var(--green)'}">${tx.type==='withdrawal'?'-':'+'}${k(tx.amount)}</td><td><span class="badge ${tx.status==='completed'?'b-ok':tx.status==='pending'?'b-pend':'b-fail'}">${tx.status}</span></td></tr>`).join(''):'<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text2)">No transactions</td></tr>';
 }
 
-function filterTx(type, btn) {
-  document.querySelectorAll('.txFilterBtn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderTx(type);
-}
+function filterTx(type,btn){document.querySelectorAll('.txFilterBtn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderTx(type);}
 
-// ══════════════════════════════════════════════════
-//  REFERRAL
-// ══════════════════════════════════════════════════
 async function loadReferral() {
   try {
-    const data = await apiFetch('/api/user/dashboard');
-    const code = currentUser.refCode || '—';
-    const url  = `${window.location.origin}/?ref=${code}`;
-    document.getElementById('myRefCode').textContent = code;
-    document.getElementById('refLink').value = url;
-    const refs = data.referrals || [];
-    const earned = refs.reduce((s,r)=>s+(+r.earnings||0),0);
-    document.getElementById('refCount').textContent  = refs.length;
-    document.getElementById('refEarned').textContent = k(earned);
-  } catch(e) { toast(e.message,'err'); }
+    const data=await apiFetch('/api/user/dashboard');
+    const code=currentUser.refCode||'—';
+    const url=`${window.location.origin}/?ref=${code}`;
+    document.getElementById('myRefCode').textContent=code;
+    document.getElementById('refLink').value=url;
+    const refs=data.referrals||[];
+    const earned=refs.reduce((s,r)=>s+(+r.earnings||0),0);
+    document.getElementById('refCount').textContent=refs.length;
+    document.getElementById('refEarned').textContent=k(earned);
+  } catch(e){toast(e.message,'err');}
 }
 
-function copyCode() { navigator.clipboard.writeText(document.getElementById('myRefCode').textContent).then(()=>toast('Code copied!','ok')); }
-function copyLink() { navigator.clipboard.writeText(document.getElementById('refLink').value).then(()=>toast('Link copied!','ok')); }
-function shareRef(via) {
-  const url = document.getElementById('refLink').value;
-  const msg = `Join Pesa Grow and earn daily returns! Use my link: ${url}`;
-  const urls = { whatsapp:`https://wa.me/?text=${encodeURIComponent(msg)}`, telegram:`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Join Pesa Grow`, sms:`sms:?body=${encodeURIComponent(msg)}` };
+function copyCode(){navigator.clipboard.writeText(document.getElementById('myRefCode').textContent).then(()=>toast('Code copied!','ok'));}
+function copyLink(){navigator.clipboard.writeText(document.getElementById('refLink').value).then(()=>toast('Link copied!','ok'));}
+function shareRef(via){
+  const url=document.getElementById('refLink').value;
+  const msg=`Join Pesa Grow and earn daily returns! Use my link: ${url}`;
+  const urls={whatsapp:`https://wa.me/?text=${encodeURIComponent(msg)}`,telegram:`https://t.me/share/url?url=${encodeURIComponent(url)}&text=Join Pesa Grow`,sms:`sms:?body=${encodeURIComponent(msg)}`};
   window.open(urls[via],'_blank');
 }
 
-// ══════════════════════════════════════════════════
-//  PROFILE
-// ══════════════════════════════════════════════════
 async function loadProfile() {
-  const u = currentUser;
-  const av = ((u.firstName||'P')[0]+(u.lastName||'G')[0]).toUpperCase();
-  document.getElementById('profAv').textContent    = av;
-  document.getElementById('profName').textContent  = u.firstName + ' ' + u.lastName;
-  document.getElementById('profEmail').textContent = u.email;
-  document.getElementById('pFirst').value          = u.firstName || '';
-  document.getElementById('pLast').value           = u.lastName  || '';
-  document.getElementById('pPhone').value          = u.phone     || '';
-  document.getElementById('profJoined').textContent    = ds(u.createdAt);
-  document.getElementById('profLastLogin').textContent = ds(u.lastLogin);
-  document.getElementById('profRefCode').textContent   = u.refCode || '—';
+  const u=currentUser;
+  const av=((u.firstName||'P')[0]+(u.lastName||'G')[0]).toUpperCase();
+  document.getElementById('profAv').textContent=av;
+  document.getElementById('profName').textContent=u.firstName+' '+u.lastName;
+  document.getElementById('profEmail').textContent=u.email;
+  document.getElementById('pFirst').value=u.firstName||'';
+  document.getElementById('pLast').value=u.lastName||'';
+  document.getElementById('pPhone').value=u.phone||'';
+  document.getElementById('profJoined').textContent=ds(u.createdAt);
+  document.getElementById('profLastLogin').textContent=ds(u.lastLogin);
+  document.getElementById('profRefCode').textContent=u.refCode||'—';
 }
 
 async function saveProfile() {
-  const firstName = document.getElementById('pFirst').value.trim();
-  const lastName  = document.getElementById('pLast').value.trim();
-  const phone     = document.getElementById('pPhone').value.trim();
-  const btn = document.querySelector('#page-profile .btn-green');
-  btn.textContent = 'Saving...'; btn.disabled = true;
+  const firstName=document.getElementById('pFirst').value.trim();
+  const lastName=document.getElementById('pLast').value.trim();
+  const phone=document.getElementById('pPhone').value.trim();
+  const btn=document.querySelector('#page-profile .btn-green');
+  btn.textContent='Saving...';btn.disabled=true;
   try {
-    await apiFetch('/api/user/profile', { method:'PUT', body:JSON.stringify({firstName, lastName, phone}) });
-    currentUser.firstName = firstName || currentUser.firstName;
-    currentUser.lastName  = lastName  || currentUser.lastName;
-    currentUser.phone     = phone;
-    localStorage.setItem('pg_user', JSON.stringify(currentUser));
-    document.getElementById('userName').textContent = currentUser.firstName;
-    document.getElementById('userAv').textContent   = (currentUser.firstName[0]+currentUser.lastName[0]).toUpperCase();
+    await apiFetch('/api/user/profile',{method:'PUT',body:JSON.stringify({firstName,lastName,phone})});
+    currentUser.firstName=firstName||currentUser.firstName;currentUser.lastName=lastName||currentUser.lastName;currentUser.phone=phone;
+    localStorage.setItem('pg_user',JSON.stringify(currentUser));
+    document.getElementById('userName').textContent=currentUser.firstName;
+    document.getElementById('userAv').textContent=(currentUser.firstName[0]+currentUser.lastName[0]).toUpperCase();
     toast('Profile saved! ✅','ok');
-  } catch(e) { toast(e.message,'err'); }
-  btn.textContent = 'Save Changes'; btn.disabled = false;
+  } catch(e){toast(e.message,'err');}
+  btn.textContent='Save Changes';btn.disabled=false;
 }
 
 async function changePass() {
-  const cur  = document.getElementById('curPass').value;
-  const nw   = document.getElementById('newPass').value;
-  const conf = document.getElementById('confPass').value;
-  if (!cur || !nw || !conf) { toast('Fill all password fields','err'); return; }
-  if (nw.length < 8) { toast('New password must be 8+ characters','err'); return; }
-  if (nw !== conf) { toast('Passwords do not match','err'); return; }
+  const cur=document.getElementById('curPass').value,nw=document.getElementById('newPass').value,conf=document.getElementById('confPass').value;
+  if(!cur||!nw||!conf){toast('Fill all password fields','err');return;}
+  if(nw.length<8){toast('New password must be 8+ characters','err');return;}
+  if(nw!==conf){toast('Passwords do not match','err');return;}
   try {
-    await apiFetch('/api/user/password', { method:'PUT', body:JSON.stringify({currentPassword:cur, newPassword:nw}) });
-    document.getElementById('curPass').value = '';
-    document.getElementById('newPass').value = '';
-    document.getElementById('confPass').value = '';
+    await apiFetch('/api/user/password',{method:'PUT',body:JSON.stringify({currentPassword:cur,newPassword:nw})});
+    document.getElementById('curPass').value='';document.getElementById('newPass').value='';document.getElementById('confPass').value='';
     toast('Password updated! 🔒','ok');
-  } catch(e) { toast(e.message,'err'); }
+  } catch(e){toast(e.message,'err');}
 }
 
-// ══════════════════════════════════════════════════
-//  NOTIFICATIONS
-// ══════════════════════════════════════════════════
 async function loadNotifications() {
   try {
-    const notifs = await apiFetch('/api/user/notifications');
-    const unread = notifs.filter(n=>!n.read);
-    document.getElementById('notifDot').style.display = unread.length ? 'block' : 'none';
-    document.getElementById('notifList').innerHTML = notifs.length ? notifs.slice(0,15).map(n=>`
-      <div class="np-item">
-        <div class="np-dot ${n.read?'read':''}"></div>
-        <div>
-          <div style="font-size:13px">${n.message}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:3px">${dt(n.createdAt)}</div>
-        </div>
-      </div>`).join('') : '<div style="padding:24px;text-align:center;color:var(--text2);font-size:14px">No notifications yet</div>';
+    const notifs=await apiFetch('/api/user/notifications');
+    const unread=notifs.filter(n=>!n.read);
+    document.getElementById('notifDot').style.display=unread.length?'block':'none';
+    document.getElementById('notifList').innerHTML=notifs.length?notifs.slice(0,15).map(n=>`<div class="np-item"><div class="np-dot ${n.read?'read':''}"></div><div><div style="font-size:13px">${n.message}</div><div style="font-size:11px;color:var(--text2);margin-top:3px">${dt(n.createdAt)}</div></div></div>`).join(''):'<div style="padding:24px;text-align:center;color:var(--text2);font-size:14px">No notifications yet</div>';
   } catch {}
 }
 
-function toggleNotif() { document.getElementById('notifPanel').classList.toggle('open'); }
+function toggleNotif(){document.getElementById('notifPanel').classList.toggle('open');}
 
 async function markAllRead() {
-  try {
-    await apiFetch('/api/user/notifications/read', { method:'PUT' });
-    document.getElementById('notifDot').style.display = 'none';
-    document.getElementById('notifPanel').classList.remove('open');
-    loadNotifications();
-  } catch {}
+  try { await apiFetch('/api/user/notifications/read',{method:'PUT'}); document.getElementById('notifDot').style.display='none'; document.getElementById('notifPanel').classList.remove('open'); loadNotifications(); } catch {}
 }
 
-document.addEventListener('click', e => {
-  if (!e.target.closest('.notif-btn') && !e.target.closest('.notif-panel')) {
-    document.getElementById('notifPanel').classList.remove('open');
-  }
-});
+document.addEventListener('click',e=>{ if(!e.target.closest('.notif-btn')&&!e.target.closest('.notif-panel'))document.getElementById('notifPanel').classList.remove('open'); });
+setInterval(loadNotifications,30000);
 
-setInterval(loadNotifications, 30000);
-
-function updateWdMin() {
-  const minWd = parseFloat(platformSettings.minWithdraw)||500;
-  const el = document.getElementById('wdAmt');
-  if (el) { el.min = minWd; el.placeholder = `Min KES ${minWd.toLocaleString()}`; }
-}
-
-// ── BOOT ──
 init();
 </script>
-  <script>
+<script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW registered'))
-      .catch(err => console.log('SW failed', err));
+    navigator.serviceWorker.register('/sw.js').then(reg=>console.log('SW registered')).catch(err=>console.log('SW failed',err));
   });
 }
 </script>
-  <button id="installBtn" style="display:none;">Install App</button>
-
+<button id="installBtn" style="display:none;">Install App</button>
 <script>
 let deferredPrompt;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  document.getElementById('installBtn').style.display = 'block';
-});
-
-document.getElementById('installBtn').addEventListener('click', async () => {
-  if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  deferredPrompt = null;
-});
+window.addEventListener('beforeinstallprompt',(e)=>{e.preventDefault();deferredPrompt=e;document.getElementById('installBtn').style.display='block';});
+document.getElementById('installBtn').addEventListener('click',async()=>{if(!deferredPrompt)return;deferredPrompt.prompt();deferredPrompt=null;});
 </script>
 </body>
 </html>
