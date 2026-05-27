@@ -30,8 +30,6 @@ html{scroll-behavior:smooth}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
 h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--green);border-radius:3px}
-
-/* NAV */
 .nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 5%;display:flex;align-items:center;justify-content:space-between;transition:.3s}
 .nav.scrolled{background:rgba(3,5,8,0.96);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
 .nav-brand{display:flex;align-items:center;gap:10px;cursor:pointer}
@@ -42,8 +40,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .nav-links a:hover{color:var(--text)}
 .nav-cta{display:flex;gap:10px;align-items:center}
 .hamburger{display:none;background:none;border:none;color:var(--text);font-size:24px;cursor:pointer}
-
-/* BUTTONS */
 .btn{padding:11px 22px;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:7px;text-decoration:none}
 .btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
 .btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,.3)}
@@ -52,22 +48,14 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .btn-lg{padding:16px 36px;font-size:16px;border-radius:13px}
 .btn-outline{background:transparent;color:var(--text);border:2px solid var(--border2);border-radius:11px;padding:14px 28px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:.2s}
 .btn-outline:hover{border-color:var(--green);color:var(--green)}
-
-/* HERO */
 .hero{min-height:100vh;display:flex;align-items:center;padding:100px 5% 80px;position:relative;gap:60px}
 .hero-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.hero-cover{
-  position:absolute;inset:0;
-  background:
-    linear-gradient(to right, rgba(3,5,8,1) 0%, rgba(3,5,8,0.88) 55%, rgba(3,5,8,0.4) 100%),
-    url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&q=80') center/cover no-repeat;
-}
+.hero-cover{position:absolute;inset:0;background:linear-gradient(to right, rgba(3,5,8,1) 0%, rgba(3,5,8,0.88) 55%, rgba(3,5,8,0.4) 100%),url('https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1600&q=80') center/cover no-repeat;}
 .hero-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,var(--bg) 100%)}
 .orb{position:absolute;border-radius:50%;filter:blur(100px);opacity:.12;z-index:1}
 .orb1{width:600px;height:600px;background:var(--green);top:-100px;left:-100px}
 .orb2{width:400px;height:400px;background:var(--gold);bottom:0;right:50px}
 .grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:48px 48px;z-index:1}
-
 .hero-content{flex:1;position:relative;z-index:2;max-width:620px}
 .hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,.08);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:8px 16px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:28px}
 .live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;flex-shrink:0}
@@ -80,7 +68,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .hstat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:28px;font-weight:800}
 .hstat-lbl{font-size:13px;color:var(--text2);margin-top:2px}
 .hstat-div{width:1px;height:36px;background:var(--border2)}
-
 .hero-visual{flex:0 0 400px;position:relative;z-index:2}
 .live-card{background:rgba(10,15,24,0.92);border:1px solid var(--border2);border-radius:20px;padding:24px;backdrop-filter:blur(20px);box-shadow:var(--shadow)}
 .lc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
@@ -97,30 +84,22 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .fn1{top:-28px;right:-20px}.fn2{bottom:-20px;left:-24px;animation-delay:1.5s}
 @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 .fn-lbl{font-size:11px;color:var(--text2)}.fn-val{font-weight:700;font-size:15px;color:var(--green)}
-
-/* TICKER */
 .ticker-bar{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:11px 0;overflow:hidden}
 .ticker-inner{display:flex;gap:52px;width:max-content;animation:scroll 40s linear infinite}
 @keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
 .ti{display:flex;align-items:center;gap:8px;font-size:13px;white-space:nowrap;font-weight:500}
 .ti-sym{color:var(--text2)}.ti-c.up{color:var(--green)}.ti-c.dn{color:var(--red)}
-
-/* STATS BAR */
 .stats-bar{padding:56px 5%;background:var(--bg2);border-bottom:1px solid var(--border)}
 .stats-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
 .stat-box{background:var(--bg2);padding:30px;text-align:center}
 .stat-num{font-family:'Bricolage Grotesque',sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:6px}
 .stat-lbl{font-size:13px;color:var(--text2)}
-
-/* SECTIONS */
 .section{padding:96px 5%;max-width:1280px;margin:0 auto}
 .dark-section{background:var(--bg2)}
 .dark-section .section{padding:96px 5%}
 .sec-lbl{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px}
 .sec-title{font-size:clamp(30px,4vw,50px);font-weight:800;letter-spacing:-1.5px;margin-bottom:14px}
 .sec-sub{font-size:16px;color:var(--text2);line-height:1.65;max-width:460px;margin-bottom:56px}
-
-/* PLANS */
 .plans-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px}
 .plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:all .3s;cursor:pointer}
 .plan:hover{transform:translateY(-6px);box-shadow:0 28px 70px rgba(0,0,0,.5);border-color:var(--border2)}
@@ -137,8 +116,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .plan-feats li::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0}
 .plan-btn{width:100%;padding:14px;border:none;border-radius:11px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:15px;cursor:pointer;background:var(--pc,var(--green));color:#000;transition:.2s}
 .plan-btn:hover{opacity:.85;transform:translateY(-1px)}
-
-/* STEPS */
 .steps{display:flex;align-items:flex-start;flex-wrap:wrap;margin-top:56px}
 .step{flex:1;min-width:200px;padding:20px;position:relative}
 .step:not(:last-child)::after{content:'→';position:absolute;right:-14px;top:50px;font-size:22px;color:var(--text3)}
@@ -147,16 +124,12 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .step-icon{font-size:34px;margin-bottom:14px}
 .step-card h3{font-size:18px;margin-bottom:8px}
 .step-card p{font-size:14px;color:var(--text2);line-height:1.6}
-
-/* VIDEO SECTION */
 @keyframes ring-pulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.15);opacity:1}}
 .vpoint{display:flex;align-items:flex-start;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;transition:.2s}
 .vpoint:hover{border-color:rgba(0,230,118,.3);transform:translateX(4px)}
 .vp-icon{font-size:22px;flex-shrink:0;width:42px;height:42px;background:var(--bg3);border-radius:10px;display:flex;align-items:center;justify-content:center}
 .vp-title{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px}
 .vp-desc{font-size:13px;color:var(--text2);line-height:1.55}
-
-/* TESTIMONIALS */
 .testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:56px}
 .tcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px}
 .tcard.feat{border-color:rgba(0,230,118,.25)}
@@ -165,22 +138,14 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .tc-author{display:flex;align-items:center;gap:12px}
 .tc-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:13px;color:#000;flex-shrink:0}
 .tc-name{font-weight:700;font-size:15px}.tc-role{font-size:12px;color:var(--text2)}
-
-/* MPESA */
-.mpesa-card{background:var(--card);border:2px solid rgba(0,230,118,.15);border-radius:24px;padding:48px;display:flex;flex-direction:column;align-items:center;gap:18px;margin-top:40px;text-align:center}
-.mpesa-num{font-family:'Bricolage Grotesque',sans-serif;font-size:52px;font-weight:800;letter-spacing:3px}
-
-/* FOOTER */
 .footer{background:#020305;border-top:1px solid var(--border);padding:56px 5% 28px}
-.footer-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:40px;margin-bottom:44px}
+.footer-grid{display:grid;grid-template-columns:1.6fr repeat(2,1fr);gap:40px;margin-bottom:44px}
 .foot-brand p{font-size:14px;color:var(--text2);margin-top:12px;line-height:1.7;max-width:220px}
 .foot-col h4{font-size:14px;font-weight:700;margin-bottom:16px}
 .foot-col a{display:block;font-size:14px;color:var(--text2);text-decoration:none;margin-bottom:10px;transition:.2s}
 .foot-col a:hover{color:var(--green)}
 .footer-btm{border-top:1px solid var(--border);padding-top:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 .footer-btm p{font-size:13px;color:var(--text3)}
-
-/* MODAL */
 .modal-bg{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.82);backdrop-filter:blur(14px);display:none;align-items:center;justify-content:center;padding:20px}
 .modal-bg.open{display:flex}
 .modal{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:38px;width:100%;max-width:440px;position:relative;max-height:90vh;overflow-y:auto}
@@ -197,17 +162,12 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 .m-switch span{color:var(--green);cursor:pointer;font-weight:600}
 .m-err{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red);padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
 .m-ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:11px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
-
-/* STK */
 .stk-spinner{width:48px;height:48px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* TOAST */
 .toast{position:fixed;bottom:24px;right:24px;z-index:600;padding:14px 22px;border-radius:13px;font-size:15px;font-weight:600;transform:translateY(80px);opacity:0;transition:.3s;max-width:320px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:rgba(0,230,118,.1);border:1px solid rgba(0,230,118,.3);color:var(--green)}
 .toast.err{background:rgba(255,77,106,.1);border:1px solid rgba(255,77,106,.3);color:var(--red)}
-
 @media(max-width:1100px){.hero{flex-direction:column;text-align:center;padding:110px 5% 60px}.hero-sub{margin:0 auto 38px}.hero-btns{justify-content:center}.hero-stats{justify-content:center}.hero-visual{display:none}.footer-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:768px){.nav-links,.nav-cta{display:none}.hamburger{display:block}.stats-inner{grid-template-columns:1fr 1fr}.steps{flex-direction:column}.step:not(:last-child)::after{display:none}.footer-grid{grid-template-columns:1fr}}
 </style>
@@ -224,7 +184,6 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
     <li><a href="#plans">Plans</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="#watch">Watch Video</a></li>
-    <li><a href="#contact">Contact</a></li>
   </ul>
   <div class="nav-cta" id="navCta">
     <button class="btn btn-ghost" onclick="openModal('login')">Login</button>
@@ -285,7 +244,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
     <div class="stat-box"><div class="stat-num" style="color:var(--green)">50K+</div><div class="stat-lbl">Registered Members</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--gold)">KES 12M+</div><div class="stat-lbl">Total Paid Out</div></div>
     <div class="stat-box"><div class="stat-num" style="color:var(--blue)">99.9%</div><div class="stat-lbl">Platform Uptime</div></div>
-    <div class="stat-box"><div class="stat-num" style="color:var(--green)">24/7</div><div class="stat-lbl">Support Available</div></div>
+    <div class="stat-box"><div class="stat-num" style="color:var(--green)">24/7</div><div class="stat-lbl">Always Available</div></div>
   </div>
 </div>
 
@@ -321,18 +280,10 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
     <div class="sec-lbl">Watch & Learn</div>
     <h2 class="sec-title">See How Pesa Grow Works</h2>
     <p class="sec-sub" style="margin-bottom:40px">Watch our quick walkthrough — from signing up to earning your first daily profit in minutes.</p>
-
     <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center">
-
-      <!-- VIDEO PLAYER -->
       <div>
-        <!-- YouTube video player — replace VIDEO_ID with your YouTube video ID -->
-        <!-- HOW TO GET VIDEO_ID: paste your YouTube link e.g. https://youtube.com/watch?v=ABC123 → VIDEO_ID = ABC123 -->
         <div id="videoBox" style="position:relative;border-radius:20px;overflow:hidden;background:var(--bg3);border:2px solid rgba(0,230,118,.2);aspect-ratio:16/9;cursor:pointer" onclick="startVideo()">
-
-          <!-- PLAY OVERLAY — shown before video starts -->
           <div id="playOverlay" style="position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(3,5,8,.85),rgba(3,5,8,.6))">
-            <!-- animated ring -->
             <div style="position:relative;width:90px;height:90px;margin-bottom:18px">
               <div style="position:absolute;inset:0;border-radius:50%;border:2px solid rgba(0,230,118,.3);animation:ring-pulse 2s ease-in-out infinite"></div>
               <div style="position:absolute;inset:8px;border-radius:50%;background:linear-gradient(135deg,var(--green),#00b341);display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(0,230,118,.5)">
@@ -342,101 +293,30 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
             <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:6px">▶ Play Video</div>
             <div style="font-size:13px;color:rgba(255,255,255,.55);background:rgba(0,0,0,.4);padding:4px 14px;border-radius:100px">How Pesa Grow works — 2 min</div>
           </div>
-
-          <!-- YOUTUBE IFRAME — injected by JS when play is clicked -->
           <div id="ytFrame" style="width:100%;height:100%"></div>
-
         </div>
-
-        <!-- video source hint below player -->
-        <div style="margin-top:14px;background:rgba(0,230,118,.04);border:1px solid rgba(0,230,118,.12);border-radius:10px;padding:11px 16px;font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px">
-          <span style="font-size:16px">💡</span>
-          <span>To use your own video: upload to <strong style="color:var(--text)">YouTube</strong> → copy the video ID → paste it into <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">index.html</code> where it says <code style="background:var(--bg3);padding:2px 6px;border-radius:4px;color:var(--green)">https://youtu.be/d0TgRzGLf9I</code></span>
-        </div>
-
-        <!-- quick stats row -->
         <div style="display:flex;gap:24px;margin-top:16px;flex-wrap:wrap">
           <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span>2 min watch</div>
           <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span>Step-by-step guide</div>
           <div style="display:flex;align-items:center;gap:7px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span>Live M-Pesa demo</div>
         </div>
       </div>
-
-      <!-- KEY POINTS -->
       <div style="display:flex;flex-direction:column;gap:16px">
         <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:22px;font-weight:800;line-height:1.2;margin-bottom:6px">Everything you need<br>to know in 2 minutes</div>
-
-        <div class="vpoint">
-          <div class="vp-icon">🔐</div>
-          <div>
-            <div class="vp-title">Create Your Free Account</div>
-            <div class="vp-desc">Sign up in under 2 minutes with just your name, email and phone. No paperwork, no delays.</div>
-          </div>
-        </div>
-
-        <div class="vpoint">
-          <div class="vp-icon">📲</div>
-          <div>
-            <div class="vp-title">Deposit via M-Pesa STK Push</div>
-            <div class="vp-desc">We send a payment prompt to your phone. Enter your PIN — funds reflect in your account instantly.</div>
-          </div>
-        </div>
-
-        <div class="vpoint">
-          <div class="vp-icon">📈</div>
-          <div>
-            <div class="vp-title">Choose an Investment Plan</div>
-            <div class="vp-desc">Pick Starter (3%), Silver (5%), Gold (7%) or Platinum (10%) daily ROI. Start from KES 1,000.</div>
-          </div>
-        </div>
-
-        <div class="vpoint">
-          <div class="vp-icon">💸</div>
-          <div>
-            <div class="vp-title">Earn Daily & Withdraw Anytime</div>
-            <div class="vp-desc">Profits credit automatically every day. Withdraw to M-Pesa anytime — processed within 2 hours.</div>
-          </div>
-        </div>
-
-        <div class="vpoint">
-          <div class="vp-icon">🤝</div>
-          <div>
-            <div class="vp-title">Earn Referral Commissions</div>
-            <div class="vp-desc">Invite friends and earn up to 10% commission on every investment they make — paid instantly.</div>
-          </div>
-        </div>
-
-        <button class="btn btn-green" style="margin-top:8px;padding:15px 28px;font-size:15px;align-self:flex-start" onclick="openModal('register')">
-          🚀 Start Earning Now — It's Free
-        </button>
+        <div class="vpoint"><div class="vp-icon">🔐</div><div><div class="vp-title">Create Your Free Account</div><div class="vp-desc">Sign up in under 2 minutes with just your name, email and phone. No paperwork, no delays.</div></div></div>
+        <div class="vpoint"><div class="vp-icon">📲</div><div><div class="vp-title">Deposit via M-Pesa STK Push</div><div class="vp-desc">We send a payment prompt to your phone. Enter your PIN — funds reflect in your account instantly.</div></div></div>
+        <div class="vpoint"><div class="vp-icon">📈</div><div><div class="vp-title">Choose an Investment Plan</div><div class="vp-desc">Pick Starter (3%), Silver (5%), Gold (7%) or Platinum (10%) daily ROI. Start from KES 1,000.</div></div></div>
+        <div class="vpoint"><div class="vp-icon">💸</div><div><div class="vp-title">Earn Daily & Withdraw Anytime</div><div class="vp-desc">Profits credit automatically every day. Withdraw to M-Pesa anytime — processed within 2 hours.</div></div></div>
+        <div class="vpoint"><div class="vp-icon">🤝</div><div><div class="vp-title">Earn Referral Commissions</div><div class="vp-desc">Invite friends and earn up to 10% commission on every investment they make — paid instantly.</div></div></div>
+        <button class="btn btn-green" style="margin-top:8px;padding:15px 28px;font-size:15px;align-self:flex-start" onclick="openModal('register')">🚀 Start Earning Now — It's Free</button>
       </div>
-
     </div>
-
-    <!-- TRUST BADGES -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin-top:48px;background:var(--border);border-radius:16px;overflow:hidden;border:1px solid var(--border)">
-      <div style="background:var(--card);text-align:center;padding:24px 16px">
-        <div style="font-size:32px;margin-bottom:8px">🔒</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">100% Secure</div>
-        <div style="font-size:12px;color:var(--text2)">Bank-level encryption on all transactions</div>
-      </div>
-      <div style="background:var(--card);text-align:center;padding:24px 16px">
-        <div style="font-size:32px;margin-bottom:8px">⚡</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Instant Deposits</div>
-        <div style="font-size:12px;color:var(--text2)">M-Pesa STK Push reflects in seconds</div>
-      </div>
-      <div style="background:var(--card);text-align:center;padding:24px 16px">
-        <div style="font-size:32px;margin-bottom:8px">📊</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Daily Profits</div>
-        <div style="font-size:12px;color:var(--text2)">Returns credited automatically every day</div>
-      </div>
-      <div style="background:var(--card);text-align:center;padding:24px 16px">
-        <div style="font-size:32px;margin-bottom:8px">🇰🇪</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Kenya-Based</div>
-        <div style="font-size:12px;color:var(--text2)">Built for Kenyans, powered by M-Pesa</div>
-      </div>
+      <div style="background:var(--card);text-align:center;padding:24px 16px"><div style="font-size:32px;margin-bottom:8px">🔒</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">100% Secure</div><div style="font-size:12px;color:var(--text2)">Bank-level encryption on all transactions</div></div>
+      <div style="background:var(--card);text-align:center;padding:24px 16px"><div style="font-size:32px;margin-bottom:8px">⚡</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Instant Deposits</div><div style="font-size:12px;color:var(--text2)">M-Pesa STK Push reflects in seconds</div></div>
+      <div style="background:var(--card);text-align:center;padding:24px 16px"><div style="font-size:32px;margin-bottom:8px">📊</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Daily Profits</div><div style="font-size:12px;color:var(--text2)">Returns credited automatically every day</div></div>
+      <div style="background:var(--card);text-align:center;padding:24px 16px"><div style="font-size:32px;margin-bottom:8px">🇰🇪</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin-bottom:4px">Kenya-Based</div><div style="font-size:12px;color:var(--text2)">Built for Kenyans, powered by M-Pesa</div></div>
     </div>
-
   </div>
 </div>
 
@@ -453,24 +333,46 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
   </div>
 </section>
 
-<!-- MPESA -->
-<div class="dark-section" id="contact">
-  <div class="section" style="max-width:860px;margin:0 auto;text-align:center">
-    <div class="sec-lbl">Deposit</div>
-    <h2 class="sec-title">Pay via M-Pesa</h2>
-    <p style="color:var(--text2);font-size:17px">Instant STK Push deposits — your phone prompts you automatically. No manual sending needed.</p>
-    <div class="mpesa-card">
-      <div style="font-size:36px;font-weight:800;color:var(--green)">🟢 M-PESA</div>
-      <div style="font-size:15px;color:var(--text2)">Till / Paybill Number</div>
-      <div class="mpesa-num">0796820013</div>
-      <div style="font-size:17px;color:var(--text2)">PESA GROW LTD</div>
-      <div style="background:rgba(0,230,118,.06);border:1px solid rgba(0,230,118,.15);border-radius:11px;padding:14px 24px;font-size:14px;color:var(--text2);max-width:500px">
-        Login then click <strong style="color:var(--text)">💳 Deposit</strong> in the nav. We'll send an M-Pesa prompt to your phone instantly.
+<!-- INVESTMENT IMAGE BANNER -->
+<div style="position:relative;width:100%;height:420px;overflow:hidden;margin-top:0">
+  <img
+    src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?w=1600&q=85&auto=format&fit=crop"
+    alt="Investment growth — money and financial success"
+    style="width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;"
+    loading="lazy"
+  />
+  <!-- Dark overlay with text -->
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(3,5,8,0.82) 0%,rgba(3,5,8,0.55) 60%,rgba(3,5,8,0.75) 100%);display:flex;align-items:center;justify-content:center;">
+    <div style="text-align:center;padding:0 20px;max-width:720px">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(0,230,118,0.1);border:1px solid rgba(0,230,118,0.3);color:#00e676;padding:7px 18px;border-radius:100px;font-size:13px;font-weight:600;margin-bottom:20px;font-family:'DM Sans',sans-serif">
+        <span style="width:7px;height:7px;background:#00e676;border-radius:50%;display:inline-block;animation:blink 1.5s infinite"></span>
+        Trusted by 50,000+ Kenyan Investors
       </div>
-      <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center">
-        <button class="btn btn-green" onclick="openModal('register')">Open Account Free</button>
-        <a href="tel:0796820013" class="btn btn-ghost">📞 0796820013</a>
-        <a href="https://wa.me/254796820013" target="_blank" class="btn btn-ghost">💬 WhatsApp</a>
+      <h2 style="font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(28px,4vw,52px);font-weight:800;color:#eef2ff;line-height:1.1;letter-spacing:-1.5px;margin-bottom:16px">
+        Your Money, <span style="color:#00e676">Growing Every Day</span>
+      </h2>
+      <p style="font-size:clamp(15px,2vw,18px);color:rgba(238,242,255,0.75);line-height:1.6;margin-bottom:28px;font-family:'DM Sans',sans-serif">
+        Join thousands of Kenyans earning daily returns via M-Pesa.<br>Start with as little as KES 1,000.
+      </p>
+      <button onclick="openModal('register')" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:12px;padding:16px 36px;font-family:'DM Sans',sans-serif;font-weight:800;font-size:16px;cursor:pointer;transition:all .2s;box-shadow:0 8px 30px rgba(0,230,118,0.35)" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+        🚀 Start Investing Free
+      </button>
+      <!-- Stats row -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:32px;margin-top:32px;flex-wrap:wrap">
+        <div style="text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;color:#00e676">3%–10%</div>
+          <div style="font-size:12px;color:rgba(238,242,255,0.55);font-family:'DM Sans',sans-serif;margin-top:2px">Daily ROI</div>
+        </div>
+        <div style="width:1px;height:32px;background:rgba(255,255,255,0.15)"></div>
+        <div style="text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;color:#ffc107">KES 1,000</div>
+          <div style="font-size:12px;color:rgba(238,242,255,0.55);font-family:'DM Sans',sans-serif;margin-top:2px">Minimum to start</div>
+        </div>
+        <div style="width:1px;height:32px;background:rgba(255,255,255,0.15)"></div>
+        <div style="text-align:center">
+          <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:26px;font-weight:800;color:#4fc3f7">Instant</div>
+          <div style="font-size:12px;color:rgba(238,242,255,0.55);font-family:'DM Sans',sans-serif;margin-top:2px">M-Pesa deposits</div>
+        </div>
       </div>
     </div>
   </div>
@@ -482,17 +384,12 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
     <div class="foot-brand">
       <div style="display:flex;align-items:center;gap:10px"><div class="nav-logo">PG</div><span class="nav-name">Pesa Grow</span></div>
       <p>Kenya's trusted daily investment platform. Grow your money safely and consistently.</p>
-      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-        <a href="tel:0796820013" class="btn btn-ghost" style="font-size:13px;padding:8px 14px">📞 0796820013</a>
-        <a href="https://wa.me/254796820013" target="_blank" class="btn btn-ghost" style="font-size:13px;padding:8px 14px">💬 WhatsApp</a>
-      </div>
     </div>
-    <div class="foot-col"><h4>Platform</h4><a href="#plans">Plans</a><a href="#how">How It Works</a><a href="#contact">Deposit</a></div>
-    <div class="foot-col"><h4>Support</h4><a href="tel:0796820013">Call Us</a><a href="https://wa.me/254796820013">WhatsApp</a><a href="#">FAQ</a></div>
+    <div class="foot-col"><h4>Platform</h4><a href="#plans">Plans</a><a href="#how">How It Works</a></div>
     <div class="foot-col"><h4>Legal</h4><a href="#">Terms of Service</a><a href="#">Privacy Policy</a><a href="#">Risk Disclosure</a></div>
   </div>
   <div class="footer-btm">
-    <p>© 2026 Pesa Grow. All rights reserved. | Support: 0796820013</p>
+    <p>© 2026 Pesa Grow. All rights reserved.</p>
     <p>Investments involve risk. Past performance is not indicative of future results.</p>
   </div>
 </footer>
@@ -507,104 +404,57 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif}
 <div class="toast" id="toast"></div>
 
 <script>
-// ══════════════════════════════════════════
-//  API CLIENT — no external files needed
-// ══════════════════════════════════════════
 const API = window.location.origin;
-
 window.PG = {
   Auth: {
     async login(email, password) {
-      // Always clear old stale tokens before fresh login
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-
+      localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user');
       let r, d;
-      try {
-        r = await fetch(`${API}/api/auth/login`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({email, password})
-        });
-      } catch { throw new Error('Cannot connect to server. Check your internet.'); }
-
+      try { r = await fetch(`${API}/api/auth/login`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})}); }
+      catch { throw new Error('Cannot connect to server. Check your internet.'); }
       try { d = await r.json(); } catch { throw new Error('Server error. Please try again.'); }
-
       if (!r.ok) throw new Error(d.error || 'Login failed');
-      localStorage.setItem('pg_token', d.token);
-      localStorage.setItem('pg_user', JSON.stringify(d.user));
+      localStorage.setItem('pg_token', d.token); localStorage.setItem('pg_user', JSON.stringify(d.user));
       return d.user;
     },
     async register(data) {
-      // Always clear old stale tokens before fresh register
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-
+      localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user');
       let r, d;
-      try {
-        r = await fetch(`${API}/api/auth/register`, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(data)
-        });
-      } catch { throw new Error('Cannot connect to server. Check your internet.'); }
-
+      try { r = await fetch(`${API}/api/auth/register`, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)}); }
+      catch { throw new Error('Cannot connect to server. Check your internet.'); }
       try { d = await r.json(); } catch { throw new Error('Server error. Please try again.'); }
-
       if (!r.ok) throw new Error(d.error || 'Registration failed');
-      localStorage.setItem('pg_token', d.token);
-      localStorage.setItem('pg_user', JSON.stringify(d.user));
+      localStorage.setItem('pg_token', d.token); localStorage.setItem('pg_user', JSON.stringify(d.user));
       return d.user;
     },
-    getMe() {
-      try { return JSON.parse(localStorage.getItem('pg_user')); } catch { return null; }
-    },
-    logout() {
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-      sessionStorage.clear();
-      window.location.replace(window.location.origin + '/index.html');
-    }
+    getMe() { try { return JSON.parse(localStorage.getItem('pg_user')); } catch { return null; } },
+    logout() { localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user'); sessionStorage.clear(); window.location.replace(window.location.origin+'/index.html'); }
   },
   token: () => localStorage.getItem('pg_token'),
   async stkPush(phone, amount) {
-    const r = await fetch(`${API}/api/mpesa/stk-push`, {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+PG.token()},
-      body: JSON.stringify({phone, amount})
-    });
+    const r = await fetch(`${API}/api/mpesa/stk-push`, {method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+PG.token()},body:JSON.stringify({phone,amount})});
     const d = await r.json();
     if (!r.ok) throw new Error(d.error || 'STK Push failed');
     return d;
   },
   async pollPayment(checkoutId) {
-    const r = await fetch(`${API}/api/mpesa/status/${checkoutId}`, {
-      headers:{'Authorization':'Bearer '+PG.token()}
-    });
+    const r = await fetch(`${API}/api/mpesa/status/${checkoutId}`, {headers:{'Authorization':'Bearer '+PG.token()}});
     return r.json();
   }
 };
 
-// Auto-fill referral from URL
 (()=>{ const ref = new URLSearchParams(location.search).get('ref'); if(ref) sessionStorage.setItem('pg_ref',ref); })();
-
-// Nav scroll
 window.addEventListener('scroll',()=>document.getElementById('mainNav').classList.toggle('scrolled',scrollY>50));
 
-// Mobile menu
 function toggleMenu(){
-  ['nav-links','nav-cta'].forEach(cls=>{
-    const el=document.querySelector('.'+cls);
-    el.style.display=el.style.display==='flex'?'none':'flex';
-  });
+  ['nav-links','nav-cta'].forEach(cls=>{ const el=document.querySelector('.'+cls); el.style.display=el.style.display==='flex'?'none':'flex'; });
 }
 
-// Ticker
 const MKTS=[{sym:'BTC',p:67420,c:2.4},{sym:'ETH',p:3210,c:1.8},{sym:'SOL',p:182,c:-0.9},{sym:'BNB',p:540,c:3.1},{sym:'XRP',p:0.62,c:-1.3},{sym:'USDT',p:1.00,c:0.01},{sym:'ADA',p:0.45,c:1.2},{sym:'DOT',p:7.2,c:-0.8}];
-function buildTicker(){
-  document.getElementById('ticker').innerHTML=[...MKTS,...MKTS].map(m=>`<div class="ti"><span class="ti-sym">${m.sym}</span><span>$${m.p.toLocaleString()}</span><span class="ti-c ${m.c>=0?'up':'dn'}">${m.c>=0?'+':''}${m.c}%</span></div>`).join('');
-}
+function buildTicker(){ document.getElementById('ticker').innerHTML=[...MKTS,...MKTS].map(m=>`<div class="ti"><span class="ti-sym">${m.sym}</span><span>$${m.p.toLocaleString()}</span><span class="ti-c ${m.c>=0?'up':'dn'}">${m.c>=0?'+':''}${m.c}%</span></div>`).join(''); }
 buildTicker();
 setInterval(()=>{MKTS.forEach(m=>{m.p=+(m.p*(1+(Math.random()-.49)*.003)).toFixed(m.p>10?2:4);m.c=+(m.c+(Math.random()-.5)*.1).toFixed(2)});buildTicker();},5000);
 
-// Hero chart
 function drawChart(){
   const c=document.getElementById('heroChart');if(!c)return;
   const ctx=c.getContext('2d'),w=c.width,h=c.height;
@@ -618,7 +468,6 @@ function drawChart(){
 setTimeout(drawChart,300);
 let hb=248600;setInterval(()=>{hb+=Math.floor(Math.random()*150);document.getElementById('heroBalance').textContent=hb.toLocaleString();},3000);
 
-// Load plans
 fetch(`${API}/api/plans`).then(r=>r.json()).then(plans=>{
   if(!plans||!plans.length){document.getElementById('plansGrid').innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text2)">No plans yet.</div>';return;}
   document.getElementById('plansGrid').innerHTML=plans.map(p=>`
@@ -644,76 +493,35 @@ fetch(`${API}/api/plans`).then(r=>r.json()).then(plans=>{
     <div class="plan" style="--pc:#8b5cf6"><div class="plan-name">Platinum</div><div class="plan-roi">10%</div><div class="plan-sub">Daily ROI • 30 Days</div><div class="plan-range">KES <strong>200,000</strong>+</div><button class="plan-btn" onclick="openModal('register')">Invest Now</button></div>`;
 });
 
-// ══════════════════════════════════════════
-//  MODALS
-// ══════════════════════════════════════════
 function openModal(type){document.getElementById('authModal').classList.add('open');renderModal(type);}
 function closeModal(){document.getElementById('authModal').classList.remove('open');}
 
 function renderModal(type){
   const b=document.getElementById('modalBody');
   if(type==='login'){
-    b.innerHTML=`
-      <div class="m-title">Welcome Back 👋</div>
-      <div class="m-sub">Login to your Pesa Grow account</div>
-      <div class="m-err" id="mErr"></div>
-      <div class="fg"><label>Email Address</label><input class="fc" id="lEmail" type="email" placeholder="you@email.com" autofocus></div>
-      <div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
-      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doLogin()">Login to Account</button>
-      <div class="m-switch" style="margin-top:14px">No account? <span onclick="renderModal('register')">Register free</span></div>`;
-
+    b.innerHTML=`<div class="m-title">Welcome Back 👋</div><div class="m-sub">Login to your Pesa Grow account</div><div class="m-err" id="mErr"></div><div class="fg"><label>Email Address</label><input class="fc" id="lEmail" type="email" placeholder="you@email.com" autofocus></div><div class="fg"><label>Password</label><input class="fc" id="lPass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div><button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doLogin()">Login to Account</button><div class="m-switch" style="margin-top:14px">No account? <span onclick="renderModal('register')">Register free</span></div>`;
   } else if(type==='register'){
-    b.innerHTML=`
-      <div class="m-title">Create Account 🚀</div>
-      <div class="m-sub">Join 50,000+ investors. Start earning today.</div>
-      <div class="m-err" id="mErr"></div>
-      <div class="fc-row">
-        <div class="fg"><label>First Name</label><input class="fc" id="rFirst" placeholder="John" autofocus></div>
-        <div class="fg"><label>Last Name</label><input class="fc" id="rLast" placeholder="Doe"></div>
-      </div>
-      <div class="fg"><label>Email</label><input class="fc" id="rEmail" type="email" placeholder="you@email.com"></div>
-      <div class="fg"><label>Phone (M-Pesa)</label><input class="fc" id="rPhone" placeholder="0712345678"></div>
-      <div class="fg"><label>Password</label><input class="fc" id="rPass" type="password" placeholder="Min 8 characters"></div>
-      <div class="fg"><label>Referral Code (optional)</label><input class="fc" id="rRef" placeholder="Enter referral code" value="${sessionStorage.getItem('pg_ref')||''}"></div>
-      <button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doRegister()">Create Free Account</button>
-      <div class="m-switch" style="margin-top:14px">Have an account? <span onclick="renderModal('login')">Login here</span></div>`;
-
+    b.innerHTML=`<div class="m-title">Create Account 🚀</div><div class="m-sub">Join 50,000+ investors. Start earning today.</div><div class="m-err" id="mErr"></div><div class="fc-row"><div class="fg"><label>First Name</label><input class="fc" id="rFirst" placeholder="John" autofocus></div><div class="fg"><label>Last Name</label><input class="fc" id="rLast" placeholder="Doe"></div></div><div class="fg"><label>Email</label><input class="fc" id="rEmail" type="email" placeholder="you@email.com"></div><div class="fg"><label>Phone (M-Pesa)</label><input class="fc" id="rPhone" placeholder="0712345678"></div><div class="fg"><label>Password</label><input class="fc" id="rPass" type="password" placeholder="Min 8 characters"></div><div class="fg"><label>Referral Code (optional)</label><input class="fc" id="rRef" placeholder="Enter referral code" value="${sessionStorage.getItem('pg_ref')||''}"></div><button class="btn btn-green" style="width:100%;padding:15px;font-size:16px" onclick="doRegister()">Create Free Account</button><div class="m-switch" style="margin-top:14px">Have an account? <span onclick="renderModal('login')">Login here</span></div>`;
   } else if(type==='stk'){
     const user=PG.Auth.getMe();
     if(!user){renderModal('login');return;}
-    b.innerHTML=`
-      <div class="m-title">💳 M-Pesa Deposit</div>
-      <div class="m-sub">We'll send a payment prompt to your phone instantly.</div>
-      <div class="m-err" id="mErr"></div>
-      <div class="m-ok" id="mOk"></div>
-      <div class="fg"><label>M-Pesa Phone Number</label><input class="fc" id="stkPhone" placeholder="e.g. 0712345678" value="${user.phone||''}"></div>
-      <div class="fg"><label>Amount (KES)</label><input class="fc" id="stkAmt" type="number" placeholder="Min KES 1,000" min="1000"></div>
-      <div id="stkArea"></div>
-      <button class="btn btn-green" id="stkBtn" style="width:100%;padding:15px;font-size:16px" onclick="doSTK()">📲 Send M-Pesa Prompt</button>
-      <div style="font-size:13px;color:var(--text2);text-align:center;margin-top:12px">Your phone will ring. Enter your M-Pesa PIN to complete.</div>`;
+    b.innerHTML=`<div class="m-title">💳 M-Pesa Deposit</div><div class="m-sub">We'll send a payment prompt to your phone instantly.</div><div class="m-err" id="mErr"></div><div class="m-ok" id="mOk"></div><div class="fg"><label>M-Pesa Phone Number</label><input class="fc" id="stkPhone" placeholder="e.g. 0712345678" value="${user.phone||''}"></div><div class="fg"><label>Amount (KES)</label><input class="fc" id="stkAmt" type="number" placeholder="Min KES 1,000" min="1000"></div><div id="stkArea"></div><button class="btn btn-green" id="stkBtn" style="width:100%;padding:15px;font-size:16px" onclick="doSTK()">📲 Send M-Pesa Prompt</button><div style="font-size:13px;color:var(--text2);text-align:center;margin-top:12px">Your phone will ring. Enter your M-Pesa PIN to complete.</div>`;
   }
 }
 
 function showErr(msg){const e=document.getElementById('mErr');if(e){e.textContent=msg;e.style.display='block';}const o=document.getElementById('mOk');if(o)o.style.display='none';}
 function showOk(msg){const e=document.getElementById('mOk');if(e){e.textContent=msg;e.style.display='block';}const r=document.getElementById('mErr');if(r)r.style.display='none';}
 
-// LOGIN
 async function doLogin(){
   const email=document.getElementById('lEmail').value.trim();
   const pass=document.getElementById('lPass').value;
   if(!email||!pass){showErr('Please fill all fields');return;}
   const btn=document.querySelector('#modalBody .btn-green');
   btn.textContent='Logging in...';btn.disabled=true;
-  try{
-    const user=await PG.Auth.login(email,pass);
-    closeModal();
-    showToast('Welcome back, '+user.firstName+'! 👋','ok');
-    updateNav(user);
-    setTimeout(()=>location.href=user.role==='admin'?'admin.html':'dashboard.html',700);
-  }catch(e){showErr(e.message);btn.textContent='Login to Account';btn.disabled=false;}
+  try{ const user=await PG.Auth.login(email,pass); closeModal(); showToast('Welcome back, '+user.firstName+'! 👋','ok'); updateNav(user); setTimeout(()=>location.href=user.role==='admin'?'admin.html':'dashboard.html',700); }
+  catch(e){showErr(e.message);btn.textContent='Login to Account';btn.disabled=false;}
 }
 
-// REGISTER
 async function doRegister(){
   const first=document.getElementById('rFirst').value.trim();
   const last=document.getElementById('rLast').value.trim();
@@ -725,16 +533,10 @@ async function doRegister(){
   if(pass.length<8){showErr('Password must be at least 8 characters');return;}
   const btn=document.querySelector('#modalBody .btn-green');
   btn.textContent='Creating account...';btn.disabled=true;
-  try{
-    const user=await PG.Auth.register({firstName:first,lastName:last,email,phone,password:pass,refCode:ref});
-    closeModal();
-    showToast('Account created! Welcome to Pesa Grow 🎉','ok');
-    updateNav(user);
-    setTimeout(()=>location.href='dashboard.html',800);
-  }catch(e){showErr(e.message);btn.textContent='Create Free Account';btn.disabled=false;}
+  try{ const user=await PG.Auth.register({firstName:first,lastName:last,email,phone,password:pass,refCode:ref}); closeModal(); showToast('Account created! Welcome to Pesa Grow 🎉','ok'); updateNav(user); setTimeout(()=>location.href='dashboard.html',800); }
+  catch(e){showErr(e.message);btn.textContent='Create Free Account';btn.disabled=false;}
 }
 
-// STK PUSH
 async function doSTK(){
   const phone=document.getElementById('stkPhone').value.trim();
   const amount=parseFloat(document.getElementById('stkAmt').value);
@@ -744,135 +546,61 @@ async function doSTK(){
   btn.textContent='Sending prompt...';btn.disabled=true;
   try{
     const res=await PG.stkPush(phone,amount);
-    document.getElementById('stkArea').innerHTML=`
-      <div style="text-align:center;padding:20px 0">
-        <div class="stk-spinner"></div>
-        <div style="font-size:36px;margin-bottom:8px">📱</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div>
-        <div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div>
-      </div>`;
+    document.getElementById('stkArea').innerHTML=`<div style="text-align:center;padding:20px 0"><div class="stk-spinner"></div><div style="font-size:36px;margin-bottom:8px">📱</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div><div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div></div>`;
     btn.textContent='Waiting for payment...';
     let tries=0;
     const poll=setInterval(async()=>{
       tries++;
-      if(tries>24){
-        clearInterval(poll);
-        showErr('Payment timed out. Try again or contact support.');
-        btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;
-        document.getElementById('stkArea').innerHTML='';
-        return;
-      }
+      if(tries>24){clearInterval(poll);showErr('Payment timed out. Please try again.');btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;document.getElementById('stkArea').innerHTML='';return;}
       try{
         const s=await PG.pollPayment(res.checkoutRequestId);
         if(s.status==='approved'){
           clearInterval(poll);
-          document.getElementById('stkArea').innerHTML=`
-            <div style="text-align:center;padding:16px 0">
-              <div style="font-size:52px;margin-bottom:8px">✅</div>
-              <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;color:var(--green)">Payment Confirmed!</div>
-              <div style="font-size:14px;color:var(--text2);margin-top:6px">KES ${amount.toLocaleString()} credited to your account.</div>
-            </div>`;
+          document.getElementById('stkArea').innerHTML=`<div style="text-align:center;padding:16px 0"><div style="font-size:52px;margin-bottom:8px">✅</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:700;color:var(--green)">Payment Confirmed!</div><div style="font-size:14px;color:var(--text2);margin-top:6px">KES ${amount.toLocaleString()} credited to your account.</div></div>`;
           showToast('KES '+amount.toLocaleString()+' deposited! 💰','ok');
           setTimeout(()=>{closeModal();location.href='dashboard.html';},2000);
         } else if(s.status==='failed'||s.status==='cancelled'){
-          clearInterval(poll);
-          showErr('Payment '+s.status+'. Please try again.');
-          btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;
-          document.getElementById('stkArea').innerHTML='';
+          clearInterval(poll);showErr('Payment '+s.status+'. Please try again.');btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;document.getElementById('stkArea').innerHTML='';
         }
       }catch{}
     },5000);
   }catch(e){showErr(e.message);btn.textContent='📲 Send M-Pesa Prompt';btn.disabled=false;}
 }
 
-// NAV UPDATE
 function updateNav(user){
-  document.getElementById('navCta').innerHTML=`
-    <span style="font-size:14px;color:var(--text2);font-weight:500">Hi, ${user.firstName} 👋</span>
-    <button class="btn btn-ghost" onclick="location.href='dashboard.html'">Dashboard</button>
-    <button class="btn btn-green" onclick="openModal('stk')">💳 Deposit</button>
-    <button class="btn btn-ghost" onclick="PG.Auth.logout()" style="color:var(--red);border-color:rgba(255,77,106,.3)">Logout</button>`;
+  document.getElementById('navCta').innerHTML=`<span style="font-size:14px;color:var(--text2);font-weight:500">Hi, ${user.firstName} 👋</span><button class="btn btn-ghost" onclick="location.href='dashboard.html'">Dashboard</button><button class="btn btn-green" onclick="openModal('stk')">💳 Deposit</button><button class="btn btn-ghost" onclick="PG.Auth.logout()" style="color:var(--red);border-color:rgba(255,77,106,.3)">Logout</button>`;
 }
 
-// TOAST
 function showToast(msg,type='ok'){
   const t=document.getElementById('toast');
   t.textContent=msg;t.className='toast '+type+' show';
   setTimeout(()=>t.classList.remove('show'),4000);
 }
 
-// INIT — check login state on landing page
 (async ()=>{
-  const tok  = localStorage.getItem('pg_token');
-  const user = PG.Auth.getMe();
-
-  if (!tok || !user) {
-    // Not logged in — show login/register buttons (default nav)
-    return;
-  }
-
-  // Token exists — verify it's still valid with server
-  try {
-    const r = await fetch(`${API}/api/auth/me`, {
-      headers: { 'Authorization': 'Bearer ' + tok }
-    });
-    if (r.ok) {
-      const fresh = await r.json();
-      localStorage.setItem('pg_user', JSON.stringify(fresh));
-      updateNav(fresh);
-    } else {
-      // Token rejected — clear it silently
-      localStorage.removeItem('pg_token');
-      localStorage.removeItem('pg_user');
-    }
-  } catch {
-    // Network error — use cached user for nav display
-    if (user) updateNav(user);
-  }
+  const tok=localStorage.getItem('pg_token');
+  const user=PG.Auth.getMe();
+  if(!tok||!user)return;
+  try{
+    const r=await fetch(`${API}/api/auth/me`,{headers:{'Authorization':'Bearer '+tok}});
+    if(r.ok){const fresh=await r.json();localStorage.setItem('pg_user',JSON.stringify(fresh));updateNav(fresh);}
+    else{localStorage.removeItem('pg_token');localStorage.removeItem('pg_user');}
+  }catch{if(user)updateNav(user);}
 })();
 
-// ── VIDEO PLAYER ──────────────────────────────────
-// STEP 1: Upload your video to YouTube
-// STEP 2: Copy the video ID from the URL
-//         e.g. https://youtube.com/watch?v=ABC123xyz → ID is ABC123xyz
-// STEP 3: Replace PASTE_YOUR_YOUTUBE_ID below with your actual ID
-
 const YOUTUBE_VIDEO_ID = 'PASTE_YOUR_YOUTUBE_ID';
-
 function startVideo() {
-  const overlay = document.getElementById('playOverlay');
-  const frame   = document.getElementById('ytFrame');
-  if (!overlay || !frame) return;
-
-  if (YOUTUBE_VIDEO_ID === 'PASTE_YOUR_YOUTUBE_ID') {
-    // No video set yet — show helpful message
-    overlay.innerHTML = `
-      <div style="text-align:center;padding:32px">
-        <div style="font-size:48px;margin-bottom:14px">🎬</div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:10px">Add Your Video</div>
-        <div style="font-size:14px;color:rgba(255,255,255,.7);max-width:320px;line-height:1.6;margin:0 auto">
-          Upload your explainer video to YouTube, then paste the video ID into <code style="background:rgba(0,230,118,.15);color:var(--green);padding:2px 6px;border-radius:4px">index.html</code> where it says <code style="background:rgba(0,230,118,.15);color:var(--green);padding:2px 6px;border-radius:4px">PASTE_YOUR_YOUTUBE_ID</code>
-        </div>
-        <div style="margin-top:18px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-          <a href="https://youtube.com/upload" target="_blank" class="btn btn-green" style="font-size:13px;padding:10px 18px;text-decoration:none">📤 Upload to YouTube</a>
-          <button onclick="document.getElementById('playOverlay').style.display='none'" class="btn btn-ghost" style="font-size:13px;padding:10px 18px">✕ Close</button>
-        </div>
-      </div>`;
+  const overlay=document.getElementById('playOverlay');
+  const frame=document.getElementById('ytFrame');
+  if(!overlay||!frame)return;
+  if(YOUTUBE_VIDEO_ID==='PASTE_YOUR_YOUTUBE_ID'){
+    overlay.innerHTML=`<div style="text-align:center;padding:32px"><div style="font-size:48px;margin-bottom:14px">🎬</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:20px;font-weight:800;color:#fff;margin-bottom:10px">Add Your Video</div><div style="font-size:14px;color:rgba(255,255,255,.7);max-width:320px;line-height:1.6;margin:0 auto">Upload to YouTube then paste the video ID into index.html where it says <code style="background:rgba(0,230,118,.15);color:var(--green);padding:2px 6px;border-radius:4px">PASTE_YOUR_YOUTUBE_ID</code></div><div style="margin-top:18px;display:flex;gap:10px;justify-content:center"><a href="https://youtube.com/upload" target="_blank" class="btn btn-green" style="font-size:13px;padding:10px 18px;text-decoration:none">📤 Upload to YouTube</a><button onclick="document.getElementById('playOverlay').style.display='none'" class="btn btn-ghost" style="font-size:13px;padding:10px 18px">✕ Close</button></div></div>`;
     return;
   }
-
-  // Hide overlay and inject YouTube iframe
-  overlay.style.display = 'none';
-  frame.innerHTML = `<iframe
-    src="https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white"
-    style="width:100%;height:100%;border:none"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-    allowfullscreen>
-  </iframe>`;
+  overlay.style.display='none';
+  frame.innerHTML=`<iframe src="https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&color=white" style="width:100%;height:100%;border:none" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 }
 </script>
-
-<!-- ── PWA ── -->
 <style>
 @keyframes pgUp{from{opacity:0;transform:translateX(-50%) translateY(30px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes pgFadeIn{from{opacity:0}to{opacity:1}}
@@ -886,197 +614,20 @@ function startVideo() {
 </style>
 <script>
 (function(){
-  var _prompt      = null;
-  var _isIOS       = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  var _isAndroid   = /android/i.test(navigator.userAgent);
-  var _isDesktop   = !_isIOS && !_isAndroid;
-  var _standalone  = window.matchMedia('(display-mode:standalone)').matches || window.navigator.standalone === true;
-
-  /* ── 1. Register service worker ─────────────────── */
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(function(reg){
-        console.log('[SW] registered scope:', reg.scope);
-        /* tell waiting SW to take over immediately */
-        if (reg.waiting) reg.waiting.postMessage({type:'SKIP_WAITING'});
-        reg.addEventListener('updatefound', function(){
-          var nw = reg.installing;
-          if (nw) nw.addEventListener('statechange', function(){
-            if (nw.state === 'installed' && reg.active) nw.postMessage({type:'SKIP_WAITING'});
-          });
-        });
-      })
-      .catch(function(e){ console.warn('[SW] failed:', e.message); });
-  }
-
-  /* ── 2. Capture beforeinstallprompt ─────────────── */
-  window.addEventListener('beforeinstallprompt', function(e){
-    e.preventDefault();
-    _prompt = e;
-    console.log('[PWA] beforeinstallprompt captured ✅');
-    if (!_standalone) setTimeout(showBar, 1200);
-  });
-
-  window.addEventListener('appinstalled', function(){
-    console.log('[PWA] installed!');
-    removeBar();
-    removeNavBtn();
-    try { showToast('Pesa Grow installed! 🎉','ok'); } catch(x){}
-  });
-
-  /* ── 3. Bottom install bar ───────────────────────── */
-  function showBar(){
-    if (_standalone) return;
-    if (document.getElementById('pgBar')) return;
-    var el = document.createElement('div');
-    el.className = 'pg-bar'; el.id = 'pgBar';
-    el.innerHTML =
-      '<div style="width:38px;height:38px;min-width:38px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:14px;color:#000">PG</div>' +
-      '<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div><div style="font-size:11px;color:#7986a8">Add to home screen</div></div>' +
-      '<button onclick="pgDoInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Install</button>' +
-      '<button onclick="removeBar()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0 4px;line-height:1">×</button>';
-    document.body.appendChild(el);
-  }
-
-  function removeBar(){
-    var el = document.getElementById('pgBar');
-    if (el){ el.style.opacity='0'; el.style.transition='.25s'; setTimeout(function(){if(el.parentNode)el.remove();},260); }
-  }
-  window.removeBar = removeBar;
-
-  function removeNavBtn(){
-    var el = document.getElementById('pgNavBtn');
-    if (el) el.remove();
-  }
-
-  /* ── 4. pgDoInstall — called by button ───────────── */
-  window.pgDoInstall = async function(){
-    if (_prompt){
-      /* native prompt available — fire it */
-      try {
-        await _prompt.prompt();
-        var r = await _prompt.userChoice;
-        _prompt = null;
-        removeBar();
-        if (r.outcome === 'accepted'){
-          setTimeout(function(){ try{showToast('Installed! 🎉','ok');}catch(x){} }, 500);
-        }
-      } catch(e){ console.warn('[PWA] prompt error:', e); pgShowModal(); }
-    } else {
-      /* no native prompt — show manual guide */
-      pgShowModal();
-    }
-  };
-
-  /* ── 5. Manual install guide modal ──────────────── */
-  function pgShowModal(){
-    if (document.getElementById('pgModal')) return;
-
-    var title, steps, tip;
-
-    if (_isDesktop){
-      title = '🖥️ Install on Your Computer';
-      tip   = 'Once installed, Pesa Grow runs like a normal desktop app — fast, no browser tab needed.';
-      steps = [
-        'Open this page in <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong> (not Firefox)',
-        'Look at the <strong>address bar</strong> at the top of your browser — on the far right you will see a small <strong style="color:#00e676;font-size:16px">⊕</strong> or computer icon',
-        'Click that icon. A small popup appears saying <strong>"Install Pesa Grow?"</strong>',
-        'Click <strong>"Install"</strong> — Pesa Grow opens as a desktop app and a shortcut is added!'
-      ];
-    } else if (_isIOS){
-      title = '📱 Install on iPhone / iPad';
-      tip   = 'Must use Safari — Chrome on iPhone cannot install apps this way.';
-      steps = [
-        'Open this page in <strong>Safari</strong> browser',
-        'Tap the <strong>Share</strong> button <strong style="color:#00e676">⬆</strong> at the bottom of the screen',
-        'Scroll down the share menu and tap <strong>"Add to Home Screen"</strong>',
-        'Tap <strong>"Add"</strong> — Pesa Grow appears on your iPhone home screen!'
-      ];
-    } else {
-      title = '📲 Install on Android';
-      tip   = 'Works best on Chrome browser.';
-      steps = [
-        'Open this page in <strong>Chrome</strong> browser',
-        'Tap the <strong>3-dot menu ⋮</strong> in the top-right corner of Chrome',
-        'Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong>',
-        'Tap <strong>"Install"</strong> — Pesa Grow appears on your home screen!'
-      ];
-    }
-
-    /* address bar visual for desktop */
-    var addrBar = _isDesktop ?
-      '<div style="margin:18px 0 6px">' +
-        '<div style="font-size:12px;color:#7986a8;margin-bottom:8px;font-weight:600">👇 Look for this in your browser address bar:</div>' +
-        '<div style="background:#1a2030;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px">' +
-          '<div style="flex:1;background:#0f1520;border-radius:6px;padding:7px 11px;font-size:12px;color:#7986a8;font-family:monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+window.location.host+'</div>' +
-          '<div style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border-radius:6px;padding:6px 12px;font-size:13px;font-weight:800;white-space:nowrap;animation:pgPulse 1.5s infinite">⊕</div>' +
-        '</div>' +
-        '<div style="font-size:11px;color:#7986a8;margin-top:6px;text-align:center">If you do not see ⊕, try refreshing the page once</div>' +
-      '</div>' : '';
-
-    var stepsHtml = steps.map(function(s,i){
-      return '<div class="pg-step">' +
-        '<div class="pg-num">'+(i+1)+'</div>' +
-        '<div style="font-size:14px;color:#c8cfe8;line-height:1.6;padding-top:2px">'+s+'</div>' +
-        '</div>';
-    }).join('');
-
-    var bg = document.createElement('div');
-    bg.className='pg-modal-bg'; bg.id='pgModal';
-    bg.onclick=function(e){if(e.target===bg)pgCloseModal();};
-    bg.innerHTML=
-      '<div class="pg-modal">'+
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">'+
-          '<div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">'+title+'</div>'+
-          '<button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0;line-height:1">×</button>'+
-        '</div>'+
-        addrBar+
-        stepsHtml+
-        '<div style="margin-top:18px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#7986a8;text-align:center">'+
-          '💡 '+tip+
-        '</div>'+
-        '<button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button>'+
-      '</div>';
-    document.body.appendChild(bg);
-  }
-
-  window.pgCloseModal=function(){
-    var el=document.getElementById('pgModal');
-    if(el){el.style.opacity='0';el.style.transition='.25s';setTimeout(function(){if(el.parentNode)el.remove();},260);}
-  };
-
-  /* ── 6. Nav install button ───────────────────────── */
-  window.addEventListener('load', function(){
-    if (_standalone) return;
-    setTimeout(function(){
-      var nav = document.getElementById('navCta');
-      if (!nav || document.getElementById('pgNavBtn')) return;
-      var btn = document.createElement('button');
-      btn.id = 'pgNavBtn';
-      btn.className = 'btn btn-ghost';
-      btn.style.cssText = 'font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.35);color:#00e676;gap:5px';
-      btn.innerHTML = _isDesktop ? '🖥️ Install' : '📲 Install';
-      btn.title = 'Install Pesa Grow as an app';
-      btn.onclick = window.pgDoInstall;
-      nav.insertBefore(btn, nav.firstChild);
-    }, 600);
-
-    /* iOS: show bar after delay */
-    if (_isIOS && !_standalone){
-      setTimeout(showBar, 2000);
-    }
-  });
-
+  var _prompt=null,_isIOS=/iphone|ipad|ipod/i.test(navigator.userAgent),_isAndroid=/android/i.test(navigator.userAgent),_isDesktop=!_isIOS&&!_isAndroid,_standalone=window.matchMedia('(display-mode:standalone)').matches||window.navigator.standalone===true;
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(function(reg){if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});reg.addEventListener('updatefound',function(){var nw=reg.installing;if(nw)nw.addEventListener('statechange',function(){if(nw.state==='installed'&&reg.active)nw.postMessage({type:'SKIP_WAITING'});});});}).catch(function(e){console.warn('[SW] failed:',e.message);});}
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();_prompt=e;if(!_standalone)setTimeout(showBar,1200);});
+  window.addEventListener('appinstalled',function(){removeBar();removeNavBtn();try{showToast('Pesa Grow installed! 🎉','ok');}catch(x){}});
+  function showBar(){if(_standalone)return;if(document.getElementById('pgBar'))return;var el=document.createElement('div');el.className='pg-bar';el.id='pgBar';el.innerHTML='<div style="width:38px;height:38px;min-width:38px;background:linear-gradient(135deg,#00e676,#00b341);border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Bricolage Grotesque,sans-serif;font-weight:800;font-size:14px;color:#000">PG</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px;color:#eef2ff">Install Pesa Grow</div><div style="font-size:11px;color:#7986a8">Add to home screen</div></div><button onclick="pgDoInstall()" style="background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">Install</button><button onclick="removeBar()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0 4px;line-height:1">×</button>';document.body.appendChild(el);}
+  function removeBar(){var el=document.getElementById('pgBar');if(el){el.style.opacity='0';el.style.transition='.25s';setTimeout(function(){if(el.parentNode)el.remove();},260);}}
+  window.removeBar=removeBar;
+  function removeNavBtn(){var el=document.getElementById('pgNavBtn');if(el)el.remove();}
+  window.pgDoInstall=async function(){if(_prompt){try{await _prompt.prompt();var r=await _prompt.userChoice;_prompt=null;removeBar();if(r.outcome==='accepted')setTimeout(function(){try{showToast('Installed! 🎉','ok');}catch(x){}},500);}catch(e){pgShowModal();}}else{pgShowModal();}};
+  function pgShowModal(){if(document.getElementById('pgModal'))return;var title,steps,tip;if(_isDesktop){title='🖥️ Install on Your Computer';tip='Once installed, Pesa Grow runs like a normal desktop app.';steps=['Open in <strong>Google Chrome</strong> or <strong>Microsoft Edge</strong>','Look at the address bar — click the <strong style="color:#00e676">⊕</strong> icon on the right','Click <strong>"Install Pesa Grow?"</strong>','Click <strong>"Install"</strong> — done!'];}else if(_isIOS){title='📱 Install on iPhone / iPad';tip='Must use Safari browser.';steps=['Open in <strong>Safari</strong>','Tap the <strong>Share ⬆</strong> button at the bottom','Tap <strong>"Add to Home Screen"</strong>','Tap <strong>"Add"</strong>'];}else{title='📲 Install on Android';tip='Works best on Chrome.';steps=['Open in <strong>Chrome</strong>','Tap <strong>3-dot menu ⋮</strong>','Tap <strong>"Add to Home screen"</strong>','Tap <strong>"Install"</strong>'];}
+  var bg=document.createElement('div');bg.className='pg-modal-bg';bg.id='pgModal';bg.onclick=function(e){if(e.target===bg)pgCloseModal();};bg.innerHTML='<div class="pg-modal"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px"><div style="font-family:Bricolage Grotesque,sans-serif;font-size:20px;font-weight:800;color:#eef2ff">'+title+'</div><button onclick="pgCloseModal()" style="background:none;border:none;color:#7986a8;font-size:24px;cursor:pointer;padding:0;line-height:1">×</button></div>'+steps.map(function(s,i){return'<div class="pg-step"><div class="pg-num">'+(i+1)+'</div><div style="font-size:14px;color:#c8cfe8;line-height:1.6;padding-top:2px">'+s+'</div></div>';}).join('')+'<div style="margin-top:18px;background:rgba(0,230,118,.05);border:1px solid rgba(0,230,118,.15);border-radius:10px;padding:12px 14px;font-size:13px;color:#7986a8;text-align:center">💡 '+tip+'</div><button onclick="pgCloseModal()" style="width:100%;margin-top:14px;background:linear-gradient(135deg,#00e676,#00b341);color:#000;border:none;border-radius:10px;padding:13px;font-weight:800;font-size:15px;cursor:pointer">Got it!</button></div>';document.body.appendChild(bg);}
+  window.pgCloseModal=function(){var el=document.getElementById('pgModal');if(el){el.style.opacity='0';el.style.transition='.25s';setTimeout(function(){if(el.parentNode)el.remove();},260);}};
+  window.addEventListener('load',function(){if(_standalone)return;setTimeout(function(){var nav=document.getElementById('navCta');if(!nav||document.getElementById('pgNavBtn'))return;var btn=document.createElement('button');btn.id='pgNavBtn';btn.className='btn btn-ghost';btn.style.cssText='font-size:13px;padding:8px 13px;border-color:rgba(0,230,118,.35);color:#00e676;gap:5px';btn.innerHTML=_isDesktop?'🖥️ Install':'📲 Install';btn.title='Install Pesa Grow as an app';btn.onclick=window.pgDoInstall;nav.insertBefore(btn,nav.firstChild);},600);if(_isIOS&&!_standalone)setTimeout(showBar,2000);});
 })();
-</script>
-  <script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('SW registered'))
-      .catch(err => console.log('SW failed', err));
-  });
-}
 </script>
 </body>
 </html>
