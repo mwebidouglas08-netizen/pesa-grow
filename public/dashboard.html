@@ -644,7 +644,7 @@ async function loadInvest() {
         <div style="font-size:48px;font-weight:800;color:${p.color||'var(--green)'};font-family:'Bricolage Grotesque',sans-serif;line-height:1">${p.roi}%</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Daily ROI • ${p.period} days</div>
         <div style="background:var(--bg3);border-radius:9px;padding:10px 12px;font-size:13px;color:var(--text2);margin-bottom:16px">Min: <strong style="color:var(--text)">KES ${(+p.minAmount).toLocaleString()}</strong><br>Max: <strong style="color:var(--text)">KES ${(+p.maxAmount).toLocaleString()}</strong></div>
-        <button class="btn btn-green btn-full">Invest Now</button>
+        <button class="btn btn-green btn-full" onclick="event.stopPropagation();openInvestModal('${p.id}')">Invest Now</button>
       </div>`).join('') || '<div style="color:var(--text2)">No plans available.</div>';
   } catch(e) { toast(e.message,'err'); }
 }
@@ -808,7 +808,7 @@ async function doWithdraw() {
     const res=await apiFetch('/api/user/withdraw',{method:'POST',body:JSON.stringify({amount,method,address})});
     document.getElementById('wdAmt').value='';document.getElementById('wdAddr').value='';document.getElementById('wdCalc').style.display='none';
     const rem=res.withdrawalsRemainingToday!==undefined?res.withdrawalsRemainingToday:'';
-    toast(`Withdrawal of ${k(amount)} submitted! ${rem!==''?rem+' withdrawal(s) left today.':`}`,'ok');
+    toast(`Withdrawal of ${k(amount)} submitted!${rem!==''?' '+rem+' withdrawal(s) left today.':''}`,'ok');
     currentUser=await apiFetch('/api/auth/me');localStorage.setItem('pg_user',JSON.stringify(currentUser));loadWithdraw();
   } catch(e){showErr('wdErr',e.message);btn.textContent='Request Withdrawal';btn.disabled=false;}
 }
