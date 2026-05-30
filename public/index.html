@@ -210,7 +210,7 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;line-height:1.1}
 .step p{font-size:14px;color:var(--text2);line-height:1.65}
 
 /* ── VIDEO ───────────────── */
-.vid-wrap{position:relative;border-radius:22px;overflow:hidden;background:var(--bg3);border:1.5px solid rgba(0,230,118,.18);aspect-ratio:16/9;cursor:pointer;box-shadow:var(--shadow)}
+.vid-wrap{position:relative;border-radius:22px;overflow:hidden;background:var(--bg3);border:1.5px solid rgba(0,230,118,.18);aspect-ratio:16/9;cursor:pointer;box-shadow:var(--shadow);width:100%}
 .vid-wrap:hover .play-inner{transform:scale(1.06)}
 .play-ov{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,rgba(2,4,8,.9),rgba(2,4,8,.6));transition:.3s}
 .play-btn{position:relative;width:88px;height:88px;margin-bottom:20px;flex-shrink:0}
@@ -321,11 +321,16 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;line-height:1.1}
   .steps{grid-template-columns:1fr}
   .trust-row{grid-template-columns:1fr 1fr}
   .footer-grid{grid-template-columns:1fr}
+  /* Video points: 2 cols on tablet */
+  #watch .section > div[style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr 1fr!important}
 }
 @media(max-width:480px){
   .hero-h1{letter-spacing:-2px}
   .trust-row{grid-template-columns:1fr}
   .mbc-h{letter-spacing:-1.5px}
+  /* Video points: 1 col on mobile */
+  #watch .section > div[style*="grid-template-columns:repeat(3"]{grid-template-columns:1fr!important}
+  .vid-wrap{border-radius:14px}
 }
 </style>
 </head>
@@ -516,43 +521,76 @@ h1,h2,h3,h4{font-family:'Bricolage Grotesque',sans-serif;line-height:1.1}
 <!-- VIDEO SECTION -->
 <div id="watch" style="background:var(--bg)">
   <div class="section" style="max-width:1100px;margin:0 auto">
-    <div class="eyebrow">Watch & Learn</div>
-    <h2 class="sec-h">See Pesa Grow <span>In Action</span></h2>
-    <p class="sec-p" style="margin-bottom:48px">A 2-minute walkthrough — from creating your account to earning your first daily profit.</p>
-    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:56px;align-items:center">
-      <div>
-        <div class="vid-wrap" onclick="startVideo()">
-          <div class="play-ov" id="playOverlay">
-            <div class="play-btn">
-              <div class="play-ring"></div>
-              <div class="play-ring2"></div>
-              <div class="play-inner">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
-              </div>
-            </div>
-            <div class="play-title">Watch How It Works</div>
-            <div class="play-sub">2 min · M-Pesa demo · Step-by-step</div>
+    <div style="text-align:center;margin-bottom:48px">
+      <div class="eyebrow" style="justify-content:center">Watch & Learn</div>
+      <h2 class="sec-h" style="max-width:600px;margin:0 auto 16px">See Pesa Grow <span>In Action</span></h2>
+      <p style="font-size:17px;color:var(--text2);line-height:1.7;max-width:520px;margin:0 auto">A 2-minute walkthrough — from creating your account to earning your first daily profit.</p>
+    </div>
+
+    <!-- FULL-WIDTH VIDEO PLAYER -->
+    <div class="vid-wrap" onclick="startVideo()" style="max-width:900px;margin:0 auto 20px;width:100%">
+      <div class="play-ov" id="playOverlay">
+        <div class="play-btn">
+          <div class="play-ring"></div>
+          <div class="play-ring2"></div>
+          <div class="play-inner">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
           </div>
-          <div id="ytFrame" style="width:100%;height:100%"></div>
         </div>
-        <div style="display:flex;gap:20px;margin-top:18px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:15px">●</span> 2 min watch</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:15px">●</span> Live M-Pesa demo</div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text2)"><span style="color:var(--green);font-size:15px">●</span> Step-by-step guide</div>
-        </div>
+        <div class="play-title">Watch How It Works</div>
+        <div class="play-sub">2 min · M-Pesa demo · Step-by-step</div>
       </div>
-      <div>
-        <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:23px;font-weight:800;line-height:1.22;margin-bottom:22px">Everything you need<br>to know in 2 minutes</div>
-        <div class="vpoints">
-          <div class="vpoint"><div class="vp-ico">🔐</div><div><div class="vp-t">Create Your Free Account</div><div class="vp-d">Sign up in 2 minutes — just name, email and phone. No documents needed.</div></div></div>
-          <div class="vpoint"><div class="vp-ico">📲</div><div><div class="vp-t">Instant M-Pesa STK Push</div><div class="vp-d">We send a request to your phone. Enter your PIN and you're funded in seconds.</div></div></div>
-          <div class="vpoint"><div class="vp-ico">📈</div><div><div class="vp-t">Pick Your Investment Plan</div><div class="vp-d">Choose from 3%–10% daily ROI. Start from KES 1,000 and scale as you grow.</div></div></div>
-          <div class="vpoint"><div class="vp-ico">💸</div><div><div class="vp-t">Daily Profits, Withdraw Anytime</div><div class="vp-d">Profits credit automatically every day. Withdraw to M-Pesa whenever you want.</div></div></div>
-          <div class="vpoint"><div class="vp-ico">🤝</div><div><div class="vp-t">Earn Referral Commissions</div><div class="vp-d">Invite friends, earn up to 10% on their investments — paid instantly to you.</div></div></div>
-        </div>
-        <button class="btn btn-green" style="margin-top:22px;padding:15px 30px;font-size:15px" onclick="openModal('register')">🚀 Start Earning Now</button>
+      <div id="ytFrame" style="width:100%;height:100%"></div>
+    </div>
+
+    <!-- Meta row under video -->
+    <div style="display:flex;gap:24px;justify-content:center;margin-bottom:56px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:7px;font-size:14px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span> 2 min watch</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:14px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span> Live M-Pesa demo</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:14px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span> Step-by-step guide</div>
+      <div style="display:flex;align-items:center;gap:7px;font-size:14px;color:var(--text2)"><span style="color:var(--green);font-size:16px">●</span> Free to join</div>
+    </div>
+
+    <!-- 3-COLUMN POINTS GRID below video -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:48px">
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">🔐</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Create Free Account</div>
+        <div class="vp-d">Sign up in 2 minutes with just your name, email and M-Pesa number. No documents.</div>
+      </div>
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">📲</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Instant STK Push</div>
+        <div class="vp-d">We send a payment request to your phone. Enter your M-Pesa PIN — funded instantly.</div>
+      </div>
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">📈</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Pick a Plan</div>
+        <div class="vp-d">Choose from 3%–10% daily ROI. Start from KES 1,000. Activate with one tap.</div>
+      </div>
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">💸</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Daily Profit Credits</div>
+        <div class="vp-d">Profits land in your account automatically every day. Withdraw to M-Pesa anytime.</div>
+      </div>
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">🤝</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Referral Commissions</div>
+        <div class="vp-d">Invite friends, earn up to 10% on every investment they make — paid instantly.</div>
+      </div>
+      <div class="vpoint" style="flex-direction:column;text-align:center;padding:22px 20px">
+        <div class="vp-ico" style="margin:0 auto 12px;width:48px;height:48px;font-size:22px">🔒</div>
+        <div class="vp-t" style="font-size:16px;margin-bottom:6px">Safe & Secure</div>
+        <div class="vp-d">Bank-level encryption on every transaction. Your money and data are always protected.</div>
       </div>
     </div>
+
+    <!-- CTA row -->
+    <div style="text-align:center;margin-bottom:52px">
+      <button class="btn btn-green btn-lg" onclick="openModal('register')" style="margin-right:12px">🚀 Start Earning Now</button>
+      <button class="btn-outline" onclick="document.getElementById('plans').scrollIntoView({behavior:'smooth'})">View Plans →</button>
+    </div>
+
     <div class="trust-row">
       <div class="trust-box"><div class="trust-ico">🔒</div><div class="trust-t">Bank-Level Security</div><div class="trust-d">256-bit SSL on every transaction</div></div>
       <div class="trust-box"><div class="trust-ico">⚡</div><div class="trust-t">Instant Deposits</div><div class="trust-d">M-Pesa STK Push reflects in seconds</div></div>
