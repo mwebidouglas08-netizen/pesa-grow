@@ -1,0 +1,53 @@
+{
+  "packageId": "ke.co.pesagrow.app",
+  "host": "REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app",
+  "name": "Pesa Grow",
+  "launcherName": "Pesa Grow",
+  "display": "standalone",
+  "orientation": "portrait",
+  "themeColor": "#00e676",
+  "navigationColor": "#030508",
+  "navigationColorDark": "#030508",
+  "navigationDividerColor": "#030508",
+  "navigationDividerColorDark": "#030508",
+  "backgroundColor": "#030508",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app/icons/icon-512.png",
+  "maskableIconUrl": "https://REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app/icons/icon-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "./android.keystore",
+    "alias": "pesagrow"
+  },
+  "appVersionCode": 1,
+  "appVersionName": "1.0.0",
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "shortName": "Dashboard",
+      "url": "/dashboard.html",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Deposit",
+      "shortName": "Deposit",
+      "url": "/dashboard.html#deposit",
+      "icons": [{ "src": "/icons/icon-96.png", "sizes": "96x96" }]
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": { "enabled": false },
+    "playBilling": { "enabled": false }
+  },
+  "alphaDependencies": { "enabled": false },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://REPLACE_WITH_YOUR_RAILWAY_URL.up.railway.app/",
+  "minSdkVersion": 19,
+  "targetSdkVersion": 34
+}
