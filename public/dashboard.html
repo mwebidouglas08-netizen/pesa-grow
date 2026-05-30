@@ -93,9 +93,22 @@ select.fc option{background:var(--bg3)}
 .modal-sub{font-size:14px;color:var(--text2);margin-bottom:22px}
 .m-err{background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.2);color:var(--red);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
 .m-ok{background:rgba(0,230,118,.07);border:1px solid rgba(0,230,118,.2);color:var(--green);padding:10px 14px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none}
-.stk-spinner{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
+.stk-spinner{display:flex;gap:8px;justify-content:center;margin:0 auto 14px;align-items:center}
+.stk-spinner span{width:10px;height:10px;background:var(--green);border-radius:50%;animation:pg-dots .9s ease-in-out infinite}
+.stk-spinner span:nth-child(2){animation-delay:.15s}
+.stk-spinner span:nth-child(3){animation-delay:.3s}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+@keyframes pg-dots{0%,80%,100%{transform:scale(0);opacity:.3}40%{transform:scale(1);opacity:1}}
+@keyframes pg-bar-load{0%{left:-45%;width:45%}100%{left:100%;width:45%}}
+@keyframes pg-fade-out{0%{opacity:1;visibility:visible}90%{opacity:0}100%{opacity:0;visibility:hidden}}
+@keyframes pg-logo-in{0%{transform:scale(.6) rotate(-10deg);opacity:0}70%{transform:scale(1.08) rotate(2deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes pg-text-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pg-ripple{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2.2);opacity:0}}
+@keyframes pg-pulse{0%,100%{box-shadow:0 0 0 0 rgba(0,230,118,.4)}50%{box-shadow:0 0 0 10px rgba(0,230,118,0)}}
+/* Dashboard init loading overlay */
+#dashLoader{position:fixed;inset:0;z-index:9998;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .5s,visibility .5s}
+#dashLoader.hidden{opacity:0;visibility:hidden}
 .notif-panel{position:fixed;top:58px;right:20px;width:320px;background:var(--card);border:1px solid var(--border2);border-radius:16px;box-shadow:var(--shadow);z-index:300;display:none;max-height:400px;overflow-y:auto}
 .notif-panel.open{display:block}
 .np-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:15px}
@@ -116,6 +129,28 @@ select.fc option{background:var(--bg3)}
 <body>
 
 <!-- TOP NAV -->
+
+<!-- ── DASHBOARD LOADER ─────────────────────────────────── -->
+<div id="dashLoader">
+  <!-- Background grid -->
+  <div style="position:absolute;inset:0;background-image:radial-gradient(rgba(0,230,118,.04) 1px,transparent 1px);background-size:32px 32px;pointer-events:none"></div>
+  <!-- Glow -->
+  <div style="position:absolute;width:280px;height:280px;background:radial-gradient(circle,rgba(0,230,118,.1),transparent 70%);border-radius:50%;filter:blur(40px);top:50%;left:50%;transform:translate(-50%,-60%)"></div>
+  <!-- Logo + ripples -->
+  <div style="position:relative;margin-bottom:28px">
+    <div style="position:absolute;inset:-20px;border-radius:50%;border:1.5px solid rgba(0,230,118,.25);animation:pg-ripple 1.6s .1s ease-out infinite"></div>
+    <div style="position:absolute;inset:-20px;border-radius:50%;border:1.5px solid rgba(0,230,118,.12);animation:pg-ripple 1.6s .5s ease-out infinite"></div>
+    <div style="width:76px;height:76px;background:linear-gradient(135deg,#00e676,#00c853);border-radius:20px;display:flex;align-items:center;justify-content:center;font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;color:#000;box-shadow:0 0 44px rgba(0,230,118,.5),0 12px 36px rgba(0,0,0,.6);animation:pg-logo-in .6s ease both;position:relative;z-index:1">PG</div>
+  </div>
+  <div style="font-family:'Bricolage Grotesque',sans-serif;font-size:24px;font-weight:800;color:#eef2ff;letter-spacing:-.5px;margin-bottom:6px;animation:pg-text-in .5s .2s ease both;opacity:0">Loading Dashboard</div>
+  <div style="font-size:13px;color:rgba(138,146,170,.65);margin-bottom:36px;animation:pg-text-in .5s .35s ease both;opacity:0">Fetching your portfolio...</div>
+  <!-- 3-dot loader -->
+  <div style="display:flex;gap:10px;animation:pg-text-in .4s .4s ease both;opacity:0">
+    <span style="width:10px;height:10px;background:var(--green);border-radius:50%;animation:pg-dots .9s ease-in-out infinite;display:block"></span>
+    <span style="width:10px;height:10px;background:var(--green);border-radius:50%;animation:pg-dots .9s .15s ease-in-out infinite;display:block"></span>
+    <span style="width:10px;height:10px;background:var(--green);border-radius:50%;animation:pg-dots .9s .3s ease-in-out infinite;display:block"></span>
+  </div>
+</div>
 <div class="top-nav">
   <div class="tn-brand" onclick="location.href='index.html'">
     <div class="tn-logo">PG</div>
@@ -438,6 +473,8 @@ async function apiFetch(url, opts={}) {
 }
 
 function clearAuthAndRedirect() {
+  const loader=document.getElementById('dashLoader');
+  if(loader)loader.remove();
   localStorage.removeItem('pg_token'); localStorage.removeItem('pg_user'); sessionStorage.clear();
   window.location.replace('index.html');
 }
@@ -500,6 +537,8 @@ async function init() {
     loadNotifications();
     startLiveTicker();
     startDepositPoller();
+    const loader=document.getElementById('dashLoader');
+    if(loader){loader.classList.add('hidden');setTimeout(()=>loader.remove(),600);}
   } catch(e) {
     console.error('Init error:', e.message);
     if (!e.message.includes('internet') && !e.message.includes('network')) clearAuthAndRedirect();
@@ -718,7 +757,7 @@ async function doSTKPush() {
   document.getElementById('stkStatusArea').innerHTML = '';
   try {
     const res = await apiFetch('/api/mpesa/stk-push', { method:'POST', body:JSON.stringify({phone,amount}) });
-    document.getElementById('stkStatusArea').innerHTML = `<div style="text-align:center;padding:20px 0;border:1px solid var(--border);border-radius:12px;margin-bottom:14px"><div class="stk-spinner"></div><div style="font-size:32px;margin-bottom:8px">📱</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div><div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div></div>`;
+    document.getElementById('stkStatusArea').innerHTML = `<div style="text-align:center;padding:20px 0;border:1px solid var(--border);border-radius:12px;margin-bottom:14px"><div class="stk-spinner"><span></span><span></span><span></span></div><div style="font-size:32px;margin-bottom:8px">📱</div><div style="font-family:'Bricolage Grotesque',sans-serif;font-size:18px;font-weight:700;margin-bottom:6px">Check Your Phone!</div><div style="font-size:14px;color:var(--text2)">Enter your M-Pesa PIN to confirm<br><strong style="color:var(--text)">KES ${amount.toLocaleString()}</strong></div></div>`;
     btn.textContent = 'Waiting for payment...';
     let tries = 0;
     const poll = setInterval(async()=>{
